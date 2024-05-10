@@ -1,6 +1,4 @@
 import React from 'react';
-import Header from '@/(components)/Header/Header';
-import Footer from '@/(components)/Footer/Footer';
 import { Kodchasan } from 'next/font/google';
 import './globals.css';
 const font = Kodchasan({
@@ -22,9 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={font.className}>
-        <Header />
         {children}
-        <Footer />
       </body>
     </html>
   );

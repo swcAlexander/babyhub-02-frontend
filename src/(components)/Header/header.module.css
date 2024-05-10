@@ -1,1 +1,126 @@
 
+
+.header {
+    position: relative;
+    background-color: var(--primary-text-color)
+
+}
+
+/* Navigation Menu - Background */
+
+.navigation {
+    /* critical sizing and position styles */
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 0;
+
+    /* non-critical appearance styles */
+    list-style: none;
+}
+
+.nav {
+    margin: 15% 0;
+}
+
+.label_nav {
+    margin-top: 0;
+    margin-left: 5em;
+
+    font-weight: 700;
+    font-size: 24;
+    line-height: 1.3;
+    letter-spacing: 0.6;
+    text-transform: uppercase;
+    color: var(--navigation-color);
+}
+
+
+
+/* Navigation Menu - List items */
+.nav_item {
+    /* non-critical appearance styles */
+    width: 200px;
+    border-top: 1px solid #111;
+    border-bottom: 1px solid #000;
+}
+
+.nav_item a {
+    /* non-critical appearance styles */
+    display: block;
+    padding: 1em;
+    background: linear-gradient(135deg,
+            rgba(0, 0, 0, 0) 0%,
+            rgba(0, 0, 0, 0.65) 100%);
+    color: white;
+    font-size: 1.2em;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.nav_item a:hover,
+.nav_item a:focus {
+    color: #c74438;
+    background: linear-gradient(135deg,
+            rgba(0, 0, 0, 0) 0%,
+            rgba(75, 20, 20, 0.65) 100%);
+}
+
+/* Site Wrapper - Everything that isn't navigation */
+.site_wrap {
+    /* Critical position and size styles */
+    min-height: 100%;
+    min-width: 100%;
+    background-color: white;
+    /* Needs a background or else the nav will show through */
+    position: relative;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+
+    /* non-critical apperance styles */
+
+}
+
+.nav_trigger {
+    /* critical styles - hide the checkbox input */
+    position: absolute;
+    clip: rect(0, 0, 0, 0);
+}
+
+.label_checkbox {
+    /* critical positioning styles */
+    position: fixed;
+    right: 4em;
+    top: 4em;
+    z-index: 2;
+
+    /* non-critical apperance styles */
+    height: 30px;
+    width: 30px;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' version='1.1' x='0px' y='0px' width='30px' height='30px' viewBox='0 0 30 30' enable-background='new 0 0 30 30' xml:space='preserve'><rect width='30' height='6'/><rect y='24' width='30' height='6'/><rect y='12' width='30' height='6'/></svg>");
+    background-size: contain;
+}
+
+
+
+/* Make the Magic Happen */
+.nav_trigger+label,
+.site_wrap {
+    transition: right 0.2s;
+}
+
+.nav_trigger:checked+label {
+    left: 50%;
+}
+
+.nav_trigger:checked~.site-wrap {
+    left: 30%;
+    box-shadow: 0 0 5px 5px rgba(0, 0, 0, 0.5);
+}
