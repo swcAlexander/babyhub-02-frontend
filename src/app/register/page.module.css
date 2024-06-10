@@ -162,9 +162,15 @@
   color: var(--accent-color);
   margin-left: 4px;
 }
+.checkbox__input {
+  margin: 0px;
+  padding: 0px;
+
+}
 
 .checkbox__input:checked ~ .checkbox__text::before {
-  background-image: url(/images/icons.svg#icon-check);
+  content: '';
+  background-image: url(/public/images/icons.svg#icon-check);
   border-color: transparent;
 }
 

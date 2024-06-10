@@ -53,12 +53,20 @@ export default function Home() {
               </svg>
             </label>
           </li>
-          <li className={styles.modal__item}>
+<li className={styles.modal__item}>
             <label className={styles.modal__label}>
-              <span className={styles.modal__text}>Коментар</span>
-              <textarea
-                className={styles.modal__textarea}
-                placeholder="Введіть текст"></textarea>
+              <span className={styles.modal__text}>Придумайте пароль</span>
+              <input
+                type="email"
+                name="imput-email"
+                className={styles.modal__input}
+              />
+              <svg className={styles.modal__icon}>
+                <use
+                  href="./images/icons.svg#icon-email-black"
+                  width="18"
+                  height="18"></use>
+              </svg>
             </label>
           </li>
         </ul>

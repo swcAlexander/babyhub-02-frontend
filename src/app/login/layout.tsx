@@ -1,11 +1,6 @@
 import React from 'react';
-import { Kodchasan } from 'next/font/google';
-import './globals.css';
-const font = Kodchasan({
-  style: ['normal'],
-  weight: ['400', '700'],
-  subsets: ['latin'],
-});
+import './page.module.css';
+
 
 export const metadata = {
   title: 'Babyhub',
@@ -19,7 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={font.className}>
+      <body>
         {children}
       </body>
     </html>
