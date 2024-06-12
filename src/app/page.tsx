@@ -1,8 +1,6 @@
-
 'use client'
 import Image from 'next/image';
-import controllers from '@/api/controllers/itemController';
-import styles from '../styles/page.module.css';
+import styles from './page.module.css';
 import { useEffect, useState } from 'react';
 
 interface ItemType {
@@ -11,12 +9,14 @@ interface ItemType {
 }
 
 const Home = () => {
- const [catalog, setCatalog] = useState<ItemType[]>([]);
+  const [catalog, setCatalog] = useState<ItemType[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data: ItemType[] = controllers.getAll() as ItemType[];
+        const response = await fetch('./api/items');
+        const data: ItemType[] = await response.json();
+        console.log(data, 'data')
         setCatalog(data);
       } catch (error) {
         console.error(error);
@@ -24,6 +24,8 @@ const Home = () => {
     };
     fetchData();
   }, []);
+  console.log(catalog, 'catalog')
+
   return (
     <main className={styles.main_page}>
       <Image

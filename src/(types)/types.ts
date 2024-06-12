@@ -4,5 +4,5 @@ const controller: {
     add: (req: any, res: any, next: any) => Promise<void>;
     updateById: (req: any, res: any, next: any) => Promise<void>;
     deleteById: (req: any, res: any, next: any) => Promise<void>;
-}
+} 
 export default controller;

@@ -23,7 +23,7 @@ interface CustomRequest extends Request {
   };
 }
 
-const getAll: (req: any, res: any, next: any) => Promise<ItemType[]>= async (req, res) => {
+const getAll =  async (req: CustomRequest, res: Response): Promise<Response<any, Record<string, any>>> => {
   await connect();
   try {
     const { page = '1', limit = '20' } = req.query;
@@ -32,10 +32,11 @@ const getAll: (req: any, res: any, next: any) => Promise<ItemType[]>= async (req
       skip,
       limit: parseInt(limit),
     }).populate('owner', 'name email');
-    res.status(200).json(result);
+    console.log(result, 'result')
+     return res.status(200).json(result);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Server Error' });
+    return res.status(500).json({ error: 'Server Error' });
   }
 };
 
