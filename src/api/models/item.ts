@@ -1,4 +1,4 @@
-import { Schema, model, Document, Types } from 'mongoose';
+import mongoose, { Document, Model, Types, Schema } from 'mongoose';
 
 interface ItemInterface extends Document {
   title: string;
@@ -45,6 +45,6 @@ const itemSchema = new Schema<ItemInterface>({
   timestamps: true,
 });
 
-const Item = model<ItemInterface>('Item', itemSchema);
+const Item: Model<ItemInterface> = mongoose.models.Itam || mongoose.model<ItemInterface>('Item', itemSchema);
 
 export default Item;

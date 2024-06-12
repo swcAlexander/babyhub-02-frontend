@@ -1,7 +1,10 @@
+
+import connect from '../connect/connect';
+import Item from '../models/item';
 import fs from 'fs/promises';
 import { HttpError, cloudinary } from '../helpers/index.js';
 import { ctrlWrapper } from '../decorators/index.js';
-import Item from '../models/items.ts';
+
 import { Request, Response } from 'express';
 
 interface CustomRequest extends Request {
@@ -20,7 +23,8 @@ interface CustomRequest extends Request {
   };
 }
 
-const getAll: (req: any, res: any, next: any) => Promise<void> = async (req, res) => {
+const getAll: (req: any, res: any, next: any) => Promise<ItemType[]>= async (req, res) => {
+  await connect();
   try {
     const { page = '1', limit = '20' } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -36,7 +40,8 @@ const getAll: (req: any, res: any, next: any) => Promise<void> = async (req, res
 };
 
 const getById = async (req: CustomRequest, res: Response): Promise<void> => {
-  const { _id: owner } = req.user;
+  await connect();
+  const { _id: owner } = (req as any).user;
   const { itemId } = req.params;
   const result = await Item.findOne({ _id: itemId, owner });
   if (!result) {
@@ -46,6 +51,7 @@ const getById = async (req: CustomRequest, res: Response): Promise<void> => {
 };
 
 const add = async (req: CustomRequest, res: Response): Promise<void> => {
+  await connect();
   const { path: oldPath } = req.file;
   const { url: poster } = await cloudinary.uploader.upload(oldPath, {
     folder: 'items',
@@ -56,6 +62,7 @@ const add = async (req: CustomRequest, res: Response): Promise<void> => {
 };
 
 const updateById = async (req: CustomRequest, res: Response): Promise<void> => {
+  await connect();
   const { _id: owner, subscription } = req.user;
   const { itemId } = req.params;
   if (subscription === 'admin') {
@@ -73,6 +80,7 @@ const updateById = async (req: CustomRequest, res: Response): Promise<void> => {
 };
 
 const deleteById = async (req: CustomRequest, res: Response): Promise<void> => {
+  await connect();
   const { _id: owner, subscription } = req.user;
   const { itemId } = req.params;
   if (subscription !== 'admin') throw HttpError(403);

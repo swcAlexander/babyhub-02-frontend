@@ -1,70 +1,29 @@
 
+'use client'
 import Image from 'next/image';
-import styles from './page.module.css';
-import controller from '@/(api)/controllers/itemController';
+import controllers from '@/api/controllers/itemController';
+import styles from '../styles/page.module.css';
+import { useEffect, useState } from 'react';
 
-interface Item {
+interface ItemType {
   _id: string;
-  name: string;
-  // Інші поля, які містяться у вашій моделі Item
+  title: string;
 }
 
-interface HomeProps {
-  catalog: Item[];
-}
+const Home = () => {
+ const [catalog, setCatalog] = useState<ItemType[]>([]);
 
-interface CustomRequest extends Request {
-  query: {
-    [key: string]: string | undefined;
-  };
-  user: {
-    _id: string;
-    subscription: string;
-  };
-  file: {
-    path: string;
-  };
-  params: {
-    itemId: string;
-  };
-}
-
-const fetchCatalog = async (): Promise<Item[]> => {
-  try {
-    const req = {
-      query: { page: '1', limit: '20' },
-      user: { _id: '', subscription: '' },
-      file: { path: '' },
-      params: { itemId: '' },
-      get: (header: string) => '',
-      headers: {},
-      accepts: () => false,
-      acceptsCharsets: () => false,
-      acceptsEncodings: () => false,
-      acceptsLanguages: () => false,
-      is: () => false,
-      header: () => '',
-    } as Partial<Request> as CustomRequest;
-
-    const res = {
-      status: () => ({
-        json: (result: Item[]) => {
-          catalog = result;
-        },
-      }),
-    } as unknown as Response;
-
-    let catalog: Item[] = [];
-    await controller.getAll(req, res, null);
-    return catalog;
-  } catch (error) {
-    console.error("Error fetching catalog:", error);
-    return [];
-  }
-};
-
-
-const Home = ({ catalog }: HomeProps) => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data: ItemType[] = controllers.getAll() as ItemType[];
+        setCatalog(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchData();
+  }, []);
   return (
     <main className={styles.main_page}>
       <Image
@@ -82,8 +41,8 @@ const Home = ({ catalog }: HomeProps) => {
         <a href="/login">Login</a>
       </button>
       <ul>
-        {catalog.map((item) => (
-          <li key={item._id}>{item.name}</li>
+        {catalog.map((itemka: ItemType) => (
+          <li key={itemka._id}>{itemka.title}</li>
         ))}
       </ul>
     </main>
