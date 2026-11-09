@@ -18,7 +18,8 @@
     "nodemailer": "^6.9.13",
     "prettier": "^3.0.3",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "sass": "^1.108.1"
   },
   "devDependencies": {
     "@types/node": "^20",

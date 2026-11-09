@@ -1,28 +1,39 @@
-'use client'
+import Link from 'next/link';
 import styles from './header.module.css';
 
-interface HeaderProps {
-  title: string;
-}
-const Header = ({ title }: HeaderProps) => {
+const navItems = [
+  { label: 'Головна', href: '/' },
+  { label: 'Каталог', href: '/catalog' },
+  { label: 'Про нас', href: '/about' },
+  { label: 'Контакти', href: '#contacts' },
+];
 
+export default function Header() {
   return (
-    <header className={styles.site_header}>
-      <h2>{title}</h2>
-      <div className={styles.navigation}>
-        <ul className={styles.nav}>
-          <li className={styles.nav_item}><a href="#">Головна</a></li>
-          <li className={styles.nav_item}><a href="#">Переклади</a></li>
-          <li className={styles.nav_item}><a href="#">Статті</a></li>
-          <li className={styles.nav_item}><a href="#">Про переклад</a></li>
-          <li className={styles.nav_item}><a href="#">Контакти</a></li>
-        </ul>
+    <header className={styles.header}>
+      <div className={styles.inner}>
+        <Link href="/" className={styles.brand}>
+          <span className={styles.brandMark}>B</span>
+          BabyHub
+        </Link>
+
+        <nav className={styles.nav} aria-label="Основна навігація">
+          {navItems.map((item) => (
+            <Link key={item.href} href={item.href} className={styles.navLink}>
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className={styles.actions}>
+          <Link href="/login" className={styles.secondaryButton}>
+            Увійти
+          </Link>
+          <Link href="/register" className={styles.primaryButton}>
+            Реєстрація
+          </Link>
+        </div>
       </div>
-
-      <input type="checkbox" id="nav-trigger" className={styles.nav_trigger} />
-      <label htmlFor="nav-trigger" className={styles.label_checkbox}></label>
-
     </header>
   );
-};
-export default Header;
+}

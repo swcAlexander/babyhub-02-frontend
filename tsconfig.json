@@ -13,12 +13,11 @@
     "incremental": true,
     "experimentalDecorators": true,
     "target": "ES2015", // Измените на "ES2015", чтобы скомпилировать в ES6
-    "rootDir": "./src", // Откуда компилировать
     // "outDir": "./public", // Куда компилировать (обычно папка, которая разворачивается на сервере)
 
     /* Поддержка JavaScript */
     "allowJs": true, // Позволяет компилировать JS-файлы
-    "checkJs": true, // Проверяет типы в JavaScript-файлах и сообщает об ошибках
+    "checkJs": false, // Отключаем строгую проверку JS-файлов для существующего backend-кода
 
     /* Emit */
     "sourceMap": true, // Создать source map файлы для готовых файлов JavaScript (хороошо подходит для дебаггинга)

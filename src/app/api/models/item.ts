@@ -45,6 +45,6 @@ const itemSchema = new Schema<ItemInterface>({
   timestamps: true,
 });
 
-const Item: Model<ItemInterface> = mongoose.models.Itam || mongoose.model<ItemInterface>('Item', itemSchema);
+const Item: Model<ItemInterface> = mongoose.models.Item || mongoose.model<ItemInterface>('Item', itemSchema);
 
 export default Item;

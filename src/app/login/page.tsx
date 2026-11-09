@@ -1,83 +1,27 @@
 import styles from './page.module.css';
-export default function Home() {
+
+export default function LoginPage() {
   return (
-    <main className={styles.main_page}>
-      <h2>Register an account</h2>
-      <form className={styles.modal__form}>
-        <ul className={styles.modal__list}>
-          <li className={styles.modal__item}>
-            <label className={styles.modal__label}>
-              <span className={styles.modal__text}>Ім'я</span>
-              <input
-                type="text"
-                name="imput-name"
-                className={styles.modal__input}
-              />
-              <svg className={styles.modal__icon}>
-                <use
-                  href="./images/icons.svg#icon-person-black"
-                  width="18"
-                  height="18"></use>
-              </svg>
-            </label>
-          </li>
-          <li className={styles.modal__item}>
-            <label className={styles.modal__label}>
-              <span className={styles.modal__text}>Телефон</span>
-              <input
-                type="tel"
-                name="imput-phone"
-                className={styles.modal__input}
-              />
-              <svg className={styles.modal__icon}>
-                <use
-                  href="./images/icons.svg#icon-phone-black"
-                  width="18"
-                  height="18"></use>
-              </svg>
-            </label>
-          </li>
-          <li className={styles.modal__item}>
-            <label className={styles.modal__label}>
-              <span className={styles.modal__text}>Пошта</span>
-              <input
-                type="email"
-                name="imput-email"
-                className={styles.modal__input}
-              />
-              <svg className={styles.modal__icon}>
-                <use
-                  href="./images/icons.svg#icon-email-black"
-                  width="18"
-                  height="18"></use>
-              </svg>
-            </label>
-          </li>
-          <li className={styles.modal__item}>
-            <label className={styles.modal__label}>
-              <span className={styles.modal__text}>Коментар</span>
-              <textarea
-                className={styles.modal__textarea}
-                placeholder="Введіть текст"></textarea>
-            </label>
-          </li>
-        </ul>
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            className={[styles.checkbox__input, styles.hidden]}
-          />
-          <span className={styles.checkbox__text}>
-            Погоджуюся з розсилкою та приймаю
-            <a href="/" className={styles.checkbox__link}>
-              Умови договору
-            </a>
-          </span>
-        </label>
-        <button type="submit" className={styles.modal__send}>
-          <span className="">Відправити</span>
-        </button>
-      </form>
+    <main className={styles.page}>
+      <section className={styles.card}>
+        <div className={styles.copy}>
+          <p className={styles.eyebrow}>Ласкаво просимо</p>
+          <h1>Увійдіть в особистий кабінет</h1>
+          <p>Керуйте орендою, переглядайте замовлення та зберігайте улюблені товари.</p>
+        </div>
+
+        <form className={styles.form}>
+          <label>
+            <span>Email</span>
+            <input type="email" name="email" placeholder="name@example.com" />
+          </label>
+          <label>
+            <span>Пароль</span>
+            <input type="password" name="password" placeholder="••••••••" />
+          </label>
+          <button type="submit">Увійти</button>
+        </form>
+      </section>
     </main>
   );
 }

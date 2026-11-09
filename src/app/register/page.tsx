@@ -1,91 +1,31 @@
 import styles from './page.module.css';
-export default function Home() {
+
+export default function RegisterPage() {
   return (
-    <main className={styles.main_page}>
-      <h2>Register an account</h2>
-      <form className={styles.modal__form}>
-        <ul className={styles.modal__list}>
-          <li className={styles.modal__item}>
-            <label className={styles.modal__label}>
-              <span className={styles.modal__text}>Ім'я</span>
-              <input
-                type="text"
-                name="imput-name"
-                className={styles.modal__input}
-              />
-              <svg className={styles.modal__icon}>
-                <use
-                  href="./images/icons.svg#icon-person-black"
-                  width="18"
-                  height="18"></use>
-              </svg>
-            </label>
-          </li>
-          <li className={styles.modal__item}>
-            <label className={styles.modal__label}>
-              <span className={styles.modal__text}>Телефон</span>
-              <input
-                type="tel"
-                name="imput-phone"
-                className={styles.modal__input}
-              />
-              <svg className={styles.modal__icon}>
-                <use
-                  href="./images/icons.svg#icon-phone-black"
-                  width="18"
-                  height="18"></use>
-              </svg>
-            </label>
-          </li>
-          <li className={styles.modal__item}>
-            <label className={styles.modal__label}>
-              <span className={styles.modal__text}>Пошта</span>
-              <input
-                type="email"
-                name="imput-email"
-                className={styles.modal__input}
-              />
-              <svg className={styles.modal__icon}>
-                <use
-                  href="./images/icons.svg#icon-email-black"
-                  width="18"
-                  height="18"></use>
-              </svg>
-            </label>
-          </li>
-<li className={styles.modal__item}>
-            <label className={styles.modal__label}>
-              <span className={styles.modal__text}>Придумайте пароль</span>
-              <input
-                type="email"
-                name="imput-email"
-                className={styles.modal__input}
-              />
-              <svg className={styles.modal__icon}>
-                <use
-                  href="./images/icons.svg#icon-email-black"
-                  width="18"
-                  height="18"></use>
-              </svg>
-            </label>
-          </li>
-        </ul>
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            className={[styles.checkbox__input, styles.hidden]}
-          />
-          <span className={styles.checkbox__text}>
-            Погоджуюся з розсилкою та приймаю
-            <a href="/" className={styles.checkbox__link}>
-              Умови договору
-            </a>
-          </span>
-        </label>
-        <button type="submit" className={styles.modal__send}>
-          <span className="">Відправити</span>
-        </button>
-      </form>
+    <main className={styles.page}>
+      <section className={styles.card}>
+        <div className={styles.copy}>
+          <p className={styles.eyebrow}>Створи аккаунт</p>
+          <h1>Реєстрація для нових батьків</h1>
+          <p>Збережіть свої переваги, відстежуйте замовлення й отримуйте персональні пропозиції.</p>
+        </div>
+
+        <form className={styles.form}>
+          <label>
+            <span>Ім&apos;я</span>
+            <input type="text" name="name" placeholder="Ваше ім&apos;я" />
+          </label>
+          <label>
+            <span>Email</span>
+            <input type="email" name="email" placeholder="name@example.com" />
+          </label>
+          <label>
+            <span>Пароль</span>
+            <input type="password" name="password" placeholder="Не менше 8 символів" />
+          </label>
+          <button type="submit">Зареєструватися</button>
+        </form>
+      </section>
     </main>
   );
 }

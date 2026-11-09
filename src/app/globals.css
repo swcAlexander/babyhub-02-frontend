@@ -1,51 +1,81 @@
-/*------------------normalize----------------------------*/
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p {
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
   margin: 0;
+  min-height: 100vh;
+  font-family: 'Kodchasan', 'Geist', sans-serif;
+  line-height: 1.5;
+  color: #10233a;
+  background:
+    radial-gradient(circle at top, rgba(140, 211, 255, 0.42), transparent 42%),
+    linear-gradient(180deg, #eef9ff 0%, #fef9f0 100%);
 }
-ul,
-ol {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-a {
-  text-decoration: none;
-}
+
 img {
   display: block;
   max-width: 100%;
   height: auto;
 }
 
-body {
-  font-family: 'Kodchasan', 'Geist', sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100vh;
-  overflow-x: hidden;
-
-  background-image: linear-gradient(to bottom, #117776 0%, #c8fff6 100%);
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
-/*------------------styles--------------------------------*/
+button,
+input,
+textarea {
+  font: inherit;
+}
+
 :root {
-  --primary-text-color: #042433;
-  --title-text-color: #0a3a50;
+  --primary-text-color: #10233a;
+  --title-text-color: #0c2135;
   --primary-white-color: #ffffff;
-  --accent-color: #2196f3;
-  --accent-background-color: #0a3a50;
-  --border-color: #eeeeee;
-  --secondery-border-color: #ececec;
-  --icons-border-color: #afb1b8;
-  --background-color: #0a3a50;
+  --accent-color: #ff9ec4;
+  --accent-background-color: #10233a;
+  --border-color: rgba(16, 35, 58, 0.08);
+  --background-color: #f5fbff;
+}
+
+.page-shell {
+  min-height: 100vh;
+}
+
+.site-footer {
+  background: #0f2136;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 48px;
+}
+
+.site-footer__inner {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 40px 0 52px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 26px;
+}
+
+.site-footer h3 {
+  margin: 0 0 12px;
+  color: #fff;
+  font-size: 1.5rem;
+}
+
+.site-footer p {
+  margin: 0;
+  line-height: 1.8;
+}
+
+@media (max-width: 760px) {
+  .site-footer__inner {
+    grid-template-columns: 1fr;
+  }
 }

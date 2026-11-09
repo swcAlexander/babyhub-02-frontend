@@ -1,18 +1,15 @@
+import type { Metadata } from 'next';
 import React from 'react';
 
-export const metadata = {
-  title: 'register',
-  description: 'реєстрація у Дитячі речі напрокат',
+export const metadata: Metadata = {
+  title: 'Реєстрація',
+  description: 'Реєстрація у Дитячі речі напрокат',
 };
 
-export default function RootLayout({
+export default function RegisterLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  );
+  return <>{children}</>;
 }

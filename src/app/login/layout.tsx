@@ -1,22 +1,15 @@
+import type { Metadata } from 'next';
 import React from 'react';
-import './page.module.css';
 
-
-export const metadata = {
-  title: 'Babyhub',
+export const metadata: Metadata = {
+  title: 'Вхід',
   description: 'Дитячі речі напрокат',
 };
 
-export default function RootLayout({
+export default function LoginLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en">
-      <body>
-        {children}
-      </body>
-    </html>
-  );
+  return <>{children}</>;
 }

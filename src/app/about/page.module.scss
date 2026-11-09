@@ -1,0 +1,89 @@
+.page {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 56px 0 88px;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.4fr 0.6fr;
+  gap: 28px;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.eyebrow {
+  margin-bottom: 16px;
+  color: #ff8fab;
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(2.3rem, 3vw, 4rem);
+  color: #10233a;
+  line-height: 1.05;
+}
+
+.infoCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 28px 24px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #e8f7ff, #fff3d8);
+  box-shadow: 0 18px 42px rgba(16, 35, 58, 0.08);
+}
+
+.infoCard strong {
+  font-size: clamp(2rem, 3vw, 3rem);
+  color: #10233a;
+}
+
+.infoCard span {
+  color: rgba(16, 35, 58, 0.76);
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 1.3fr 0.7fr;
+  gap: 28px;
+}
+
+.textBlock h2 {
+  margin-top: 0;
+  color: #10233a;
+  font-size: clamp(1.7rem, 2.8vw, 2.5rem);
+}
+
+.textBlock p {
+  color: rgba(16, 35, 58, 0.8);
+  line-height: 1.8;
+}
+
+.list {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.list li {
+  padding: 18px 20px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(16, 35, 58, 0.08);
+  line-height: 1.6;
+  color: rgba(16, 35, 58, 0.82);
+}
+
+@media (max-width: 760px) {
+  .hero,
+  .content {
+    grid-template-columns: 1fr;
+  }
+}
