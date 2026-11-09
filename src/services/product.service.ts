@@ -253,9 +253,19 @@ export async function getPublishedProducts(options: ProductListOptions = {}): Pr
 
   const allowedCategoryIds = publishedCategoryIds.map((category) => category._id);
 
+  const localeFilter = {
+    $and: [
+      { [`name.${locale}`]: { $exists: true, $type: 'string' } },
+      { [`name.${locale}`]: { $not: /^\s*$/ } },
+      { [`slug.${locale}`]: { $exists: true, $type: 'string' } },
+      { [`slug.${locale}`]: { $not: /^\s*$/ } },
+    ],
+  };
+
   const filter: Record<string, unknown> = {
     status: 'published',
     category: { $in: allowedCategoryIds },
+    ...localeFilter,
   };
 
   if (categoryScope.categoryId) {

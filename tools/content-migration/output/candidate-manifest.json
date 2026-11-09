@@ -1,0 +1,305 @@
+{
+  "manifestVersion": "0.1.0-dry-run",
+  "generatedAt": "2026-11-09T14:34:21.566Z",
+  "source": {
+    "kind": "public-legacy-site",
+    "rootUrl": "https://lutsk.babyservice.ua/",
+    "notes": [
+      "Control sample only: category and product URLs from the public legacy site.",
+      "No MongoDB connection, importer or content write operations were executed."
+    ]
+  },
+  "categories": [
+    {
+      "sourcePageKey": "page:uk:category:avtokrisla",
+      "entityKey": "entity:category:avtokrisla",
+      "localeMatch": "confirmed",
+      "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla.html",
+      "normalizedUrl": "/avtokrisla.html",
+      "locale": "uk",
+      "name": {
+        "uk": "Дитяче автокрісло.Прокат оренда у Baby Service Луцьк",
+        "ru": null
+      },
+      "slug": {
+        "uk": "avtokrisla",
+        "ru": null
+      },
+      "description": {
+        "uk": "Зручні, сертифіковані, перевірені, чисті автокрісла-зручний засіб для перевезення дітей в автомобілі.Прокат оренда Луцьк",
+        "ru": null
+      },
+      "status": "accept",
+      "issues": [],
+      "evidence": [
+        {
+          "url": "https://lutsk.babyservice.ua/avtokrisla.html",
+          "sourceType": "html",
+          "note": "Legacy category page extracted from public HTML."
+        }
+      ]
+    },
+    {
+      "sourcePageKey": "page:ru:category:avtokrisla",
+      "entityKey": "entity:category:avtokrisla",
+      "localeMatch": "confirmed",
+      "legacyUrl": "https://lutsk.babyservice.ua/ru/avtokrisla.html",
+      "normalizedUrl": "/ru/avtokrisla.html",
+      "locale": "ru",
+      "name": {
+        "uk": null,
+        "ru": "Детские автокреса.Прокат оренда в Baby Service Луцк"
+      },
+      "slug": {
+        "uk": null,
+        "ru": "avtokrisla"
+      },
+      "description": {
+        "uk": null,
+        "ru": "Детское автокресло удобное, безопасное средство для перевозки детей в автомобиле.Купить?Прокат оренда в БэбиСервис Луцк"
+      },
+      "status": "accept",
+      "issues": [],
+      "evidence": [
+        {
+          "url": "https://lutsk.babyservice.ua/ru/avtokrisla.html",
+          "sourceType": "html",
+          "note": "Legacy category page extracted from public HTML."
+        }
+      ]
+    }
+  ],
+  "products": [
+    {
+      "sourcePageKey": "page:uk:product:avtokreslo-adbor-capri",
+      "entityKey": "entity:product:avtokreslo-adbor-capri",
+      "localeMatch": "confirmed",
+      "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_adbor_capri.html",
+      "normalizedUrl": "/avtokrisla/avtokreslo_adbor_capri.html",
+      "categoryEntityKey": "entity:category:avtokrisla",
+      "name": {
+        "uk": "Автокрісло adbor напрокат, в оренду Baby Service Луцьк",
+        "ru": null
+      },
+      "slug": {
+        "uk": "avtokreslo-adbor-capri",
+        "ru": null
+      },
+      "shortDescription": {
+        "uk": "Дитяче автокрісло-люлька adbor для самих маленьких від 0 до 10кг. Зручна, недорога оренда, прокат в Baby Service Луцьк.",
+        "ru": null
+      },
+      "description": {
+        "uk": "Дитяче автокрісло-люлька adbor для самих маленьких від 0 до 10кг. Зручна, недорога оренда, прокат в Baby Service Луцьк.",
+        "ru": null
+      },
+      "imageLegacyUrls": [
+        "https://lutsk.babyservice.ua/themes/imgs/logo.png",
+        "https://lutsk.babyservice.ua/images/prods/43_2_avtokreslo-adbor_baby_service__lutsk.jpg"
+      ],
+      "pricingRaw": {
+        "rawText": "Автокрісло adbor напрокат, в оренду Baby Service Луцьк укр рус служба прокату дитячих товарів Телефони у Луцьку (097) 714-28-28 (050) 714-28-28 Київ | Львів | Северодонецьк | Полтава | Кропивницький Луганськ | Харків | Черкаси | Бориспіль | Вінниця Суми | Дніпро | Одеса | Миколаїв | Запоріжжя Житомир | Луцьк | Вараш | Бровари | Рівне Baby Service в Молдові Travel ПАРТНЕРИ УМОВИ ПРОКАТУ ПРО НАС ВІДГУКИ СТАТТІ КОНТАКТИ ВАГИ ДИТЯЧІ АВТОКРІСЛА - Автокрісло Adbor Capri (0-10кг) - Автокрісло Chicco Synthesis XT Plus 0-1",
+        "currency": null,
+        "type": "rental",
+        "amount": null,
+        "periodDays": null,
+        "isConfirmed": false
+      },
+      "availabilityRaw": {
+        "rawText": null,
+        "normalized": null,
+        "confidence": "unknown"
+      },
+      "status": "accept",
+      "issues": [],
+      "evidence": [
+        {
+          "url": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_adbor_capri.html",
+          "sourceType": "html",
+          "note": "Public product page extracted from legacy HTML."
+        }
+      ]
+    },
+    {
+      "sourcePageKey": "page:ru:product:avtokreslo-adbor-capri",
+      "entityKey": "entity:product:avtokreslo-adbor-capri",
+      "localeMatch": "confirmed",
+      "legacyUrl": "https://lutsk.babyservice.ua/ru/avtokrisla/avtokreslo_adbor_capri.html",
+      "normalizedUrl": "/ru/avtokrisla/avtokreslo_adbor_capri.html",
+      "categoryEntityKey": "entity:category:avtokrisla",
+      "name": {
+        "uk": null,
+        "ru": "Автокресло adbor напрокат, в оренду Baby Service Луцк"
+      },
+      "slug": {
+        "uk": null,
+        "ru": "avtokreslo-adbor-capri"
+      },
+      "shortDescription": {
+        "uk": null,
+        "ru": "Детское автокресло-люлька adbor для самых маленьких от 0 до 10кг.Удобная, недорогая оренда, прокат в Baby Service Луцк."
+      },
+      "description": {
+        "uk": null,
+        "ru": "Детское автокресло-люлька adbor для самых маленьких от 0 до 10кг.Удобная, недорогая оренда, прокат в Baby Service Луцк."
+      },
+      "imageLegacyUrls": [
+        "https://lutsk.babyservice.ua/themes/imgs/logo.png",
+        "https://lutsk.babyservice.ua/images/prods/43_2_avtokreslo-adbor_baby_service__lutsk.jpg"
+      ],
+      "pricingRaw": {
+        "rawText": "Автокресло adbor напрокат, в оренду Baby Service Луцк укр рус служба проката детских товаров Телефоны в Луцке (097) 714-28-28 (050) 714-28-28 Киев | Львов | Северодонецк | Полтава | Кропивницкий Луганск | Харьков | Черкассы | Борисполь | Винница Сумы | Днепр | Одесса | Николаев | Запорожье Житомир | Луцк | Вараш | Бровары | Ровно Baby Service в Молдове Travel ПАРТНЕРЫ УСЛОВИЯ ПРОКАТА О НАС ОТЗЫВЫ CТАТЬИ КОНТАКТЫ ВЕСЫ ДЕТСКИЕ АВТОКРЕСЛО - Автокресло Adbor Capri (0-10кг) - Автокресло Chicco Synthesis XT Plus 0-13 кг",
+        "currency": null,
+        "type": "rental",
+        "amount": null,
+        "periodDays": null,
+        "isConfirmed": false
+      },
+      "availabilityRaw": {
+        "rawText": null,
+        "normalized": null,
+        "confidence": "unknown"
+      },
+      "status": "accept",
+      "issues": [],
+      "evidence": [
+        {
+          "url": "https://lutsk.babyservice.ua/ru/avtokrisla/avtokreslo_adbor_capri.html",
+          "sourceType": "html",
+          "note": "Public product page extracted from legacy HTML."
+        }
+      ]
+    }
+  ],
+  "media": [
+    {
+      "sourcePageKey": "page:uk:product:avtokreslo-adbor-capri",
+      "entityKey": "entity:product:avtokreslo-adbor-capri:media:0",
+      "legacyUrl": "https://lutsk.babyservice.ua/themes/imgs/logo.png",
+      "normalizedUrl": "https://lutsk.babyservice.ua/themes/imgs/logo.png",
+      "filename": "logo.png",
+      "mimeType": null,
+      "width": null,
+      "height": null,
+      "alt": {
+        "uk": null,
+        "ru": null
+      },
+      "linkedProductEntityKeys": [
+        "entity:product:avtokreslo-adbor-capri"
+      ],
+      "linkedCategoryEntityKeys": [],
+      "availability": "available",
+      "duplicateOf": null,
+      "status": "accept",
+      "issues": [],
+      "evidence": [
+        {
+          "url": "https://lutsk.babyservice.ua/themes/imgs/logo.png",
+          "sourceType": "html",
+          "note": "Image URL extracted from legacy product HTML."
+        }
+      ]
+    },
+    {
+      "sourcePageKey": "page:uk:product:avtokreslo-adbor-capri",
+      "entityKey": "entity:product:avtokreslo-adbor-capri:media:1",
+      "legacyUrl": "https://lutsk.babyservice.ua/images/prods/43_2_avtokreslo-adbor_baby_service__lutsk.jpg",
+      "normalizedUrl": "https://lutsk.babyservice.ua/images/prods/43_2_avtokreslo-adbor_baby_service__lutsk.jpg",
+      "filename": "43_2_avtokreslo-adbor_baby_service__lutsk.jpg",
+      "mimeType": null,
+      "width": null,
+      "height": null,
+      "alt": {
+        "uk": null,
+        "ru": null
+      },
+      "linkedProductEntityKeys": [
+        "entity:product:avtokreslo-adbor-capri"
+      ],
+      "linkedCategoryEntityKeys": [],
+      "availability": "available",
+      "duplicateOf": null,
+      "status": "accept",
+      "issues": [],
+      "evidence": [
+        {
+          "url": "https://lutsk.babyservice.ua/images/prods/43_2_avtokreslo-adbor_baby_service__lutsk.jpg",
+          "sourceType": "html",
+          "note": "Image URL extracted from legacy product HTML."
+        }
+      ]
+    },
+    {
+      "sourcePageKey": "page:ru:product:avtokreslo-adbor-capri",
+      "entityKey": "entity:product:avtokreslo-adbor-capri:media:0",
+      "legacyUrl": "https://lutsk.babyservice.ua/themes/imgs/logo.png",
+      "normalizedUrl": "https://lutsk.babyservice.ua/themes/imgs/logo.png",
+      "filename": "logo.png",
+      "mimeType": null,
+      "width": null,
+      "height": null,
+      "alt": {
+        "uk": null,
+        "ru": null
+      },
+      "linkedProductEntityKeys": [
+        "entity:product:avtokreslo-adbor-capri"
+      ],
+      "linkedCategoryEntityKeys": [],
+      "availability": "available",
+      "duplicateOf": null,
+      "status": "accept",
+      "issues": [],
+      "evidence": [
+        {
+          "url": "https://lutsk.babyservice.ua/themes/imgs/logo.png",
+          "sourceType": "html",
+          "note": "Image URL extracted from legacy product HTML."
+        }
+      ]
+    },
+    {
+      "sourcePageKey": "page:ru:product:avtokreslo-adbor-capri",
+      "entityKey": "entity:product:avtokreslo-adbor-capri:media:1",
+      "legacyUrl": "https://lutsk.babyservice.ua/images/prods/43_2_avtokreslo-adbor_baby_service__lutsk.jpg",
+      "normalizedUrl": "https://lutsk.babyservice.ua/images/prods/43_2_avtokreslo-adbor_baby_service__lutsk.jpg",
+      "filename": "43_2_avtokreslo-adbor_baby_service__lutsk.jpg",
+      "mimeType": null,
+      "width": null,
+      "height": null,
+      "alt": {
+        "uk": null,
+        "ru": null
+      },
+      "linkedProductEntityKeys": [
+        "entity:product:avtokreslo-adbor-capri"
+      ],
+      "linkedCategoryEntityKeys": [],
+      "availability": "available",
+      "duplicateOf": null,
+      "status": "accept",
+      "issues": [],
+      "evidence": [
+        {
+          "url": "https://lutsk.babyservice.ua/images/prods/43_2_avtokreslo-adbor_baby_service__lutsk.jpg",
+          "sourceType": "html",
+          "note": "Image URL extracted from legacy product HTML."
+        }
+      ]
+    }
+  ],
+  "pages": [],
+  "validation": {
+    "totalRecords": 8,
+    "accepted": 8,
+    "reviewRequired": 0,
+    "rejected": 0,
+    "issuesByCode": {},
+    "blockers": [
+      "Legacy HTML is the only source, no CMS export or DB export is available.",
+      "Locale pairs are accepted only when the same normalized URL and language structure confirm a shared entity.",
+      "Price conversion remains manual because legacy product pages do not provide a confirmed salePrice contract."
+    ]
+  }
+}

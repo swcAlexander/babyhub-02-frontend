@@ -1,0 +1,12 @@
+{
+  "totalRecords": 8,
+  "accepted": 8,
+  "reviewRequired": 0,
+  "rejected": 0,
+  "issuesByCode": {},
+  "blockers": [
+    "Legacy HTML is the only source, no CMS export or DB export is available.",
+    "Locale pairs are accepted only when the same normalized URL and language structure confirm a shared entity.",
+    "Price conversion remains manual because legacy product pages do not provide a confirmed salePrice contract."
+  ]
+}
