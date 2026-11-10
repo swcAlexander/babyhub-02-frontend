@@ -1,5 +1,8 @@
 # CONTENT_MIGRATION_MANIFEST_DESIGN.md
 
+Актуальне доповнення для категорії: [етап 3.8.21](#24-підготовка-українських-автокрісел--3821).
+Попередні аудити та результати нижче залишені історичними.
+
 ## 1. Мета та обмеження
 
 ### Підтверджено
@@ -1122,3 +1125,57 @@ main повторно прочитано: правильна published-пара/
 Точна PowerShell-команда без виведення DB_HOST, тимчасові скриншоти та деталі
 контракту сервісу наведені в
 [README, етап 3.8.20](../tools/content-migration/README.md#етап-3820-публікація-пари-й-штатний-каталог).
+
+## 24. Підготовка українських автокрісел — 3.8.21
+
+Стан перевірено read-only 2026-11-10. Окремий `output/avtokrisla-uk-manifest-3821.json`
+розширює контрольний sample до повної української категорії: 20 Product, 22 фото,
+1 Category. Пагінація 6+6+6+2 і page-all дають однаковий список; перевірені всі українські
+сторінки товарів. 25 локальних HTML-знімків та їх SHA-256 є доказами, логотипи виключені.
+Російських записів у наборі немає. Історичні manifest/звіти/journals не змінено.
+
+`output/avtokrisla-uk-ready-3821.json` містить 19 Product та 20 фото: один суперечливий
+Product і два непридатних до перенесення фото виключені. План main: **18 new draft,
+1 reuse published Adbor, 1 blocked**. Category published повторно використовується;
+дублікатів чи конфліктів `_id`/source URL/slug у main не знайдено.
+Фото: **19 PRODUCT_IMPORT_REQUIRED, 1 reuse, 2 blocked**, без дозволу upload.
+
+Блокування джерел:
+
+- `avtokreslo_nanya_sp_lx_9_36kg.html`: картка/опис/photo — 4Baby Weelmo 9–25 кг,
+  title/H1/URL — Nanya SP LX 9–36 кг. `SOURCE_MODEL_IDENTITY_CONFLICT` блокує Product
+  та його фото; потрібне ручне рішення, автоматичного перейменування немає.
+- Друге фото бустера `/image/BabyServiseLcbuster1.jpg` — HTTP 404 text/html без redirect.
+  Inventory зберігає missing/SOURCE_PHOTO_HTTP_404; ready-вибірка його не містить.
+  Основне фото доступне, Product не заблокований.
+
+`prepare-import.mjs --batch` явно розширює межу до 1 Category та 1–50 унікальних UK Product.
+Усі final payload/ідентичності/зв'язки перевіряються до вставок, весь batch — одна транзакція.
+Без прапорця збережена межа однієї пари; review/reject/error-issues блокуються до підключення.
+Нові записи draft; in_stock/UAH/rentalRates=[] та deferred price=0 позначаються в importMeta.
+Генератор не створює непідтверджений тариф. Published у main повторно використовуються
+без оновлення статусу чи даних. Test лишився draft-only, перевірений лише симуляторами.
+Загальний validator readiness review через непідтверджені source business/media fields
+збережено окремо від погоджених defaults та успішної Mongoose payload validation.
+
+Фото CLI вибирає source тільки з явних manifest/product-slug/photo-url, підтримує декілька
+фото послідовними контрольованими запусками. Нові source URL мають окремі target-specific
+IDs/locks/journals. Старі main/test Adbor identities/журнали збережені для recovery.
+Published Category допускається для нових draft Product. Published Product тут незмінний:
+тільки verified committed reuse без будь-яких записів; нове фото блокується.
+Durable phases, lock ownership, no takeover, $addToSet, транзакція, overwrite:false та recovery
+перевірені in-memory тестами, не реальними мутаціями.
+
+`plan-avtokrisla.mjs` приймає тільки read-only target і нове ім'я звіту. Він перевіряє
+inventory/accepted batch, bytes/MIME/dimensions/hash, main Media/journal/lock, але не Cloudinary resource.
+Driver mutations/індекси/явні транзакції заблоковані guard; Cloudinary mutation API відсутні.
+Підсумковий звіт `output/avtokrisla-dry-run-main-3821-final.json` підтверджує незмінність
+catalog/locks і захищених файлів за SHA-256, 0 спроб мутацій, uploads=0, mongoWrites=0.
+Legacy документи та test не читали/не змінювали. `.env`, схеми, публічні фільтри не змінено.
+
+Main journal вже відстежується Git, не ignored, незмінний; містить recovery metadata,
+не credentials. Для його збереження не потрібно додавати весь output.
+**111/111 тестів**, typecheck та diff-check успішні; deployment/commit/push не виконували.
+Точні команди наступного read-only й майбутнього окремо дозволеного імпорту,
+артефакти та зміни інструментів — у
+[README, етап 3.8.21](../tools/content-migration/README.md#етап-3821-підготовка-українських-автокрісел).

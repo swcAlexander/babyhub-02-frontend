@@ -37,8 +37,8 @@ const get = (object, field) => field.split('.').reduce((value, part) => value?.[
 const matches = (doc, query) => Object.entries(query).every(([key, value]) => key === '$or'
   ? value.some(condition => matches(doc, condition))
   : value === null ? get(doc, key) == null : String(get(doc, key)) === String(value));
-const fixture = (target = 'test') => {
-  const IDENTITY = photoIdentity(target);
+const fixture = (target = 'test', sourcePhotoUrl = TARGET.photoUrl) => {
+  const IDENTITY = photoIdentity(target, sourcePhotoUrl);
   const state = {
     products: [{ _id: oid(TEST_PRODUCT_ID), name: { uk: 'Автокрісло' }, slug: { uk: TARGET.slug },
       status: 'draft', importMeta: { legacyUrl: TARGET.legacyUrl }, images: [],
@@ -133,9 +133,9 @@ const fixture = (target = 'test') => {
   const options = { target, confirmDatabase: target === 'main' ? 'db-babyhub' : undefined, prepared, connection, models, cloudinary, journal, account: 'a'.repeat(64),
     async fetchImpl(url, options) {
       state.fetches++;
-      assert.equal(url, TARGET.photoUrl);
+      assert.equal(url, sourcePhotoUrl);
       assert.equal(options.redirect, 'manual');
-      return photoResponse();
+      return photoResponse(jpeg, { url: sourcePhotoUrl });
     } };
   return { state, options, run: confirmed => runPhotoMigration({ ...options, confirmed }) };
 };
@@ -146,6 +146,72 @@ test('CLI вимагає явну ціль для запису та зберіг
   assert.throws(() => parsePhotoArguments(['--confirm-import']), { code: 'TARGET_REQUIRED' });
   for (const args of [['--url=other'], ['--db=main'], ['file'], ['--confirm-import', '--confirm-import']]) {
     assert.throws(() => parsePhotoArguments(args), { code: 'INVALID_ARGUMENTS' });
+  }
+});
+
+test('main published пара повторно використовує committed фото без жодних мутацій', async () => {
+  const f = fixture('main');
+  await f.run(true); // Only in-memory mocks.
+  f.state.products[0].status = 'published';
+  f.state.categories[0].status = 'published';
+  const before = JSON.stringify([f.state.products, f.state.categories, f.state.media, f.state.journal]);
+  const dry = await f.run(false);
+  assert.equal(dry.planned.media, 'reuse');
+  assert.equal(dry.planned.productImage, 'reuse-link');
+  const writes = f.state.writes.length;
+  const saves = f.state.journalSaves.length;
+  const cloudCalls = f.state.cloudCalls.length;
+  const result = await f.run(true);
+  assert.equal(result.uploads + result.createdMedia + result.productModified, 0);
+  assert.equal(f.state.writes.length, writes);
+  assert.equal(f.state.journalSaves.length, saves);
+  assert.equal(f.state.cloudCalls.length, cloudCalls);
+  assert.equal(f.state.products[0].status, 'published');
+  assert.equal(JSON.stringify([f.state.products, f.state.categories, f.state.media, f.state.journal]), before);
+});
+
+test('published Product без завершеного фото блокується; published Category допускає новий draft Product', async () => {
+  const f = fixture('main');
+  f.state.products[0].status = 'published';
+  await assert.rejects(f.run(false), { code: 'PUBLISHED_PRODUCT_IMMUTABLE' });
+  await assert.rejects(f.run(true), { code: 'PUBLISHED_PRODUCT_IMMUTABLE' });
+  assert.equal(f.state.writes.length + f.state.cloudCalls.length + f.state.journalSaves.length, 0);
+  f.state.products[0].status = 'draft';
+  f.state.categories[0].status = 'published';
+  assert.equal((await f.run(true)).createdMedia, 1);
+});
+
+test('друга manifest-фотографія має окремі ID, журнал і lock; recovery та повторний запуск збережені', async () => {
+  const url = 'https://lutsk.babyservice.ua/image/second-product.jpg';
+  const f = fixture('main', url);
+  f.options.photoUrl = url;
+  const productUrl = 'https://lutsk.babyservice.ua/avtokrisla/another-seat.html';
+  f.options.prepared = buildImportDocuments({ ...manifest, products: [{ ...manifest.products[0],
+    sourcePageKey: 'page:uk:product:another-seat', entityKey: 'entity:product:another-seat',
+    legacyUrl: productUrl, slug: { uk: 'another-seat' }, imageLegacyUrls: [url] }] }, { Category, Product, mongoose });
+  f.state.products[0].slug.uk = 'another-seat';
+  f.state.products[0].importMeta.legacyUrl = productUrl;
+  assert.notEqual(photoIdentity('main', url).mediaId, photoIdentity('main').mediaId);
+  assert.notEqual(photoJournalPath('main', url), photoJournalPath('main'));
+  assert.notEqual(photoIdentity('main', url).mediaId, photoIdentity('test', url).mediaId);
+  f.state.failProductUpdate = true;
+  await assert.rejects(f.run(true), { code: 'PRODUCT_UPDATE_FAILED' });
+  assert.equal(f.state.journal.phase, 'uploaded');
+  f.state.failProductUpdate = false;
+  const restored = await f.run(true);
+  assert.equal(restored.uploads, 0);
+  assert.equal(restored.createdMedia, 1);
+  const repeat = await f.run(true);
+  assert.equal(repeat.uploads + repeat.createdMedia + repeat.productModified, 0);
+  assert.equal(f.state.content_migration_locks[0]._id, `baby-service-photo-main-v1:${photoIdentity('main', url).mediaId}`);
+});
+
+test('розширений photo CLI вимагає всі три параметри; довільні hosts та службові фото заборонені', async () => {
+  const parsed = parsePhotoArguments(['--target=main', '--manifest=ready.json', '--product-slug=seat', '--photo-url=https://lutsk.babyservice.ua/image/seat.jpg']);
+  assert.equal(parsed.productSlug, 'seat');
+  for (const args of [['--manifest=a'], ['--photo-url=a'], ['--manifest=a', '--manifest=b']]) assert.throws(() => parsePhotoArguments(args));
+  for (const url of ['https://example.com/image/seat.jpg', 'https://lutsk.babyservice.ua/themes/imgs/logo.jpg', 'https://lutsk.babyservice.ua/image/seat.jpg?x=1']) {
+    await assert.rejects(fetchPhoto(() => { throw new Error('must not fetch'); }, url), { code: 'UNSAFE_PHOTO_URL' });
   }
 });
 

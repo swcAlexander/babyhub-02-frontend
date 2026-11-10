@@ -1,0 +1,2781 @@
+{
+  "stage": "3.8.21",
+  "mode": "dry-run",
+  "generatedAt": "2026-11-10T14:32:43.040Z",
+  "target": "main",
+  "database": "db-babyhub",
+  "sourceManifest": "tools/content-migration/output/avtokrisla-uk-manifest-3821.json",
+  "validation": {
+    "validatorVersion": "2.0.0",
+    "sourceManifest": "tools/content-migration/output/avtokrisla-uk-manifest-3821.json",
+    "structuralValidation": {
+      "status": "valid",
+      "recordsChecked": 43,
+      "errors": []
+    },
+    "migrationReadiness": {
+      "status": "review",
+      "totalRecords": 43,
+      "accepted": 1,
+      "reviewRequired": 42,
+      "issuesByCode": {
+        "PRICE_NOT_CONFIRMED": 20,
+        "PRICE_AMOUNT_MISSING": 20,
+        "PRICE_CURRENCY_UNCONFIRMED": 20,
+        "RENTAL_PERIOD_UNCONFIRMED": 20,
+        "RENTAL_UNIT_UNCONFIRMED": 20,
+        "AVAILABILITY_UNCONFIRMED": 20,
+        "MEDIA_STORAGE_TYPE_UNCONFIRMED": 22
+      },
+      "records": [
+        {
+          "collection": "categories",
+          "index": 0,
+          "sourcePageKey": "page:uk:category:avtokrisla",
+          "status": "accept",
+          "structuralStatus": "valid",
+          "readinessStatus": "accept",
+          "identity": {
+            "effectiveEntityKey": "entity:category:avtokrisla",
+            "localeMatch": "unconfirmed"
+          },
+          "issues": []
+        },
+        {
+          "collection": "products",
+          "index": 0,
+          "sourcePageKey": "page:uk:product:avtokreslo-adbor-capri",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokreslo-adbor-capri",
+            "localeMatch": "unconfirmed"
+          },
+          "issues": [
+            {
+              "code": "PRICE_NOT_CONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Pricing is explicitly unconfirmed or lacks confirmation.",
+              "field": "pricingRaw.isConfirmed"
+            },
+            {
+              "code": "PRICE_AMOUNT_MISSING",
+              "severity": "warning",
+              "status": "review",
+              "message": "A non-negative numeric price is required; no value was invented.",
+              "field": "pricingRaw.amount"
+            },
+            {
+              "code": "PRICE_CURRENCY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "A confirmed currency is required.",
+              "field": "pricingRaw.currency"
+            },
+            {
+              "code": "RENTAL_PERIOD_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Rental pricing requires a confirmed period; it cannot be converted to salePrice.",
+              "field": "pricingRaw.periodDays"
+            },
+            {
+              "code": "RENTAL_UNIT_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target rentalRates schema requires a confirmed unit.",
+              "field": "pricingRaw.unit"
+            },
+            {
+              "code": "AVAILABILITY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Product availability must be explicitly confirmed; no default was applied.",
+              "field": "availabilityRaw"
+            }
+          ]
+        },
+        {
+          "collection": "products",
+          "index": 1,
+          "sourcePageKey": "page:uk:product:avtokrislo-chicco-synthesis-xt-plus-0-13-kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokrislo-chicco-synthesis-xt-plus-0-13-kg",
+            "localeMatch": "unconfirmed"
+          },
+          "issues": [
+            {
+              "code": "PRICE_NOT_CONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Pricing is explicitly unconfirmed or lacks confirmation.",
+              "field": "pricingRaw.isConfirmed"
+            },
+            {
+              "code": "PRICE_AMOUNT_MISSING",
+              "severity": "warning",
+              "status": "review",
+              "message": "A non-negative numeric price is required; no value was invented.",
+              "field": "pricingRaw.amount"
+            },
+            {
+              "code": "PRICE_CURRENCY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "A confirmed currency is required.",
+              "field": "pricingRaw.currency"
+            },
+            {
+              "code": "RENTAL_PERIOD_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Rental pricing requires a confirmed period; it cannot be converted to salePrice.",
+              "field": "pricingRaw.periodDays"
+            },
+            {
+              "code": "RENTAL_UNIT_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target rentalRates schema requires a confirmed unit.",
+              "field": "pricingRaw.unit"
+            },
+            {
+              "code": "AVAILABILITY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Product availability must be explicitly confirmed; no default was applied.",
+              "field": "availabilityRaw"
+            }
+          ]
+        },
+        {
+          "collection": "products",
+          "index": 2,
+          "sourcePageKey": "page:uk:product:avtokreslo-kolyaska-doona-infant",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokreslo-kolyaska-doona-infant",
+            "localeMatch": "unconfirmed"
+          },
+          "issues": [
+            {
+              "code": "PRICE_NOT_CONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Pricing is explicitly unconfirmed or lacks confirmation.",
+              "field": "pricingRaw.isConfirmed"
+            },
+            {
+              "code": "PRICE_AMOUNT_MISSING",
+              "severity": "warning",
+              "status": "review",
+              "message": "A non-negative numeric price is required; no value was invented.",
+              "field": "pricingRaw.amount"
+            },
+            {
+              "code": "PRICE_CURRENCY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "A confirmed currency is required.",
+              "field": "pricingRaw.currency"
+            },
+            {
+              "code": "RENTAL_PERIOD_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Rental pricing requires a confirmed period; it cannot be converted to salePrice.",
+              "field": "pricingRaw.periodDays"
+            },
+            {
+              "code": "RENTAL_UNIT_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target rentalRates schema requires a confirmed unit.",
+              "field": "pricingRaw.unit"
+            },
+            {
+              "code": "AVAILABILITY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Product availability must be explicitly confirmed; no default was applied.",
+              "field": "availabilityRaw"
+            }
+          ]
+        },
+        {
+          "collection": "products",
+          "index": 3,
+          "sourcePageKey": "page:uk:product:avtokrislo-cabrio-fix-4baby-colby-0-13kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokrislo-cabrio-fix-4baby-colby-0-13kg",
+            "localeMatch": "unconfirmed"
+          },
+          "issues": [
+            {
+              "code": "PRICE_NOT_CONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Pricing is explicitly unconfirmed or lacks confirmation.",
+              "field": "pricingRaw.isConfirmed"
+            },
+            {
+              "code": "PRICE_AMOUNT_MISSING",
+              "severity": "warning",
+              "status": "review",
+              "message": "A non-negative numeric price is required; no value was invented.",
+              "field": "pricingRaw.amount"
+            },
+            {
+              "code": "PRICE_CURRENCY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "A confirmed currency is required.",
+              "field": "pricingRaw.currency"
+            },
+            {
+              "code": "RENTAL_PERIOD_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Rental pricing requires a confirmed period; it cannot be converted to salePrice.",
+              "field": "pricingRaw.periodDays"
+            },
+            {
+              "code": "RENTAL_UNIT_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target rentalRates schema requires a confirmed unit.",
+              "field": "pricingRaw.unit"
+            },
+            {
+              "code": "AVAILABILITY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Product availability must be explicitly confirmed; no default was applied.",
+              "field": "availabilityRaw"
+            }
+          ]
+        },
+        {
+          "collection": "products",
+          "index": 4,
+          "sourcePageKey": "page:uk:product:avtokreslo-caretero-fly-0-13-kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokreslo-caretero-fly-0-13-kg",
+            "localeMatch": "unconfirmed"
+          },
+          "issues": [
+            {
+              "code": "PRICE_NOT_CONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Pricing is explicitly unconfirmed or lacks confirmation.",
+              "field": "pricingRaw.isConfirmed"
+            },
+            {
+              "code": "PRICE_AMOUNT_MISSING",
+              "severity": "warning",
+              "status": "review",
+              "message": "A non-negative numeric price is required; no value was invented.",
+              "field": "pricingRaw.amount"
+            },
+            {
+              "code": "PRICE_CURRENCY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "A confirmed currency is required.",
+              "field": "pricingRaw.currency"
+            },
+            {
+              "code": "RENTAL_PERIOD_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Rental pricing requires a confirmed period; it cannot be converted to salePrice.",
+              "field": "pricingRaw.periodDays"
+            },
+            {
+              "code": "RENTAL_UNIT_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target rentalRates schema requires a confirmed unit.",
+              "field": "pricingRaw.unit"
+            },
+            {
+              "code": "AVAILABILITY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Product availability must be explicitly confirmed; no default was applied.",
+              "field": "availabilityRaw"
+            }
+          ]
+        },
+        {
+          "collection": "products",
+          "index": 5,
+          "sourcePageKey": "page:uk:product:avtokrislo-lionelo-color-violet-0-18-kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokrislo-lionelo-color-violet-0-18-kg",
+            "localeMatch": "unconfirmed"
+          },
+          "issues": [
+            {
+              "code": "PRICE_NOT_CONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Pricing is explicitly unconfirmed or lacks confirmation.",
+              "field": "pricingRaw.isConfirmed"
+            },
+            {
+              "code": "PRICE_AMOUNT_MISSING",
+              "severity": "warning",
+              "status": "review",
+              "message": "A non-negative numeric price is required; no value was invented.",
+              "field": "pricingRaw.amount"
+            },
+            {
+              "code": "PRICE_CURRENCY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "A confirmed currency is required.",
+              "field": "pricingRaw.currency"
+            },
+            {
+              "code": "RENTAL_PERIOD_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Rental pricing requires a confirmed period; it cannot be converted to salePrice.",
+              "field": "pricingRaw.periodDays"
+            },
+            {
+              "code": "RENTAL_UNIT_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target rentalRates schema requires a confirmed unit.",
+              "field": "pricingRaw.unit"
+            },
+            {
+              "code": "AVAILABILITY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Product availability must be explicitly confirmed; no default was applied.",
+              "field": "availabilityRaw"
+            }
+          ]
+        },
+        {
+          "collection": "products",
+          "index": 6,
+          "sourcePageKey": "page:uk:product:avtokreslo-eternal-shield-sport-star-9-25kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokreslo-eternal-shield-sport-star-9-25kg",
+            "localeMatch": "unconfirmed"
+          },
+          "issues": [
+            {
+              "code": "PRICE_NOT_CONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Pricing is explicitly unconfirmed or lacks confirmation.",
+              "field": "pricingRaw.isConfirmed"
+            },
+            {
+              "code": "PRICE_AMOUNT_MISSING",
+              "severity": "warning",
+              "status": "review",
+              "message": "A non-negative numeric price is required; no value was invented.",
+              "field": "pricingRaw.amount"
+            },
+            {
+              "code": "PRICE_CURRENCY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "A confirmed currency is required.",
+              "field": "pricingRaw.currency"
+            },
+            {
+              "code": "RENTAL_PERIOD_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Rental pricing requires a confirmed period; it cannot be converted to salePrice.",
+              "field": "pricingRaw.periodDays"
+            },
+            {
+              "code": "RENTAL_UNIT_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target rentalRates schema requires a confirmed unit.",
+              "field": "pricingRaw.unit"
+            },
+            {
+              "code": "AVAILABILITY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Product availability must be explicitly confirmed; no default was applied.",
+              "field": "availabilityRaw"
+            }
+          ]
+        },
+        {
+          "collection": "products",
+          "index": 7,
+          "sourcePageKey": "page:uk:product:avtokreslo-nanya-sp-lx-9-36kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokreslo-nanya-sp-lx-9-36kg",
+            "localeMatch": "unconfirmed"
+          },
+          "issues": [
+            {
+              "code": "PRICE_NOT_CONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Pricing is explicitly unconfirmed or lacks confirmation.",
+              "field": "pricingRaw.isConfirmed"
+            },
+            {
+              "code": "PRICE_AMOUNT_MISSING",
+              "severity": "warning",
+              "status": "review",
+              "message": "A non-negative numeric price is required; no value was invented.",
+              "field": "pricingRaw.amount"
+            },
+            {
+              "code": "PRICE_CURRENCY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "A confirmed currency is required.",
+              "field": "pricingRaw.currency"
+            },
+            {
+              "code": "RENTAL_PERIOD_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Rental pricing requires a confirmed period; it cannot be converted to salePrice.",
+              "field": "pricingRaw.periodDays"
+            },
+            {
+              "code": "RENTAL_UNIT_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target rentalRates schema requires a confirmed unit.",
+              "field": "pricingRaw.unit"
+            },
+            {
+              "code": "AVAILABILITY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Product availability must be explicitly confirmed; no default was applied.",
+              "field": "availabilityRaw"
+            }
+          ]
+        },
+        {
+          "collection": "products",
+          "index": 8,
+          "sourcePageKey": "page:uk:product:avtokreslo-bambi-m-0522-9-36-kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokreslo-bambi-m-0522-9-36-kg",
+            "localeMatch": "unconfirmed"
+          },
+          "issues": [
+            {
+              "code": "PRICE_NOT_CONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Pricing is explicitly unconfirmed or lacks confirmation.",
+              "field": "pricingRaw.isConfirmed"
+            },
+            {
+              "code": "PRICE_AMOUNT_MISSING",
+              "severity": "warning",
+              "status": "review",
+              "message": "A non-negative numeric price is required; no value was invented.",
+              "field": "pricingRaw.amount"
+            },
+            {
+              "code": "PRICE_CURRENCY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "A confirmed currency is required.",
+              "field": "pricingRaw.currency"
+            },
+            {
+              "code": "RENTAL_PERIOD_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Rental pricing requires a confirmed period; it cannot be converted to salePrice.",
+              "field": "pricingRaw.periodDays"
+            },
+            {
+              "code": "RENTAL_UNIT_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target rentalRates schema requires a confirmed unit.",
+              "field": "pricingRaw.unit"
+            },
+            {
+              "code": "AVAILABILITY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Product availability must be explicitly confirmed; no default was applied.",
+              "field": "availabilityRaw"
+            }
+          ]
+        },
+        {
+          "collection": "products",
+          "index": 9,
+          "sourcePageKey": "page:uk:product:avtokreslo-buster-15-36kg-2-3",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokreslo-buster-15-36kg-2-3",
+            "localeMatch": "unconfirmed"
+          },
+          "issues": [
+            {
+              "code": "PRICE_NOT_CONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Pricing is explicitly unconfirmed or lacks confirmation.",
+              "field": "pricingRaw.isConfirmed"
+            },
+            {
+              "code": "PRICE_AMOUNT_MISSING",
+              "severity": "warning",
+              "status": "review",
+              "message": "A non-negative numeric price is required; no value was invented.",
+              "field": "pricingRaw.amount"
+            },
+            {
+              "code": "PRICE_CURRENCY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "A confirmed currency is required.",
+              "field": "pricingRaw.currency"
+            },
+            {
+              "code": "RENTAL_PERIOD_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Rental pricing requires a confirmed period; it cannot be converted to salePrice.",
+              "field": "pricingRaw.periodDays"
+            },
+            {
+              "code": "RENTAL_UNIT_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target rentalRates schema requires a confirmed unit.",
+              "field": "pricingRaw.unit"
+            },
+            {
+              "code": "AVAILABILITY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Product availability must be explicitly confirmed; no default was applied.",
+              "field": "availabilityRaw"
+            }
+          ]
+        },
+        {
+          "collection": "products",
+          "index": 10,
+          "sourcePageKey": "page:uk:product:avtokrislo-4vaby-freeway-0-25-kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokrislo-4vaby-freeway-0-25-kg",
+            "localeMatch": "unconfirmed"
+          },
+          "issues": [
+            {
+              "code": "PRICE_NOT_CONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Pricing is explicitly unconfirmed or lacks confirmation.",
+              "field": "pricingRaw.isConfirmed"
+            },
+            {
+              "code": "PRICE_AMOUNT_MISSING",
+              "severity": "warning",
+              "status": "review",
+              "message": "A non-negative numeric price is required; no value was invented.",
+              "field": "pricingRaw.amount"
+            },
+            {
+              "code": "PRICE_CURRENCY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "A confirmed currency is required.",
+              "field": "pricingRaw.currency"
+            },
+            {
+              "code": "RENTAL_PERIOD_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Rental pricing requires a confirmed period; it cannot be converted to salePrice.",
+              "field": "pricingRaw.periodDays"
+            },
+            {
+              "code": "RENTAL_UNIT_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target rentalRates schema requires a confirmed unit.",
+              "field": "pricingRaw.unit"
+            },
+            {
+              "code": "AVAILABILITY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Product availability must be explicitly confirmed; no default was applied.",
+              "field": "availabilityRaw"
+            }
+          ]
+        },
+        {
+          "collection": "products",
+          "index": 11,
+          "sourcePageKey": "page:uk:product:avtokreslo-4vaby-rodos-0-25-kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokreslo-4vaby-rodos-0-25-kg",
+            "localeMatch": "unconfirmed"
+          },
+          "issues": [
+            {
+              "code": "PRICE_NOT_CONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Pricing is explicitly unconfirmed or lacks confirmation.",
+              "field": "pricingRaw.isConfirmed"
+            },
+            {
+              "code": "PRICE_AMOUNT_MISSING",
+              "severity": "warning",
+              "status": "review",
+              "message": "A non-negative numeric price is required; no value was invented.",
+              "field": "pricingRaw.amount"
+            },
+            {
+              "code": "PRICE_CURRENCY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "A confirmed currency is required.",
+              "field": "pricingRaw.currency"
+            },
+            {
+              "code": "RENTAL_PERIOD_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Rental pricing requires a confirmed period; it cannot be converted to salePrice.",
+              "field": "pricingRaw.periodDays"
+            },
+            {
+              "code": "RENTAL_UNIT_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target rentalRates schema requires a confirmed unit.",
+              "field": "pricingRaw.unit"
+            },
+            {
+              "code": "AVAILABILITY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Product availability must be explicitly confirmed; no default was applied.",
+              "field": "availabilityRaw"
+            }
+          ]
+        },
+        {
+          "collection": "products",
+          "index": 12,
+          "sourcePageKey": "page:uk:product:avtokrislo-lionelo-bastiaan-isofix-0-36-kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokrislo-lionelo-bastiaan-isofix-0-36-kg",
+            "localeMatch": "unconfirmed"
+          },
+          "issues": [
+            {
+              "code": "PRICE_NOT_CONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Pricing is explicitly unconfirmed or lacks confirmation.",
+              "field": "pricingRaw.isConfirmed"
+            },
+            {
+              "code": "PRICE_AMOUNT_MISSING",
+              "severity": "warning",
+              "status": "review",
+              "message": "A non-negative numeric price is required; no value was invented.",
+              "field": "pricingRaw.amount"
+            },
+            {
+              "code": "PRICE_CURRENCY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "A confirmed currency is required.",
+              "field": "pricingRaw.currency"
+            },
+            {
+              "code": "RENTAL_PERIOD_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Rental pricing requires a confirmed period; it cannot be converted to salePrice.",
+              "field": "pricingRaw.periodDays"
+            },
+            {
+              "code": "RENTAL_UNIT_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target rentalRates schema requires a confirmed unit.",
+              "field": "pricingRaw.unit"
+            },
+            {
+              "code": "AVAILABILITY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Product availability must be explicitly confirmed; no default was applied.",
+              "field": "availabilityRaw"
+            }
+          ]
+        },
+        {
+          "collection": "products",
+          "index": 13,
+          "sourcePageKey": "page:uk:product:avtkrislo-lionelo-lo-nico-9-36-kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtkrislo-lionelo-lo-nico-9-36-kg",
+            "localeMatch": "unconfirmed"
+          },
+          "issues": [
+            {
+              "code": "PRICE_NOT_CONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Pricing is explicitly unconfirmed or lacks confirmation.",
+              "field": "pricingRaw.isConfirmed"
+            },
+            {
+              "code": "PRICE_AMOUNT_MISSING",
+              "severity": "warning",
+              "status": "review",
+              "message": "A non-negative numeric price is required; no value was invented.",
+              "field": "pricingRaw.amount"
+            },
+            {
+              "code": "PRICE_CURRENCY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "A confirmed currency is required.",
+              "field": "pricingRaw.currency"
+            },
+            {
+              "code": "RENTAL_PERIOD_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Rental pricing requires a confirmed period; it cannot be converted to salePrice.",
+              "field": "pricingRaw.periodDays"
+            },
+            {
+              "code": "RENTAL_UNIT_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target rentalRates schema requires a confirmed unit.",
+              "field": "pricingRaw.unit"
+            },
+            {
+              "code": "AVAILABILITY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Product availability must be explicitly confirmed; no default was applied.",
+              "field": "availabilityRaw"
+            }
+          ]
+        },
+        {
+          "collection": "products",
+          "index": 14,
+          "sourcePageKey": "page:uk:product:avtokrislo-4baby-fly-fix-9-36-kg-z-isofix",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokrislo-4baby-fly-fix-9-36-kg-z-isofix",
+            "localeMatch": "unconfirmed"
+          },
+          "issues": [
+            {
+              "code": "PRICE_NOT_CONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Pricing is explicitly unconfirmed or lacks confirmation.",
+              "field": "pricingRaw.isConfirmed"
+            },
+            {
+              "code": "PRICE_AMOUNT_MISSING",
+              "severity": "warning",
+              "status": "review",
+              "message": "A non-negative numeric price is required; no value was invented.",
+              "field": "pricingRaw.amount"
+            },
+            {
+              "code": "PRICE_CURRENCY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "A confirmed currency is required.",
+              "field": "pricingRaw.currency"
+            },
+            {
+              "code": "RENTAL_PERIOD_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Rental pricing requires a confirmed period; it cannot be converted to salePrice.",
+              "field": "pricingRaw.periodDays"
+            },
+            {
+              "code": "RENTAL_UNIT_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target rentalRates schema requires a confirmed unit.",
+              "field": "pricingRaw.unit"
+            },
+            {
+              "code": "AVAILABILITY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Product availability must be explicitly confirmed; no default was applied.",
+              "field": "availabilityRaw"
+            }
+          ]
+        },
+        {
+          "collection": "products",
+          "index": 15,
+          "sourcePageKey": "page:uk:product:avtokreslo-4baby-star-fix-9-36-kg-s-isofix",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokreslo-4baby-star-fix-9-36-kg-s-isofix",
+            "localeMatch": "unconfirmed"
+          },
+          "issues": [
+            {
+              "code": "PRICE_NOT_CONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Pricing is explicitly unconfirmed or lacks confirmation.",
+              "field": "pricingRaw.isConfirmed"
+            },
+            {
+              "code": "PRICE_AMOUNT_MISSING",
+              "severity": "warning",
+              "status": "review",
+              "message": "A non-negative numeric price is required; no value was invented.",
+              "field": "pricingRaw.amount"
+            },
+            {
+              "code": "PRICE_CURRENCY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "A confirmed currency is required.",
+              "field": "pricingRaw.currency"
+            },
+            {
+              "code": "RENTAL_PERIOD_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Rental pricing requires a confirmed period; it cannot be converted to salePrice.",
+              "field": "pricingRaw.periodDays"
+            },
+            {
+              "code": "RENTAL_UNIT_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target rentalRates schema requires a confirmed unit.",
+              "field": "pricingRaw.unit"
+            },
+            {
+              "code": "AVAILABILITY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Product availability must be explicitly confirmed; no default was applied.",
+              "field": "availabilityRaw"
+            }
+          ]
+        },
+        {
+          "collection": "products",
+          "index": 16,
+          "sourcePageKey": "page:uk:product:avtokrislo-4baby-pro-fix-15-36-kg-z-isofix",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokrislo-4baby-pro-fix-15-36-kg-z-isofix",
+            "localeMatch": "unconfirmed"
+          },
+          "issues": [
+            {
+              "code": "PRICE_NOT_CONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Pricing is explicitly unconfirmed or lacks confirmation.",
+              "field": "pricingRaw.isConfirmed"
+            },
+            {
+              "code": "PRICE_AMOUNT_MISSING",
+              "severity": "warning",
+              "status": "review",
+              "message": "A non-negative numeric price is required; no value was invented.",
+              "field": "pricingRaw.amount"
+            },
+            {
+              "code": "PRICE_CURRENCY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "A confirmed currency is required.",
+              "field": "pricingRaw.currency"
+            },
+            {
+              "code": "RENTAL_PERIOD_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Rental pricing requires a confirmed period; it cannot be converted to salePrice.",
+              "field": "pricingRaw.periodDays"
+            },
+            {
+              "code": "RENTAL_UNIT_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target rentalRates schema requires a confirmed unit.",
+              "field": "pricingRaw.unit"
+            },
+            {
+              "code": "AVAILABILITY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Product availability must be explicitly confirmed; no default was applied.",
+              "field": "availabilityRaw"
+            }
+          ]
+        },
+        {
+          "collection": "products",
+          "index": 17,
+          "sourcePageKey": "page:uk:product:avtokrislo-lionelo-sander-isofix-0-36-kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokrislo-lionelo-sander-isofix-0-36-kg",
+            "localeMatch": "unconfirmed"
+          },
+          "issues": [
+            {
+              "code": "PRICE_NOT_CONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Pricing is explicitly unconfirmed or lacks confirmation.",
+              "field": "pricingRaw.isConfirmed"
+            },
+            {
+              "code": "PRICE_AMOUNT_MISSING",
+              "severity": "warning",
+              "status": "review",
+              "message": "A non-negative numeric price is required; no value was invented.",
+              "field": "pricingRaw.amount"
+            },
+            {
+              "code": "PRICE_CURRENCY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "A confirmed currency is required.",
+              "field": "pricingRaw.currency"
+            },
+            {
+              "code": "RENTAL_PERIOD_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Rental pricing requires a confirmed period; it cannot be converted to salePrice.",
+              "field": "pricingRaw.periodDays"
+            },
+            {
+              "code": "RENTAL_UNIT_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target rentalRates schema requires a confirmed unit.",
+              "field": "pricingRaw.unit"
+            },
+            {
+              "code": "AVAILABILITY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Product availability must be explicitly confirmed; no default was applied.",
+              "field": "availabilityRaw"
+            }
+          ]
+        },
+        {
+          "collection": "products",
+          "index": 18,
+          "sourcePageKey": "page:uk:product:avtokrislo-carrello-asteroid-0-36-kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokrislo-carrello-asteroid-0-36-kg",
+            "localeMatch": "unconfirmed"
+          },
+          "issues": [
+            {
+              "code": "PRICE_NOT_CONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Pricing is explicitly unconfirmed or lacks confirmation.",
+              "field": "pricingRaw.isConfirmed"
+            },
+            {
+              "code": "PRICE_AMOUNT_MISSING",
+              "severity": "warning",
+              "status": "review",
+              "message": "A non-negative numeric price is required; no value was invented.",
+              "field": "pricingRaw.amount"
+            },
+            {
+              "code": "PRICE_CURRENCY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "A confirmed currency is required.",
+              "field": "pricingRaw.currency"
+            },
+            {
+              "code": "RENTAL_PERIOD_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Rental pricing requires a confirmed period; it cannot be converted to salePrice.",
+              "field": "pricingRaw.periodDays"
+            },
+            {
+              "code": "RENTAL_UNIT_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target rentalRates schema requires a confirmed unit.",
+              "field": "pricingRaw.unit"
+            },
+            {
+              "code": "AVAILABILITY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Product availability must be explicitly confirmed; no default was applied.",
+              "field": "availabilityRaw"
+            }
+          ]
+        },
+        {
+          "collection": "products",
+          "index": 19,
+          "sourcePageKey": "page:uk:product:avtokrislo-lorelli-9-36-kg-x-drive-plus",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokrislo-lorelli-9-36-kg-x-drive-plus",
+            "localeMatch": "unconfirmed"
+          },
+          "issues": [
+            {
+              "code": "PRICE_NOT_CONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Pricing is explicitly unconfirmed or lacks confirmation.",
+              "field": "pricingRaw.isConfirmed"
+            },
+            {
+              "code": "PRICE_AMOUNT_MISSING",
+              "severity": "warning",
+              "status": "review",
+              "message": "A non-negative numeric price is required; no value was invented.",
+              "field": "pricingRaw.amount"
+            },
+            {
+              "code": "PRICE_CURRENCY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "A confirmed currency is required.",
+              "field": "pricingRaw.currency"
+            },
+            {
+              "code": "RENTAL_PERIOD_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Rental pricing requires a confirmed period; it cannot be converted to salePrice.",
+              "field": "pricingRaw.periodDays"
+            },
+            {
+              "code": "RENTAL_UNIT_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target rentalRates schema requires a confirmed unit.",
+              "field": "pricingRaw.unit"
+            },
+            {
+              "code": "AVAILABILITY_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "Product availability must be explicitly confirmed; no default was applied.",
+              "field": "availabilityRaw"
+            }
+          ]
+        },
+        {
+          "collection": "media",
+          "index": 0,
+          "sourcePageKey": "page:uk:product:avtokreslo-adbor-capri",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokreslo-adbor-capri:media:0",
+            "localeMatch": null
+          },
+          "issues": [
+            {
+              "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target Media model requires a confirmed storageType; none was inferred.",
+              "field": "storageType"
+            }
+          ]
+        },
+        {
+          "collection": "media",
+          "index": 1,
+          "sourcePageKey": "page:uk:product:avtokrislo-chicco-synthesis-xt-plus-0-13-kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokrislo-chicco-synthesis-xt-plus-0-13-kg:media:0",
+            "localeMatch": null
+          },
+          "issues": [
+            {
+              "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target Media model requires a confirmed storageType; none was inferred.",
+              "field": "storageType"
+            }
+          ]
+        },
+        {
+          "collection": "media",
+          "index": 2,
+          "sourcePageKey": "page:uk:product:avtokreslo-kolyaska-doona-infant",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokreslo-kolyaska-doona-infant:media:0",
+            "localeMatch": null
+          },
+          "issues": [
+            {
+              "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target Media model requires a confirmed storageType; none was inferred.",
+              "field": "storageType"
+            }
+          ]
+        },
+        {
+          "collection": "media",
+          "index": 3,
+          "sourcePageKey": "page:uk:product:avtokreslo-kolyaska-doona-infant",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokreslo-kolyaska-doona-infant:media:1",
+            "localeMatch": null
+          },
+          "issues": [
+            {
+              "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target Media model requires a confirmed storageType; none was inferred.",
+              "field": "storageType"
+            }
+          ]
+        },
+        {
+          "collection": "media",
+          "index": 4,
+          "sourcePageKey": "page:uk:product:avtokrislo-cabrio-fix-4baby-colby-0-13kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokrislo-cabrio-fix-4baby-colby-0-13kg:media:0",
+            "localeMatch": null
+          },
+          "issues": [
+            {
+              "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target Media model requires a confirmed storageType; none was inferred.",
+              "field": "storageType"
+            }
+          ]
+        },
+        {
+          "collection": "media",
+          "index": 5,
+          "sourcePageKey": "page:uk:product:avtokreslo-caretero-fly-0-13-kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokreslo-caretero-fly-0-13-kg:media:0",
+            "localeMatch": null
+          },
+          "issues": [
+            {
+              "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target Media model requires a confirmed storageType; none was inferred.",
+              "field": "storageType"
+            }
+          ]
+        },
+        {
+          "collection": "media",
+          "index": 6,
+          "sourcePageKey": "page:uk:product:avtokrislo-lionelo-color-violet-0-18-kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokrislo-lionelo-color-violet-0-18-kg:media:0",
+            "localeMatch": null
+          },
+          "issues": [
+            {
+              "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target Media model requires a confirmed storageType; none was inferred.",
+              "field": "storageType"
+            }
+          ]
+        },
+        {
+          "collection": "media",
+          "index": 7,
+          "sourcePageKey": "page:uk:product:avtokreslo-eternal-shield-sport-star-9-25kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokreslo-eternal-shield-sport-star-9-25kg:media:0",
+            "localeMatch": null
+          },
+          "issues": [
+            {
+              "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target Media model requires a confirmed storageType; none was inferred.",
+              "field": "storageType"
+            }
+          ]
+        },
+        {
+          "collection": "media",
+          "index": 8,
+          "sourcePageKey": "page:uk:product:avtokreslo-nanya-sp-lx-9-36kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokreslo-nanya-sp-lx-9-36kg:media:0",
+            "localeMatch": null
+          },
+          "issues": [
+            {
+              "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target Media model requires a confirmed storageType; none was inferred.",
+              "field": "storageType"
+            }
+          ]
+        },
+        {
+          "collection": "media",
+          "index": 9,
+          "sourcePageKey": "page:uk:product:avtokreslo-bambi-m-0522-9-36-kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokreslo-bambi-m-0522-9-36-kg:media:0",
+            "localeMatch": null
+          },
+          "issues": [
+            {
+              "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target Media model requires a confirmed storageType; none was inferred.",
+              "field": "storageType"
+            }
+          ]
+        },
+        {
+          "collection": "media",
+          "index": 10,
+          "sourcePageKey": "page:uk:product:avtokreslo-buster-15-36kg-2-3",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokreslo-buster-15-36kg-2-3:media:0",
+            "localeMatch": null
+          },
+          "issues": [
+            {
+              "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target Media model requires a confirmed storageType; none was inferred.",
+              "field": "storageType"
+            }
+          ]
+        },
+        {
+          "collection": "media",
+          "index": 11,
+          "sourcePageKey": "page:uk:product:avtokreslo-buster-15-36kg-2-3",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokreslo-buster-15-36kg-2-3:media:1",
+            "localeMatch": null
+          },
+          "issues": [
+            {
+              "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target Media model requires a confirmed storageType; none was inferred.",
+              "field": "storageType"
+            }
+          ]
+        },
+        {
+          "collection": "media",
+          "index": 12,
+          "sourcePageKey": "page:uk:product:avtokrislo-4vaby-freeway-0-25-kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokrislo-4vaby-freeway-0-25-kg:media:0",
+            "localeMatch": null
+          },
+          "issues": [
+            {
+              "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target Media model requires a confirmed storageType; none was inferred.",
+              "field": "storageType"
+            }
+          ]
+        },
+        {
+          "collection": "media",
+          "index": 13,
+          "sourcePageKey": "page:uk:product:avtokreslo-4vaby-rodos-0-25-kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokreslo-4vaby-rodos-0-25-kg:media:0",
+            "localeMatch": null
+          },
+          "issues": [
+            {
+              "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target Media model requires a confirmed storageType; none was inferred.",
+              "field": "storageType"
+            }
+          ]
+        },
+        {
+          "collection": "media",
+          "index": 14,
+          "sourcePageKey": "page:uk:product:avtokrislo-lionelo-bastiaan-isofix-0-36-kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokrislo-lionelo-bastiaan-isofix-0-36-kg:media:0",
+            "localeMatch": null
+          },
+          "issues": [
+            {
+              "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target Media model requires a confirmed storageType; none was inferred.",
+              "field": "storageType"
+            }
+          ]
+        },
+        {
+          "collection": "media",
+          "index": 15,
+          "sourcePageKey": "page:uk:product:avtkrislo-lionelo-lo-nico-9-36-kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtkrislo-lionelo-lo-nico-9-36-kg:media:0",
+            "localeMatch": null
+          },
+          "issues": [
+            {
+              "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target Media model requires a confirmed storageType; none was inferred.",
+              "field": "storageType"
+            }
+          ]
+        },
+        {
+          "collection": "media",
+          "index": 16,
+          "sourcePageKey": "page:uk:product:avtokrislo-4baby-fly-fix-9-36-kg-z-isofix",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokrislo-4baby-fly-fix-9-36-kg-z-isofix:media:0",
+            "localeMatch": null
+          },
+          "issues": [
+            {
+              "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target Media model requires a confirmed storageType; none was inferred.",
+              "field": "storageType"
+            }
+          ]
+        },
+        {
+          "collection": "media",
+          "index": 17,
+          "sourcePageKey": "page:uk:product:avtokreslo-4baby-star-fix-9-36-kg-s-isofix",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokreslo-4baby-star-fix-9-36-kg-s-isofix:media:0",
+            "localeMatch": null
+          },
+          "issues": [
+            {
+              "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target Media model requires a confirmed storageType; none was inferred.",
+              "field": "storageType"
+            }
+          ]
+        },
+        {
+          "collection": "media",
+          "index": 18,
+          "sourcePageKey": "page:uk:product:avtokrislo-4baby-pro-fix-15-36-kg-z-isofix",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokrislo-4baby-pro-fix-15-36-kg-z-isofix:media:0",
+            "localeMatch": null
+          },
+          "issues": [
+            {
+              "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target Media model requires a confirmed storageType; none was inferred.",
+              "field": "storageType"
+            }
+          ]
+        },
+        {
+          "collection": "media",
+          "index": 19,
+          "sourcePageKey": "page:uk:product:avtokrislo-lionelo-sander-isofix-0-36-kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokrislo-lionelo-sander-isofix-0-36-kg:media:0",
+            "localeMatch": null
+          },
+          "issues": [
+            {
+              "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target Media model requires a confirmed storageType; none was inferred.",
+              "field": "storageType"
+            }
+          ]
+        },
+        {
+          "collection": "media",
+          "index": 20,
+          "sourcePageKey": "page:uk:product:avtokrislo-carrello-asteroid-0-36-kg",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokrislo-carrello-asteroid-0-36-kg:media:0",
+            "localeMatch": null
+          },
+          "issues": [
+            {
+              "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target Media model requires a confirmed storageType; none was inferred.",
+              "field": "storageType"
+            }
+          ]
+        },
+        {
+          "collection": "media",
+          "index": 21,
+          "sourcePageKey": "page:uk:product:avtokrislo-lorelli-9-36-kg-x-drive-plus",
+          "status": "review",
+          "structuralStatus": "valid",
+          "readinessStatus": "review",
+          "identity": {
+            "effectiveEntityKey": "entity:product:avtokrislo-lorelli-9-36-kg-x-drive-plus:media:0",
+            "localeMatch": null
+          },
+          "issues": [
+            {
+              "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+              "severity": "warning",
+              "status": "review",
+              "message": "The target Media model requires a confirmed storageType; none was inferred.",
+              "field": "storageType"
+            }
+          ]
+        }
+      ]
+    },
+    "summary": {
+      "totalRecords": 43,
+      "accepted": 1,
+      "reviewRequired": 42,
+      "rejected": 0
+    }
+  },
+  "category": {
+    "action": "reuse",
+    "id": "f1780080e3a428313fa00e67",
+    "slug": "avtokrisla",
+    "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla.html"
+  },
+  "products": [
+    {
+      "name": "Автокрісло Adbor Capri (0-10кг)",
+      "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_adbor_capri.html",
+      "slug": "avtokreslo-adbor-capri",
+      "category": "avtokrisla",
+      "action": "reuse",
+      "issues": [],
+      "databaseMatches": [
+        {
+          "id": "1e7f71a16f3c0e7f577c424c",
+          "slug": "avtokreslo-adbor-capri",
+          "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_adbor_capri.html",
+          "categoryId": "f1780080e3a428313fa00e67",
+          "status": "published"
+        }
+      ],
+      "validationErrors": [],
+      "productId": "1e7f71a16f3c0e7f577c424c"
+    },
+    {
+      "name": "Автокрісло Chicco Synthesis XT Plus 0-13 кг",
+      "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_chicco_synthesis_xt_plus_0_13_kg.html",
+      "slug": "avtokrislo-chicco-synthesis-xt-plus-0-13-kg",
+      "category": "avtokrisla",
+      "action": "create-draft",
+      "issues": [],
+      "databaseMatches": [],
+      "validationErrors": [],
+      "productId": "216ba996fc8766ddc67c9bc9"
+    },
+    {
+      "name": "Автокрісло -коляска Doona Infant",
+      "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/_avtokreslo_kolyaska_doona_infant.html",
+      "slug": "avtokreslo-kolyaska-doona-infant",
+      "category": "avtokrisla",
+      "action": "create-draft",
+      "issues": [],
+      "databaseMatches": [],
+      "validationErrors": [],
+      "productId": "14e045031f0205db58fa9575"
+    },
+    {
+      "name": "Автокрісло 4Baby Colby (0-13кг)",
+      "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_cabrio_fix_4baby_colby_0_13kg.html",
+      "slug": "avtokrislo-cabrio-fix-4baby-colby-0-13kg",
+      "category": "avtokrisla",
+      "action": "create-draft",
+      "issues": [],
+      "databaseMatches": [],
+      "validationErrors": [],
+      "productId": "a72bd74d645131a41d5b9b34"
+    },
+    {
+      "name": "Автокрісло Caretero Fly (0-13 кг)",
+      "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_caretero_fly_0_13_kg.html",
+      "slug": "avtokreslo-caretero-fly-0-13-kg",
+      "category": "avtokrisla",
+      "action": "create-draft",
+      "issues": [],
+      "databaseMatches": [],
+      "validationErrors": [],
+      "productId": "52e9d52ca4bc779478afab20"
+    },
+    {
+      "name": "Автокрісло Lionelo Color Violet 0-18 кг",
+      "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_lionelo_color_violet_0_18_kg.html",
+      "slug": "avtokrislo-lionelo-color-violet-0-18-kg",
+      "category": "avtokrisla",
+      "action": "create-draft",
+      "issues": [],
+      "databaseMatches": [],
+      "validationErrors": [],
+      "productId": "9f418914f8e6b10701931ff9"
+    },
+    {
+      "name": "Автокрісло Eternal Shield Sport Star 9-25кг",
+      "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_eternal_shield_sport_star_9_25kg.html",
+      "slug": "avtokreslo-eternal-shield-sport-star-9-25kg",
+      "category": "avtokrisla",
+      "action": "create-draft",
+      "issues": [],
+      "databaseMatches": [],
+      "validationErrors": [],
+      "productId": "4ea9ecf107c9b51ccba032d4"
+    },
+    {
+      "name": "Автокрісло 4Baby Weelmo (9-25кг)",
+      "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_nanya_sp_lx_9_36kg.html",
+      "slug": "avtokreslo-nanya-sp-lx-9-36kg",
+      "category": "avtokrisla",
+      "action": "blocked",
+      "issues": [
+        {
+          "code": "SOURCE_MODEL_IDENTITY_CONFLICT",
+          "severity": "error",
+          "status": "review",
+          "message": "Category/breadcrumb/description/photo identify 4Baby Weelmo (9-25kg), but URL/title/H1 identify Nanya SP LX (9-36kg). Manual identity decision required; no automatic renaming."
+        }
+      ],
+      "databaseMatches": [],
+      "validationErrors": []
+    },
+    {
+      "name": "Автокрісло Bambi M 0522 9-36 кг",
+      "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_bambi_m_0522_9_36_kg.html",
+      "slug": "avtokreslo-bambi-m-0522-9-36-kg",
+      "category": "avtokrisla",
+      "action": "create-draft",
+      "issues": [],
+      "databaseMatches": [],
+      "validationErrors": [],
+      "productId": "2788452269ac4567199eb81d"
+    },
+    {
+      "name": "Бустер Heyner Capsula JR4 15-36кг (2/3)",
+      "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_buster_15_36kg_2_3.html",
+      "slug": "avtokreslo-buster-15-36kg-2-3",
+      "category": "avtokrisla",
+      "action": "create-draft",
+      "issues": [],
+      "databaseMatches": [],
+      "validationErrors": [],
+      "productId": "d688d039223d5aca88c3edd1"
+    },
+    {
+      "name": "Автокрісло 4Вaby Freeway (0-25 кг )",
+      "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_4vaby_freeway_0_25_kg.html",
+      "slug": "avtokrislo-4vaby-freeway-0-25-kg",
+      "category": "avtokrisla",
+      "action": "create-draft",
+      "issues": [],
+      "databaseMatches": [],
+      "validationErrors": [],
+      "productId": "ddeb0eded4aa4374dd8fd91c"
+    },
+    {
+      "name": "Автокрісло 4Вaby Rodos (0-25 кг )",
+      "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_4vaby_rodos_0_25_kg.html",
+      "slug": "avtokreslo-4vaby-rodos-0-25-kg",
+      "category": "avtokrisla",
+      "action": "create-draft",
+      "issues": [],
+      "databaseMatches": [],
+      "validationErrors": [],
+      "productId": "7fed76ef175a9f4ba018ccf9"
+    },
+    {
+      "name": "Автокрісло Lionelo Bastiaan Isofix 0-36 кг",
+      "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_lionelo_bastiaan_isofix_0_36_kg.html",
+      "slug": "avtokrislo-lionelo-bastiaan-isofix-0-36-kg",
+      "category": "avtokrisla",
+      "action": "create-draft",
+      "issues": [],
+      "databaseMatches": [],
+      "validationErrors": [],
+      "productId": "98a8eec60f2dff689685e816"
+    },
+    {
+      "name": "Авткрісло Lionelo Nico 9 - 36 кг",
+      "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtkrislo_lionelo_lo_nico_9_36_kg.html",
+      "slug": "avtkrislo-lionelo-lo-nico-9-36-kg",
+      "category": "avtokrisla",
+      "action": "create-draft",
+      "issues": [],
+      "databaseMatches": [],
+      "validationErrors": [],
+      "productId": "9dfce6e21912176e140cc45c"
+    },
+    {
+      "name": "Автокрісло 4Baby Fly-Fix 9-36 кг з Isofix",
+      "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_4baby_fly_fix_9_36_kg_z_isofix.html",
+      "slug": "avtokrislo-4baby-fly-fix-9-36-kg-z-isofix",
+      "category": "avtokrisla",
+      "action": "create-draft",
+      "issues": [],
+      "databaseMatches": [],
+      "validationErrors": [],
+      "productId": "0870f65a2e4d36ca5401fd8b"
+    },
+    {
+      "name": "Автокрісло 4Baby Star-Fix 9-36 кг з Isofix",
+      "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_4baby_star_fix_9_36_kg_s_isofix.html",
+      "slug": "avtokreslo-4baby-star-fix-9-36-kg-s-isofix",
+      "category": "avtokrisla",
+      "action": "create-draft",
+      "issues": [],
+      "databaseMatches": [],
+      "validationErrors": [],
+      "productId": "fbd5c5bae1a04952018b94ac"
+    },
+    {
+      "name": "Автокрісло 4Baby Pro-Fix 15-36 кг з Isofix",
+      "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_4baby_pro_fix_15_36_kg_z_isofix.html",
+      "slug": "avtokrislo-4baby-pro-fix-15-36-kg-z-isofix",
+      "category": "avtokrisla",
+      "action": "create-draft",
+      "issues": [],
+      "databaseMatches": [],
+      "validationErrors": [],
+      "productId": "c72ead1c17f2eca8a0b46294"
+    },
+    {
+      "name": "Автокрісло Lionelo Sander ISOFIX 0 - 36 кг",
+      "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_lionelo_sander_isofix_0_36_kg.html",
+      "slug": "avtokrislo-lionelo-sander-isofix-0-36-kg",
+      "category": "avtokrisla",
+      "action": "create-draft",
+      "issues": [],
+      "databaseMatches": [],
+      "validationErrors": [],
+      "productId": "f2b5d63cf23068520096e404"
+    },
+    {
+      "name": "Автокрісло Carrello Asteroid 0-36 кг",
+      "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_carrello_asteroid_0_36_kg.html",
+      "slug": "avtokrislo-carrello-asteroid-0-36-kg",
+      "category": "avtokrisla",
+      "action": "create-draft",
+      "issues": [],
+      "databaseMatches": [],
+      "validationErrors": [],
+      "productId": "88956c338f1163f842610ca2"
+    },
+    {
+      "name": "Автокрісло Lorelli 9-36 кг (X-DRIVE PLUS)",
+      "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_lorelli_9_36_kg_x_drive_plus.html",
+      "slug": "avtokrislo-lorelli-9-36-kg-x-drive-plus",
+      "category": "avtokrisla",
+      "action": "create-draft",
+      "issues": [],
+      "databaseMatches": [],
+      "validationErrors": [],
+      "productId": "6c16fc3be2776c4e061b4b06"
+    }
+  ],
+  "photos": [
+    {
+      "product": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_adbor_capri.html",
+      "action": "reuse",
+      "mode": "dry-run",
+      "database": "db-babyhub",
+      "productId": "1e7f71a16f3c0e7f577c424c",
+      "sourceUrl": "https://lutsk.babyservice.ua/images/prods/43_2_avtokreslo-adbor_baby_service__lutsk.jpg",
+      "target": "main",
+      "dependency": null,
+      "lock": "available-existing",
+      "journalPath": "tools/content-migration/output/product-photo-journal-main-v1.json",
+      "planned": {
+        "media": "reuse",
+        "productImage": "reuse-link"
+      },
+      "publicId": "baby-service/legacy-photo-cf32e0fd119d5555e07a240016073530326118910f8e55d1b7424ab50e540fba",
+      "mediaId": "cf32e0fd119d5555e07a2400",
+      "filename": "legacy-photo-cf32e0fd119d5555e07a240016073530326118910f8e55d1b7424ab50e540fba.jpg",
+      "photo": {
+        "mimeType": "image/jpeg",
+        "format": "jpg",
+        "sizeBytes": 9079,
+        "width": 249,
+        "height": 270,
+        "sha256": "916854470160e1ae0a0f1a8d70546538ac602ec10339452c946ffd5a5b0c9425"
+      },
+      "mediaModelValidation": "valid-with-preview-url",
+      "existingMedia": true,
+      "journalPhase": "committed",
+      "cloudResource": "not-checked-in-dry-run",
+      "uploads": 0,
+      "mongoWrites": 0
+    },
+    {
+      "product": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_chicco_synthesis_xt_plus_0_13_kg.html",
+      "action": "wait-for-product-import",
+      "mode": "dry-run",
+      "database": "db-babyhub",
+      "productId": null,
+      "sourceUrl": "https://lutsk.babyservice.ua/images/prods/139_2_chikko_2.jpg",
+      "target": "main",
+      "dependency": "PRODUCT_IMPORT_REQUIRED",
+      "lock": "absent",
+      "journalPath": "tools/content-migration/output/product-photo-journal-main-3f7919ee182e66b90d77a1d6-v1.json",
+      "planned": {
+        "media": "wait-for-product-import",
+        "productImage": "wait-for-product-import"
+      },
+      "publicId": "baby-service/legacy-photo-3f7919ee182e66b90d77a1d67e8fd1155c8567bc2b099e06f4622272ed2cdc4f",
+      "mediaId": "3f7919ee182e66b90d77a1d6",
+      "filename": "legacy-photo-3f7919ee182e66b90d77a1d67e8fd1155c8567bc2b099e06f4622272ed2cdc4f.jpg",
+      "photo": {
+        "mimeType": "image/jpeg",
+        "format": "jpg",
+        "sizeBytes": 6762,
+        "width": 270,
+        "height": 270,
+        "sha256": "ec4874ca8bde9eeba3f0361f889d3b719da2899de94d135b62fa66f2bac97633"
+      },
+      "mediaModelValidation": "valid-with-preview-url",
+      "existingMedia": false,
+      "journalPhase": null,
+      "cloudResource": "not-checked-in-dry-run",
+      "uploads": 0,
+      "mongoWrites": 0
+    },
+    {
+      "product": "https://lutsk.babyservice.ua/avtokrisla/_avtokreslo_kolyaska_doona_infant.html",
+      "action": "wait-for-product-import",
+      "mode": "dry-run",
+      "database": "db-babyhub",
+      "productId": null,
+      "sourceUrl": "https://lutsk.babyservice.ua/images/prods/162_2_avtokrislo_doona_baby_service.jpg",
+      "target": "main",
+      "dependency": "PRODUCT_IMPORT_REQUIRED",
+      "lock": "absent",
+      "journalPath": "tools/content-migration/output/product-photo-journal-main-a899b997e7a76800e86a2716-v1.json",
+      "planned": {
+        "media": "wait-for-product-import",
+        "productImage": "wait-for-product-import"
+      },
+      "publicId": "baby-service/legacy-photo-a899b997e7a76800e86a2716e800e67bae674148a4f7ab8d1da945949d6cdfc0",
+      "mediaId": "a899b997e7a76800e86a2716",
+      "filename": "legacy-photo-a899b997e7a76800e86a2716e800e67bae674148a4f7ab8d1da945949d6cdfc0.jpg",
+      "photo": {
+        "mimeType": "image/jpeg",
+        "format": "jpg",
+        "sizeBytes": 5626,
+        "width": 225,
+        "height": 225,
+        "sha256": "8fecbbda1ef4bd7e26f4cd08cca706c571b798e9fbc7d89f9e849b7ceedc8332"
+      },
+      "mediaModelValidation": "valid-with-preview-url",
+      "existingMedia": false,
+      "journalPhase": null,
+      "cloudResource": "not-checked-in-dry-run",
+      "uploads": 0,
+      "mongoWrites": 0
+    },
+    {
+      "product": "https://lutsk.babyservice.ua/avtokrisla/_avtokreslo_kolyaska_doona_infant.html",
+      "action": "wait-for-product-import",
+      "mode": "dry-run",
+      "database": "db-babyhub",
+      "productId": null,
+      "sourceUrl": "https://lutsk.babyservice.ua/image/Avtocrislo-koljaska__Doona_Infant_3.jpg",
+      "target": "main",
+      "dependency": "PRODUCT_IMPORT_REQUIRED",
+      "lock": "absent",
+      "journalPath": "tools/content-migration/output/product-photo-journal-main-320cebc09e77ccfb482cc523-v1.json",
+      "planned": {
+        "media": "wait-for-product-import",
+        "productImage": "wait-for-product-import"
+      },
+      "publicId": "baby-service/legacy-photo-320cebc09e77ccfb482cc52319b12c366e4a0567aa23ce3e048b577fe9040dea",
+      "mediaId": "320cebc09e77ccfb482cc523",
+      "filename": "legacy-photo-320cebc09e77ccfb482cc52319b12c366e4a0567aa23ce3e048b577fe9040dea.jpg",
+      "photo": {
+        "mimeType": "image/jpeg",
+        "format": "jpg",
+        "sizeBytes": 46046,
+        "width": 580,
+        "height": 580,
+        "sha256": "82f6d194f5a26745e6852a8f91188f41f2338b856a62c7f1707f33492c4a43c7"
+      },
+      "mediaModelValidation": "valid-with-preview-url",
+      "existingMedia": false,
+      "journalPhase": null,
+      "cloudResource": "not-checked-in-dry-run",
+      "uploads": 0,
+      "mongoWrites": 0
+    },
+    {
+      "product": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_cabrio_fix_4baby_colby_0_13kg.html",
+      "action": "wait-for-product-import",
+      "mode": "dry-run",
+      "database": "db-babyhub",
+      "productId": null,
+      "sourceUrl": "https://lutsk.babyservice.ua/images/prods/5_2_novye-avtokresla-4-baby-colby-0-13kg-photo-b323.jpg",
+      "target": "main",
+      "dependency": "PRODUCT_IMPORT_REQUIRED",
+      "lock": "absent",
+      "journalPath": "tools/content-migration/output/product-photo-journal-main-9093cd51aa71456ce7b5eff1-v1.json",
+      "planned": {
+        "media": "wait-for-product-import",
+        "productImage": "wait-for-product-import"
+      },
+      "publicId": "baby-service/legacy-photo-9093cd51aa71456ce7b5eff199517e68d50837460e2257a7970ef51a69d7863c",
+      "mediaId": "9093cd51aa71456ce7b5eff1",
+      "filename": "legacy-photo-9093cd51aa71456ce7b5eff199517e68d50837460e2257a7970ef51a69d7863c.jpg",
+      "photo": {
+        "mimeType": "image/jpeg",
+        "format": "jpg",
+        "sizeBytes": 9159,
+        "width": 270,
+        "height": 270,
+        "sha256": "5a8c58b69b4849d8ec791b77d6b69df44b1f3ad9aad34a6c36cbd5c21810a18b"
+      },
+      "mediaModelValidation": "valid-with-preview-url",
+      "existingMedia": false,
+      "journalPhase": null,
+      "cloudResource": "not-checked-in-dry-run",
+      "uploads": 0,
+      "mongoWrites": 0
+    },
+    {
+      "product": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_caretero_fly_0_13_kg.html",
+      "action": "wait-for-product-import",
+      "mode": "dry-run",
+      "database": "db-babyhub",
+      "productId": null,
+      "sourceUrl": "https://lutsk.babyservice.ua/images/prods/53_2_babyservisecaretero.jpg",
+      "target": "main",
+      "dependency": "PRODUCT_IMPORT_REQUIRED",
+      "lock": "absent",
+      "journalPath": "tools/content-migration/output/product-photo-journal-main-cea34c29b75f1011afb5b21e-v1.json",
+      "planned": {
+        "media": "wait-for-product-import",
+        "productImage": "wait-for-product-import"
+      },
+      "publicId": "baby-service/legacy-photo-cea34c29b75f1011afb5b21e967532cea33cef1da8de97ec5ee8fc5534e164ca",
+      "mediaId": "cea34c29b75f1011afb5b21e",
+      "filename": "legacy-photo-cea34c29b75f1011afb5b21e967532cea33cef1da8de97ec5ee8fc5534e164ca.jpg",
+      "photo": {
+        "mimeType": "image/jpeg",
+        "format": "jpg",
+        "sizeBytes": 11134,
+        "width": 249,
+        "height": 270,
+        "sha256": "66178fbed8858459cdbb814cbbbe97a586c7d993b4f46669bf0ab6c7ed2d37c8"
+      },
+      "mediaModelValidation": "valid-with-preview-url",
+      "existingMedia": false,
+      "journalPhase": null,
+      "cloudResource": "not-checked-in-dry-run",
+      "uploads": 0,
+      "mongoWrites": 0
+    },
+    {
+      "product": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_lionelo_color_violet_0_18_kg.html",
+      "action": "wait-for-product-import",
+      "mode": "dry-run",
+      "database": "db-babyhub",
+      "productId": null,
+      "sourceUrl": "https://lutsk.babyservice.ua/images/prods/138_2_avtokrislo_liam_color_0-18_kg.jpg",
+      "target": "main",
+      "dependency": "PRODUCT_IMPORT_REQUIRED",
+      "lock": "absent",
+      "journalPath": "tools/content-migration/output/product-photo-journal-main-4bb88d89d375ffd8ccba733f-v1.json",
+      "planned": {
+        "media": "wait-for-product-import",
+        "productImage": "wait-for-product-import"
+      },
+      "publicId": "baby-service/legacy-photo-4bb88d89d375ffd8ccba733f270314723c9f41a1a69b12d8c98739c6d315067b",
+      "mediaId": "4bb88d89d375ffd8ccba733f",
+      "filename": "legacy-photo-4bb88d89d375ffd8ccba733f270314723c9f41a1a69b12d8c98739c6d315067b.jpg",
+      "photo": {
+        "mimeType": "image/jpeg",
+        "format": "jpg",
+        "sizeBytes": 8460,
+        "width": 270,
+        "height": 256,
+        "sha256": "a34922175fbbe1230cc8c8287f4c1586bdf3a80bf4f3058d6f354dfc6609fc59"
+      },
+      "mediaModelValidation": "valid-with-preview-url",
+      "existingMedia": false,
+      "journalPhase": null,
+      "cloudResource": "not-checked-in-dry-run",
+      "uploads": 0,
+      "mongoWrites": 0
+    },
+    {
+      "product": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_eternal_shield_sport_star_9_25kg.html",
+      "action": "wait-for-product-import",
+      "mode": "dry-run",
+      "database": "db-babyhub",
+      "productId": null,
+      "sourceUrl": "https://lutsk.babyservice.ua/images/prods/52_2_babyserviseeternal.jpg",
+      "target": "main",
+      "dependency": "PRODUCT_IMPORT_REQUIRED",
+      "lock": "absent",
+      "journalPath": "tools/content-migration/output/product-photo-journal-main-1f54887a40c69678836722f8-v1.json",
+      "planned": {
+        "media": "wait-for-product-import",
+        "productImage": "wait-for-product-import"
+      },
+      "publicId": "baby-service/legacy-photo-1f54887a40c69678836722f8d2131a5e135590956f01d08cf5b54ca9c8ecad6e",
+      "mediaId": "1f54887a40c69678836722f8",
+      "filename": "legacy-photo-1f54887a40c69678836722f8d2131a5e135590956f01d08cf5b54ca9c8ecad6e.jpg",
+      "photo": {
+        "mimeType": "image/jpeg",
+        "format": "jpg",
+        "sizeBytes": 7503,
+        "width": 186,
+        "height": 270,
+        "sha256": "3d1c045ab5ec6c8a096702ba27dd1c7796b17345baf90b7c5eeee11bc6e6bb09"
+      },
+      "mediaModelValidation": "valid-with-preview-url",
+      "existingMedia": false,
+      "journalPhase": null,
+      "cloudResource": "not-checked-in-dry-run",
+      "uploads": 0,
+      "mongoWrites": 0
+    },
+    {
+      "product": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_nanya_sp_lx_9_36kg.html",
+      "sourceUrl": "https://lutsk.babyservice.ua/images/prods/4_2_4baby-weelmo.jpg",
+      "action": "blocked",
+      "dependency": "PRODUCT_IDENTITY_REVIEW_REQUIRED",
+      "photo": {
+        "sizeBytes": 5641,
+        "mimeType": "image/jpeg",
+        "format": "jpg",
+        "sha256": "7f5304313cffe09390f00abe49c95c15d102790c39db6de10d942d7f36d25cc5",
+        "width": 180,
+        "height": 270
+      }
+    },
+    {
+      "product": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_bambi_m_0522_9_36_kg.html",
+      "action": "wait-for-product-import",
+      "mode": "dry-run",
+      "database": "db-babyhub",
+      "productId": null,
+      "sourceUrl": "https://lutsk.babyservice.ua/images/prods/47_2_babyservisebambi.jpg",
+      "target": "main",
+      "dependency": "PRODUCT_IMPORT_REQUIRED",
+      "lock": "absent",
+      "journalPath": "tools/content-migration/output/product-photo-journal-main-4c670be7b5245cb2040d64ca-v1.json",
+      "planned": {
+        "media": "wait-for-product-import",
+        "productImage": "wait-for-product-import"
+      },
+      "publicId": "baby-service/legacy-photo-4c670be7b5245cb2040d64ca2d78b43d45e5e15be05f2df697fc46f77e07e0d5",
+      "mediaId": "4c670be7b5245cb2040d64ca",
+      "filename": "legacy-photo-4c670be7b5245cb2040d64ca2d78b43d45e5e15be05f2df697fc46f77e07e0d5.jpg",
+      "photo": {
+        "mimeType": "image/jpeg",
+        "format": "jpg",
+        "sizeBytes": 8780,
+        "width": 162,
+        "height": 270,
+        "sha256": "bf347d93519d2ba2b1a979b80f088bbf166e1ef6d1a66bd7fdb971901f85dff1"
+      },
+      "mediaModelValidation": "valid-with-preview-url",
+      "existingMedia": false,
+      "journalPhase": null,
+      "cloudResource": "not-checked-in-dry-run",
+      "uploads": 0,
+      "mongoWrites": 0
+    },
+    {
+      "product": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_buster_15_36kg_2_3.html",
+      "action": "wait-for-product-import",
+      "mode": "dry-run",
+      "database": "db-babyhub",
+      "productId": null,
+      "sourceUrl": "https://lutsk.babyservice.ua/images/prods/39_2_babyserviselcbuster.jpg",
+      "target": "main",
+      "dependency": "PRODUCT_IMPORT_REQUIRED",
+      "lock": "absent",
+      "journalPath": "tools/content-migration/output/product-photo-journal-main-82ca834bc9f899b637751c8c-v1.json",
+      "planned": {
+        "media": "wait-for-product-import",
+        "productImage": "wait-for-product-import"
+      },
+      "publicId": "baby-service/legacy-photo-82ca834bc9f899b637751c8c164e5b7f5577b443ae9e1bdcb28a2dd19ba93d59",
+      "mediaId": "82ca834bc9f899b637751c8c",
+      "filename": "legacy-photo-82ca834bc9f899b637751c8c164e5b7f5577b443ae9e1bdcb28a2dd19ba93d59.jpg",
+      "photo": {
+        "mimeType": "image/jpeg",
+        "format": "jpg",
+        "sizeBytes": 5531,
+        "width": 270,
+        "height": 270,
+        "sha256": "ed74ffb1a301296b458853a0f541eafff1601df9075c061e78a8e974c48adabf"
+      },
+      "mediaModelValidation": "valid-with-preview-url",
+      "existingMedia": false,
+      "journalPhase": null,
+      "cloudResource": "not-checked-in-dry-run",
+      "uploads": 0,
+      "mongoWrites": 0
+    },
+    {
+      "product": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_buster_15_36kg_2_3.html",
+      "sourceUrl": "https://lutsk.babyservice.ua/image/BabyServiseLcbuster1.jpg",
+      "action": "blocked",
+      "issue": "PHOTO_UNAVAILABLE_OR_REDIRECT"
+    },
+    {
+      "product": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_4vaby_freeway_0_25_kg.html",
+      "action": "wait-for-product-import",
+      "mode": "dry-run",
+      "database": "db-babyhub",
+      "productId": null,
+      "sourceUrl": "https://lutsk.babyservice.ua/images/prods/164_2_sbaby_service_lutsk_abtokrislo_4baby-freeway.jpg",
+      "target": "main",
+      "dependency": "PRODUCT_IMPORT_REQUIRED",
+      "lock": "absent",
+      "journalPath": "tools/content-migration/output/product-photo-journal-main-ca26372bfce33b85123e6cb6-v1.json",
+      "planned": {
+        "media": "wait-for-product-import",
+        "productImage": "wait-for-product-import"
+      },
+      "publicId": "baby-service/legacy-photo-ca26372bfce33b85123e6cb6ae31f49cad144c127dac44dd5cc2beccf826e00d",
+      "mediaId": "ca26372bfce33b85123e6cb6",
+      "filename": "legacy-photo-ca26372bfce33b85123e6cb6ae31f49cad144c127dac44dd5cc2beccf826e00d.jpg",
+      "photo": {
+        "mimeType": "image/jpeg",
+        "format": "jpg",
+        "sizeBytes": 8631,
+        "width": 270,
+        "height": 270,
+        "sha256": "af914fde39502ae94a4dce7c6856b868c98b417deefa98f24582bb2e08440aea"
+      },
+      "mediaModelValidation": "valid-with-preview-url",
+      "existingMedia": false,
+      "journalPhase": null,
+      "cloudResource": "not-checked-in-dry-run",
+      "uploads": 0,
+      "mongoWrites": 0
+    },
+    {
+      "product": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_4vaby_rodos_0_25_kg.html",
+      "action": "wait-for-product-import",
+      "mode": "dry-run",
+      "database": "db-babyhub",
+      "productId": null,
+      "sourceUrl": "https://lutsk.babyservice.ua/images/prods/165_2_baby_service_avtokreslo_4baby_rodos_0-25-kg.jpg",
+      "target": "main",
+      "dependency": "PRODUCT_IMPORT_REQUIRED",
+      "lock": "absent",
+      "journalPath": "tools/content-migration/output/product-photo-journal-main-0b3dea9b8141d7d3ed3dc431-v1.json",
+      "planned": {
+        "media": "wait-for-product-import",
+        "productImage": "wait-for-product-import"
+      },
+      "publicId": "baby-service/legacy-photo-0b3dea9b8141d7d3ed3dc431166e77bdaa6fbede1b36491f6ef9569349179375",
+      "mediaId": "0b3dea9b8141d7d3ed3dc431",
+      "filename": "legacy-photo-0b3dea9b8141d7d3ed3dc431166e77bdaa6fbede1b36491f6ef9569349179375.jpg",
+      "photo": {
+        "mimeType": "image/jpeg",
+        "format": "jpg",
+        "sizeBytes": 8758,
+        "width": 252,
+        "height": 270,
+        "sha256": "393d9da8f8f92e711c99ef17866024c75dc538c064537fec1047f055091193b1"
+      },
+      "mediaModelValidation": "valid-with-preview-url",
+      "existingMedia": false,
+      "journalPhase": null,
+      "cloudResource": "not-checked-in-dry-run",
+      "uploads": 0,
+      "mongoWrites": 0
+    },
+    {
+      "product": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_lionelo_bastiaan_isofix_0_36_kg.html",
+      "action": "wait-for-product-import",
+      "mode": "dry-run",
+      "database": "db-babyhub",
+      "productId": null,
+      "sourceUrl": "https://lutsk.babyservice.ua/images/prods/166_2_bastian_fioletoviy.jpg",
+      "target": "main",
+      "dependency": "PRODUCT_IMPORT_REQUIRED",
+      "lock": "absent",
+      "journalPath": "tools/content-migration/output/product-photo-journal-main-3e49d4b13a7c45201a01ece0-v1.json",
+      "planned": {
+        "media": "wait-for-product-import",
+        "productImage": "wait-for-product-import"
+      },
+      "publicId": "baby-service/legacy-photo-3e49d4b13a7c45201a01ece0e3c1eda12d0504d9d223e79e8b8d7083a7949b9a",
+      "mediaId": "3e49d4b13a7c45201a01ece0",
+      "filename": "legacy-photo-3e49d4b13a7c45201a01ece0e3c1eda12d0504d9d223e79e8b8d7083a7949b9a.jpg",
+      "photo": {
+        "mimeType": "image/jpeg",
+        "format": "jpg",
+        "sizeBytes": 6800,
+        "width": 200,
+        "height": 200,
+        "sha256": "f77f63b75e0312d13e430098a118d43e5faca77a044f00911a2191629fec574a"
+      },
+      "mediaModelValidation": "valid-with-preview-url",
+      "existingMedia": false,
+      "journalPhase": null,
+      "cloudResource": "not-checked-in-dry-run",
+      "uploads": 0,
+      "mongoWrites": 0
+    },
+    {
+      "product": "https://lutsk.babyservice.ua/avtokrisla/avtkrislo_lionelo_lo_nico_9_36_kg.html",
+      "action": "wait-for-product-import",
+      "mode": "dry-run",
+      "database": "db-babyhub",
+      "productId": null,
+      "sourceUrl": "https://lutsk.babyservice.ua/images/prods/167_2_baby_servise_procat-orenda-prodag_lutsk.jpg_2.jpg",
+      "target": "main",
+      "dependency": "PRODUCT_IMPORT_REQUIRED",
+      "lock": "absent",
+      "journalPath": "tools/content-migration/output/product-photo-journal-main-c8ddb93752be42a09fc022ec-v1.json",
+      "planned": {
+        "media": "wait-for-product-import",
+        "productImage": "wait-for-product-import"
+      },
+      "publicId": "baby-service/legacy-photo-c8ddb93752be42a09fc022ec2b7d59e6911aa7c38e04d9d4940b92bd248591bd",
+      "mediaId": "c8ddb93752be42a09fc022ec",
+      "filename": "legacy-photo-c8ddb93752be42a09fc022ec2b7d59e6911aa7c38e04d9d4940b92bd248591bd.jpg",
+      "photo": {
+        "mimeType": "image/jpeg",
+        "format": "jpg",
+        "sizeBytes": 8462,
+        "width": 270,
+        "height": 270,
+        "sha256": "01242f64280e30d6faa1e184779a89b558ea37b31345332d920343d84d2b6aab"
+      },
+      "mediaModelValidation": "valid-with-preview-url",
+      "existingMedia": false,
+      "journalPhase": null,
+      "cloudResource": "not-checked-in-dry-run",
+      "uploads": 0,
+      "mongoWrites": 0
+    },
+    {
+      "product": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_4baby_fly_fix_9_36_kg_z_isofix.html",
+      "action": "wait-for-product-import",
+      "mode": "dry-run",
+      "database": "db-babyhub",
+      "productId": null,
+      "sourceUrl": "https://lutsk.babyservice.ua/images/prods/171_2_baby_service_lutsk__4baby_(fly-fix)_isofix.jpg",
+      "target": "main",
+      "dependency": "PRODUCT_IMPORT_REQUIRED",
+      "lock": "absent",
+      "journalPath": "tools/content-migration/output/product-photo-journal-main-5c1b0e3af31776bfbc42c82b-v1.json",
+      "planned": {
+        "media": "wait-for-product-import",
+        "productImage": "wait-for-product-import"
+      },
+      "publicId": "baby-service/legacy-photo-5c1b0e3af31776bfbc42c82b1ee45901c219a0ff403dc45419ef968f7da0867f",
+      "mediaId": "5c1b0e3af31776bfbc42c82b",
+      "filename": "legacy-photo-5c1b0e3af31776bfbc42c82b1ee45901c219a0ff403dc45419ef968f7da0867f.jpg",
+      "photo": {
+        "mimeType": "image/jpeg",
+        "format": "jpg",
+        "sizeBytes": 7552,
+        "width": 270,
+        "height": 270,
+        "sha256": "757f8fcf265cdfc7f3f6539e0655f7e13941deeebf854b0445a371e08207014b"
+      },
+      "mediaModelValidation": "valid-with-preview-url",
+      "existingMedia": false,
+      "journalPhase": null,
+      "cloudResource": "not-checked-in-dry-run",
+      "uploads": 0,
+      "mongoWrites": 0
+    },
+    {
+      "product": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_4baby_star_fix_9_36_kg_s_isofix.html",
+      "action": "wait-for-product-import",
+      "mode": "dry-run",
+      "database": "db-babyhub",
+      "productId": null,
+      "sourceUrl": "https://lutsk.babyservice.ua/images/prods/172_2_avtokrislo___4baby_star-fix__9-36_kg_v_baby_service_lutsk.jpg",
+      "target": "main",
+      "dependency": "PRODUCT_IMPORT_REQUIRED",
+      "lock": "absent",
+      "journalPath": "tools/content-migration/output/product-photo-journal-main-fb872755185f839c09123bb1-v1.json",
+      "planned": {
+        "media": "wait-for-product-import",
+        "productImage": "wait-for-product-import"
+      },
+      "publicId": "baby-service/legacy-photo-fb872755185f839c09123bb1a25044e0fe88e2fa857d502e805b784ba4224b02",
+      "mediaId": "fb872755185f839c09123bb1",
+      "filename": "legacy-photo-fb872755185f839c09123bb1a25044e0fe88e2fa857d502e805b784ba4224b02.jpg",
+      "photo": {
+        "mimeType": "image/jpeg",
+        "format": "jpg",
+        "sizeBytes": 7837,
+        "width": 270,
+        "height": 270,
+        "sha256": "6678902f6dc046ef572e84a7440f8f9508154922eb7d3a06a45774c24eef9ed7"
+      },
+      "mediaModelValidation": "valid-with-preview-url",
+      "existingMedia": false,
+      "journalPhase": null,
+      "cloudResource": "not-checked-in-dry-run",
+      "uploads": 0,
+      "mongoWrites": 0
+    },
+    {
+      "product": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_4baby_pro_fix_15_36_kg_z_isofix.html",
+      "action": "wait-for-product-import",
+      "mode": "dry-run",
+      "database": "db-babyhub",
+      "productId": null,
+      "sourceUrl": "https://lutsk.babyservice.ua/images/prods/173_2_baby_servise_4baby_pro-fix_lutsk.jpg",
+      "target": "main",
+      "dependency": "PRODUCT_IMPORT_REQUIRED",
+      "lock": "absent",
+      "journalPath": "tools/content-migration/output/product-photo-journal-main-9deadce98730879ebb378fd3-v1.json",
+      "planned": {
+        "media": "wait-for-product-import",
+        "productImage": "wait-for-product-import"
+      },
+      "publicId": "baby-service/legacy-photo-9deadce98730879ebb378fd3fc00f51aed5f79958035f758bced0b23f6de12a5",
+      "mediaId": "9deadce98730879ebb378fd3",
+      "filename": "legacy-photo-9deadce98730879ebb378fd3fc00f51aed5f79958035f758bced0b23f6de12a5.jpg",
+      "photo": {
+        "mimeType": "image/jpeg",
+        "format": "jpg",
+        "sizeBytes": 8845,
+        "width": 270,
+        "height": 270,
+        "sha256": "76c40ad3b0c87503d60a1018043f2179e29e706f068d2886624c38842dffd8d2"
+      },
+      "mediaModelValidation": "valid-with-preview-url",
+      "existingMedia": false,
+      "journalPhase": null,
+      "cloudResource": "not-checked-in-dry-run",
+      "uploads": 0,
+      "mongoWrites": 0
+    },
+    {
+      "product": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_lionelo_sander_isofix_0_36_kg.html",
+      "action": "wait-for-product-import",
+      "mode": "dry-run",
+      "database": "db-babyhub",
+      "productId": null,
+      "sourceUrl": "https://lutsk.babyservice.ua/images/prods/183_2_chorniy_sander_lionelo.jpg",
+      "target": "main",
+      "dependency": "PRODUCT_IMPORT_REQUIRED",
+      "lock": "absent",
+      "journalPath": "tools/content-migration/output/product-photo-journal-main-6775db6a3008c7b587403849-v1.json",
+      "planned": {
+        "media": "wait-for-product-import",
+        "productImage": "wait-for-product-import"
+      },
+      "publicId": "baby-service/legacy-photo-6775db6a3008c7b587403849ca22a7fe6c75b01442fda16dd04d5cdbfd608b6c",
+      "mediaId": "6775db6a3008c7b587403849",
+      "filename": "legacy-photo-6775db6a3008c7b587403849ca22a7fe6c75b01442fda16dd04d5cdbfd608b6c.jpg",
+      "photo": {
+        "mimeType": "image/jpeg",
+        "format": "jpg",
+        "sizeBytes": 6232,
+        "width": 270,
+        "height": 202,
+        "sha256": "a96ee174f08a39baa80b85372f35ce7dcdcae19faad2142175d33cad2e2f4e09"
+      },
+      "mediaModelValidation": "valid-with-preview-url",
+      "existingMedia": false,
+      "journalPhase": null,
+      "cloudResource": "not-checked-in-dry-run",
+      "uploads": 0,
+      "mongoWrites": 0
+    },
+    {
+      "product": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_carrello_asteroid_0_36_kg.html",
+      "action": "wait-for-product-import",
+      "mode": "dry-run",
+      "database": "db-babyhub",
+      "productId": null,
+      "sourceUrl": "https://lutsk.babyservice.ua/images/prods/200_2_baby_service_carello_asteroid.jpg",
+      "target": "main",
+      "dependency": "PRODUCT_IMPORT_REQUIRED",
+      "lock": "absent",
+      "journalPath": "tools/content-migration/output/product-photo-journal-main-f55a9511d61e2a1a4120d746-v1.json",
+      "planned": {
+        "media": "wait-for-product-import",
+        "productImage": "wait-for-product-import"
+      },
+      "publicId": "baby-service/legacy-photo-f55a9511d61e2a1a4120d74649962b54c5400d6ec4d500b6d24c8bed69382e1d",
+      "mediaId": "f55a9511d61e2a1a4120d746",
+      "filename": "legacy-photo-f55a9511d61e2a1a4120d74649962b54c5400d6ec4d500b6d24c8bed69382e1d.jpg",
+      "photo": {
+        "mimeType": "image/jpeg",
+        "format": "jpg",
+        "sizeBytes": 7168,
+        "width": 270,
+        "height": 270,
+        "sha256": "024030d0d238bd681766db32f92de605e730ac2c7a4c3370da72d0ad2179cccc"
+      },
+      "mediaModelValidation": "valid-with-preview-url",
+      "existingMedia": false,
+      "journalPhase": null,
+      "cloudResource": "not-checked-in-dry-run",
+      "uploads": 0,
+      "mongoWrites": 0
+    },
+    {
+      "product": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_lorelli_9_36_kg_x_drive_plus.html",
+      "action": "wait-for-product-import",
+      "mode": "dry-run",
+      "database": "db-babyhub",
+      "productId": null,
+      "sourceUrl": "https://lutsk.babyservice.ua/images/prods/204_2_avtokrislo_lorelli_9-36_kg_(x-drive_plus)_baby_servece_lutsk.jpg",
+      "target": "main",
+      "dependency": "PRODUCT_IMPORT_REQUIRED",
+      "lock": "absent",
+      "journalPath": "tools/content-migration/output/product-photo-journal-main-6c7171d8a08f986ed8a61db6-v1.json",
+      "planned": {
+        "media": "wait-for-product-import",
+        "productImage": "wait-for-product-import"
+      },
+      "publicId": "baby-service/legacy-photo-6c7171d8a08f986ed8a61db6bf508a8c9724a8189416ed256b927fa561dbc44f",
+      "mediaId": "6c7171d8a08f986ed8a61db6",
+      "filename": "legacy-photo-6c7171d8a08f986ed8a61db6bf508a8c9724a8189416ed256b927fa561dbc44f.jpg",
+      "photo": {
+        "mimeType": "image/jpeg",
+        "format": "jpg",
+        "sizeBytes": 8440,
+        "width": 176,
+        "height": 270,
+        "sha256": "3d502985481f758d63a95e4d2d5ca1973845215815cdba8bce36bb757ca0710b"
+      },
+      "mediaModelValidation": "valid-with-preview-url",
+      "existingMedia": false,
+      "journalPhase": null,
+      "cloudResource": "not-checked-in-dry-run",
+      "uploads": 0,
+      "mongoWrites": 0
+    }
+  ],
+  "mongoWrites": 0,
+  "uploads": 0,
+  "cloudResource": "not-checked-in-dry-run",
+  "batch": {
+    "mode": "dry-run",
+    "target": "main",
+    "database": "db-babyhub",
+    "planned": {
+      "categories": "reuse",
+      "products": {
+        "createDraft": 18,
+        "reuse": 1
+      }
+    },
+    "categoryId": "f1780080e3a428313fa00e67",
+    "productId": "1e7f71a16f3c0e7f577c424c",
+    "products": [
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_adbor_capri.html",
+        "slug": "avtokreslo-adbor-capri",
+        "productId": "1e7f71a16f3c0e7f577c424c",
+        "action": "reuse",
+        "existingStatus": "published"
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_chicco_synthesis_xt_plus_0_13_kg.html",
+        "slug": "avtokrislo-chicco-synthesis-xt-plus-0-13-kg",
+        "productId": "216ba996fc8766ddc67c9bc9",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/_avtokreslo_kolyaska_doona_infant.html",
+        "slug": "avtokreslo-kolyaska-doona-infant",
+        "productId": "14e045031f0205db58fa9575",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_cabrio_fix_4baby_colby_0_13kg.html",
+        "slug": "avtokrislo-cabrio-fix-4baby-colby-0-13kg",
+        "productId": "a72bd74d645131a41d5b9b34",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_caretero_fly_0_13_kg.html",
+        "slug": "avtokreslo-caretero-fly-0-13-kg",
+        "productId": "52e9d52ca4bc779478afab20",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_lionelo_color_violet_0_18_kg.html",
+        "slug": "avtokrislo-lionelo-color-violet-0-18-kg",
+        "productId": "9f418914f8e6b10701931ff9",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_eternal_shield_sport_star_9_25kg.html",
+        "slug": "avtokreslo-eternal-shield-sport-star-9-25kg",
+        "productId": "4ea9ecf107c9b51ccba032d4",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_bambi_m_0522_9_36_kg.html",
+        "slug": "avtokreslo-bambi-m-0522-9-36-kg",
+        "productId": "2788452269ac4567199eb81d",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_buster_15_36kg_2_3.html",
+        "slug": "avtokreslo-buster-15-36kg-2-3",
+        "productId": "d688d039223d5aca88c3edd1",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_4vaby_freeway_0_25_kg.html",
+        "slug": "avtokrislo-4vaby-freeway-0-25-kg",
+        "productId": "ddeb0eded4aa4374dd8fd91c",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_4vaby_rodos_0_25_kg.html",
+        "slug": "avtokreslo-4vaby-rodos-0-25-kg",
+        "productId": "7fed76ef175a9f4ba018ccf9",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_lionelo_bastiaan_isofix_0_36_kg.html",
+        "slug": "avtokrislo-lionelo-bastiaan-isofix-0-36-kg",
+        "productId": "98a8eec60f2dff689685e816",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtkrislo_lionelo_lo_nico_9_36_kg.html",
+        "slug": "avtkrislo-lionelo-lo-nico-9-36-kg",
+        "productId": "9dfce6e21912176e140cc45c",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_4baby_fly_fix_9_36_kg_z_isofix.html",
+        "slug": "avtokrislo-4baby-fly-fix-9-36-kg-z-isofix",
+        "productId": "0870f65a2e4d36ca5401fd8b",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_4baby_star_fix_9_36_kg_s_isofix.html",
+        "slug": "avtokreslo-4baby-star-fix-9-36-kg-s-isofix",
+        "productId": "fbd5c5bae1a04952018b94ac",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_4baby_pro_fix_15_36_kg_z_isofix.html",
+        "slug": "avtokrislo-4baby-pro-fix-15-36-kg-z-isofix",
+        "productId": "c72ead1c17f2eca8a0b46294",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_lionelo_sander_isofix_0_36_kg.html",
+        "slug": "avtokrislo-lionelo-sander-isofix-0-36-kg",
+        "productId": "f2b5d63cf23068520096e404",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_carrello_asteroid_0_36_kg.html",
+        "slug": "avtokrislo-carrello-asteroid-0-36-kg",
+        "productId": "88956c338f1163f842610ca2",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_lorelli_9_36_kg_x_drive_plus.html",
+        "slug": "avtokrislo-lorelli-9-36-kg-x-drive-plus",
+        "productId": "6c16fc3be2776c4e061b4b06",
+        "action": "create-draft",
+        "existingStatus": null
+      }
+    ],
+    "categoryAction": "reuse",
+    "mongoWrites": 0
+  },
+  "verification": {
+    "catalogBefore": {
+      "categories": {
+        "count": 1,
+        "sha256": "9100e7f88d0cbe4da23636c52b20a4c7aa0d409656e08ea6e4968a3ccd566280"
+      },
+      "products": {
+        "count": 1,
+        "sha256": "bc4d4e9bc83ba7043dab81e09fd64fc5747c9d02cf9484e34854a935d05d2dcd"
+      },
+      "media": {
+        "count": 1,
+        "sha256": "1f285152097d1fa2875e28800818a5013843af1e44a310f25199200c33ab4592"
+      },
+      "content_migration_locks": {
+        "count": 1,
+        "sha256": "c90122aa0f81c3c02e8bae1b6f120a9c73673937be3dcff29d720d0d6b3001c1"
+      }
+    },
+    "catalogAfter": {
+      "categories": {
+        "count": 1,
+        "sha256": "9100e7f88d0cbe4da23636c52b20a4c7aa0d409656e08ea6e4968a3ccd566280"
+      },
+      "products": {
+        "count": 1,
+        "sha256": "bc4d4e9bc83ba7043dab81e09fd64fc5747c9d02cf9484e34854a935d05d2dcd"
+      },
+      "media": {
+        "count": 1,
+        "sha256": "1f285152097d1fa2875e28800818a5013843af1e44a310f25199200c33ab4592"
+      },
+      "content_migration_locks": {
+        "count": 1,
+        "sha256": "c90122aa0f81c3c02e8bae1b6f120a9c73673937be3dcff29d720d0d6b3001c1"
+      }
+    },
+    "catalogUnchanged": true,
+    "protectedFiles": [
+      {
+        "path": ".env",
+        "unchanged": true
+      },
+      {
+        "path": "tools/content-migration/output/product-photo-journal-main-v1.json",
+        "unchanged": true
+      },
+      {
+        "path": "tools/content-migration/output/product-photo-journal-v1.json",
+        "unchanged": true
+      },
+      {
+        "path": "tools/content-migration/output/candidate-manifest.json",
+        "unchanged": true
+      }
+    ],
+    "mutationAttempts": 0
+  },
+  "summary": {
+    "products": 20,
+    "newProducts": 18,
+    "reusedProducts": 1,
+    "blockedProducts": 1,
+    "photos": 22,
+    "reusedPhotos": 1,
+    "dependentPhotos": 19,
+    "blockedPhotos": 2
+  }
+}

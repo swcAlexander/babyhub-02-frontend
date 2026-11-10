@@ -2,6 +2,10 @@
 
 Цей каталог містить ізольований інструмент для обмеженого HTML extraction з публічного legacy сайту.
 
+Актуальний пакетний план: [етап 3.8.21](#етап-3821-підготовка-українських-автокрісел).
+Нижчі описи попередніх етапів збережені як історія. Межа однієї draft-пари
+тепер має явне розширення `--batch`; published у main можна використати повторно без оновлень.
+
 ## Обмеження
 - `run-dry-run.mjs` і `validate-manifest.mjs` не підключаються до MongoDB.
 - `prepare-import.mjs` без цілі лише формує payload і виконує локальну Mongoose-валідацію; із `--target` dry-run також читає обрану БД для перевірки конфліктів.
@@ -766,3 +770,115 @@ draft-категорій залишаються прихованими. Зага
 - https://lutsk.babyservice.ua/ru/avtokrisla.html
 - https://lutsk.babyservice.ua/avtokrisla/avtokreslo_adbor_capri.html
 - https://lutsk.babyservice.ua/ru/avtokrisla/avtokreslo_adbor_capri.html
+
+## Етап 3.8.21: підготовка українських автокрісел
+
+Виконано лише підготовку та read-only main, без наповнення test. Початкове робоче дерево
+було чисте. Історичні manifest, звіти й обидва фотожурнали збережені без змін.
+Джерело: <https://lutsk.babyservice.ua/avtokrisla.html>. Перевірено сторінки
+`/avtokrisla/page-2.html`, `page-3.html`, `page-4.html` та `page-all.html`:
+6 + 6 + 6 + 2 = **20 українських товарів**, тотожні порядок і назви на page-all.
+Перевірено всі 20 українських сторінок товарів; `/ru/` не витягували.
+25 HTML-знімків збережено в output, SHA-256 — у `extraction.snapshots` нового manifest.
+Логотипи `/themes/imgs/logo.png` виключені.
+
+Нові артефакти в `tools/content-migration/output/`:
+
+- `avtokrisla-uk-manifest-3821.json`: повний inventory, 1 Category / 20 Product / 22 фото;
+  кожен Product має name/source URL/slug/category/photos, sourceIdentity та evidence.
+- `avtokrisla-uk-ready-3821.json`: вибірка для майбутнього запуску — 19 Product
+  (18 нових + Adbor) і 20 фото (19 нових + наявне). Суперечливий товар і відсутнє фото виключені.
+  Це підготовлений набір, не дозвіл на запис.
+- `avtokrisla-dry-run-main-3821.json`, `...-repeat.json`: перші перевірки;
+  `avtokrisla-dry-run-main-3821-final.json`: підсумковий план із поточним batch-контрактом.
+  Planner щоразу вимагає нове ім'я файла (`wx`), не перезаписує попередній.
+
+Результат: **18 create-draft / 1 reuse / 1 blocked**, Category reuse.
+Дублікатів чи конфліктів `_id`/URL/slug у main для всіх 20 записів немає.
+Category `f1780080e3a428313fa00e67` і Adbor Capri `1e7f71a16f3c0e7f577c424c`
+повторно використовуються published без зміни даних. Media `cf32e0fd119d5555e07a2400`,
+committed журнал, provenance, hash джерела й вільний lock узгоджені.
+Cloudinary resource lookup у dry-run не виконувався — це перевірка main Media,
+журналу й байтів legacy JPEG, не нова перевірка віддаленого Cloudinary resource.
+
+Фото: **19 очікують імпорту Product / 1 reuse / 2 blocked**.
+19 нових фото мають `dependency: PRODUCT_IMPORT_REQUIRED`, Media і Product.images —
+`wait-for-product-import`; дозволу на upload немає.
+
+Конкретні блокування:
+
+- `SOURCE_MODEL_IDENTITY_CONFLICT`: картка, breadcrumb, опис і фото — **4Baby Weelmo 9–25 кг**,
+  URL `avtokreslo_nanya_sp_lx_9_36kg.html`, title/H1 — **Nanya SP LX 9–36 кг**.
+  Товар і його фото заблоковані до ручного рішення; автоматичного перейменування немає.
+- `/image/BabyServiseLcbuster1.jpg`: HTTPS GET повернув **HTTP 404**, text/html, без редиректу.
+  Повний manifest містить `availability: missing`, `SOURCE_PHOTO_HTTP_404`; мережевий захист
+  dry-run повертає `PHOTO_UNAVAILABLE_OR_REDIRECT`. Основне фото бустера доступне,
+  тому сам Product може бути створений draft з одним фото після окремого дозволу.
+
+### Реалізовані зміни інструментів
+
+- `prepare-import.mjs --batch`: одна українська Category, 1–50 унікальних Product;
+  без прапорця збережено межу однієї пари. `review`/`reject`/error-issues блокуються.
+  До першої вставки перевіряються всі записи та зв'язки; весь batch — одна транзакція.
+  Стабільні ID, точні URL/slug, ізоляція main/test і подвійне main-підтвердження збережені.
+  Відповідні published у main повторно використовуються без оновлень; test лишається draft-only.
+  Batch створює окремий звіт через `wx`. Payload у звіті — план, не копія reused документа.
+- Нові Product: `draft`, `availability: in_stock`, `currency: UAH`, `rentalRates: []`.
+  Непідтверджена ціна **deferred 0 UAH** позначена в `importMeta.source`, не створює
+  вигаданого тарифу чи salePrice. Defaults позначені в importMeta й не застосовуються до reused документів.
+- Фото CLI приймає явну трійку `--manifest=... --product-slug=... --photo-url=...`.
+  Фото обирається лише з конкретного українського Product у manifest; HTTPS JPEG тільки
+  цього host у `/images/prods/` або `/image/`, без redirect/query/hash/службових картинок.
+  Нові source URL мають окремі Media/public ID, lock і journal; старі Adbor identities/шляхи збережені.
+  Published Category допускається як незмінний зв'язок нового draft Product.
+  Published Product дозволяє тільки перевірене повторне використання committed фото/зв'язку,
+  без lock/upload/DB/journal writes; нове фото для published Product блокується.
+  Recovery, upload-intent/uploaded/committed, overwrite:false, транзакція, $addToSet,
+  перевірки до/після commit та заборона автоматичного перехоплення locks збережені.
+- `prepare-avtokrisla-manifest.mjs`: offline extraction зі знімків, без мережі/БД;
+  перевіряє пагінацію та UK-маркери, створює нові manifest через `wx`.
+- `plan-avtokrisla.mjs`: read-only orchestration inventory та accepted batch;
+  відхиляє write-підтвердження, вимагає target, перевіряє JPEG/MIME/size/hash/Media/journal/lock.
+  Cloudinary upload/delete/lookup API відсутні; driver writes/індекси/явні транзакції
+  заблоковані guard. SHA-256 categories/products/media/locks і захищених файлів до/після
+  збіглися; **0 спроб мутацій**.
+
+Загальний validator: structural-valid, readiness review через непідтверджені
+source price/availability/storage. Це не підтверджені бізнес-дані: погоджені defaults
+застосовує importer, актуальна Mongoose-валідація payload проходить. Source identity conflict
+і відсутнє фото додатково зафіксовані в stage manifest/плані.
+
+Main journal `output/product-photo-journal-main-v1.json` **вже tracked у Git**, не ігнорується,
+незмінний. Перевірений вміст: recovery metadata та account hash; URI/паролів/API keys немає.
+Додавати весь output не потрібно. Для іншого checkout, де файл ignored/untracked,
+після перевірки секретів можна адресно зберегти лише його командою
+`git add -f -- tools/content-migration/output/product-photo-journal-main-v1.json`;
+у цьому етапі staging/commit не виконували.
+
+### Наступні контрольовані запуски
+
+Read-only команди (імена звітів мають бути вільними):
+
+```powershell
+node --use-system-ca --conditions=react-server --experimental-strip-types tools/content-migration/plan-avtokrisla.mjs --target=main tools/content-migration/output/avtokrisla-dry-run-main-3821-next.json
+node --use-system-ca --experimental-strip-types tools/content-migration/prepare-import.mjs --target=main --batch tools/content-migration/output/avtokrisla-uk-ready-3821.json tools/content-migration/output/avtokrisla-import-preview-3821-next.json
+```
+
+**Лише після нового прямого дозволу на запис** — майбутній імпорт 18 draft Product
+із reuse Category/Adbor. Цю команду на 3.8.21 **не виконували**:
+
+```powershell
+node --use-system-ca --experimental-strip-types tools/content-migration/prepare-import.mjs --target=main --batch --confirm-import --confirm-database=db-babyhub tools/content-migration/output/avtokrisla-uk-ready-3821.json tools/content-migration/output/avtokrisla-import-result-3821-next.json
+```
+
+Після перевірки імпорту — повторний planner з новим output filename. Приклад окремого
+photo dry-run Chicco; upload потребуватиме окремого дозволу після нового плану:
+
+```powershell
+node --use-system-ca --conditions=react-server --experimental-strip-types tools/content-migration/migrate-product-photo.mjs --target=main --manifest=tools/content-migration/output/avtokrisla-uk-ready-3821.json --product-slug=avtokrislo-chicco-synthesis-xt-plus-0-13-kg --photo-url=https://lutsk.babyservice.ua/images/prods/139_2_chikko_2.jpg
+```
+
+Перевірки: **111/111 тестів**, включно з in-memory batch rollback/retry, published reuse,
+multi-source photo recovery та read-only guard; typecheck і `git diff --check` успішні.
+Реальних MongoDB writes/індексів/транзакцій, upload/delete, змін статусів, legacy/test,
+`.env`, схем, public filters, deployment, commit/push не було.

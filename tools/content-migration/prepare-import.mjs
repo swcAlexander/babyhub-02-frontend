@@ -19,12 +19,16 @@ export const assertTestDatabase = (databaseName) => {
 export const loadImportConfiguration = loadTargetConfiguration;
 
 export const parseImportArguments = (args) => {
-  const { positional, ...selection } = parseTargetArguments(args, { maxPositional: 2 });
+  const batch = args.includes('--batch');
+  if (args.filter(arg => arg === '--batch').length > 1) throw safetyError('INVALID_ARGUMENTS');
+  const { positional, ...selection } = parseTargetArguments(args.filter(arg => arg !== '--batch'), { maxPositional: 2 });
   return {
     ...selection,
+    batch,
     inputPath: path.resolve(positional[0] || path.join(OUTPUT_DIR, 'candidate-manifest.json')),
     outputPath: path.resolve(positional[1] || path.join(OUTPUT_DIR,
-      selection.target ? `import-dry-run-${selection.target}-v1.json` : 'import-dry-run-v1.json')),
+      batch ? `import-batch-dry-run-${selection.target ?? 'local'}-v1.json`
+        : selection.target ? `import-dry-run-${selection.target}-v1.json` : 'import-dry-run-v1.json')),
   };
 };
 const DEFAULTS_APPLIED = {
@@ -206,18 +210,29 @@ const serializeDocuments = (entries) => entries.map(({ record, document }) => ({
   payload: document.toObject({ depopulate: true, versionKey: false }),
 }));
 
-export const assertImportScope = (prepared) => {
-  if (prepared.issues.length || prepared.categories.length !== 1 || prepared.products.length !== 1) {
+export const assertImportScope = (prepared, { batch = false } = {}) => {
+  if (prepared.issues.length || prepared.categories.length !== 1 || prepared.products.length < 1
+    || prepared.products.length > (batch ? 50 : 1)) {
     throw safetyError('SINGLE_PAIR_REQUIRED');
   }
   for (const { record, document } of [...prepared.categories, ...prepared.products]) {
+    if (record.status === 'review' || record.status === 'reject' || record.issues?.some(issue => issue.severity === 'error')) {
+      throw safetyError('UNREVIEWED_SOURCE');
+    }
     if (sourceLocale(record) !== 'uk' || document.status !== 'draft') throw safetyError('UK_DRAFT_REQUIRED');
     const legacyUrl = document.importMeta?.legacyUrl;
     if (typeof legacyUrl !== 'string' || !/^https?:\/\//.test(legacyUrl)) {
       throw safetyError('SOURCE_IDENTITY_REQUIRED');
     }
   }
-  if (String(prepared.products[0].document.category) !== String(prepared.categories[0].document._id)) {
+  for (const entries of [prepared.categories, prepared.products]) {
+    for (const field of ['legacyUrl', 'slug', 'entityKey']) {
+      const values = entries.map(({ record, document }) => field === 'legacyUrl' ? document.importMeta.legacyUrl
+        : field === 'slug' ? document.slug.uk : record.entityKey);
+      if (values.some(value => !value) || new Set(values).size !== values.length) throw safetyError('DUPLICATE_IDENTITY');
+    }
+  }
+  if (prepared.products.some(({ document }) => String(document.category) !== String(prepared.categories[0].document._id))) {
     throw safetyError('CATEGORY_LINK_MISMATCH');
   }
 };
@@ -233,7 +248,7 @@ export const importId = (models, type, slug, target) => new models.mongoose.Type
   createHash('sha256').update(`babyhub-${target}-import-v1:${type}:${slug}`).digest('hex').slice(0, 24),
 );
 
-const findExisting = async (Model, document, session) => {
+const findExisting = async (Model, document, session, target) => {
   const matches = await Model.find({ $or: [
     { _id: document._id },
     { 'slug.uk': document.slug.uk },
@@ -244,7 +259,7 @@ const findExisting = async (Model, document, session) => {
   if (existing) {
     if (existing.slug?.uk !== document.slug.uk
       || existing.importMeta?.legacyUrl !== document.importMeta.legacyUrl
-      || existing.status !== 'draft') throw safetyError('EXISTING_DOCUMENT_CONFLICT');
+      || !['draft', ...(target === 'main' ? ['published'] : [])].includes(existing.status)) throw safetyError('EXISTING_DOCUMENT_CONFLICT');
     await existing.validate();
   }
   return existing;
@@ -256,9 +271,10 @@ export const runPreparedImport = async (prepared, models, {
   confirmDatabase,
   configuration,
   openConnection = openTargetConnection,
+  batch = false,
 } = {}) => {
   assertWriteAuthorization({ confirmed, target, confirmDatabase });
-  assertImportScope(prepared);
+  assertImportScope(prepared, { batch });
   if ((await validateImportDocuments(prepared)).length) throw safetyError('INVALID_DOCUMENTS');
   // This branch must not read .env, open connections, start sessions or write documents.
   if (confirmed !== true && target === undefined) return { mode: 'dry-run', created: { categories: 0, products: 0 } };
@@ -277,16 +293,27 @@ export const runPreparedImport = async (prepared, models, {
       assertTargetDatabase(connection.db?.databaseName, target);
       const category = new Category(prepared.categories[0].document.toObject());
       category._id = importId(models, 'Category', category.slug.uk, target);
-      const existingCategory = await findExisting(Category, category, session);
+      const existingCategory = await findExisting(Category, category, session, target);
       if (existingCategory) category._id = existingCategory._id;
 
-      const product = new Product(prepared.products[0].document.toObject());
-      product._id = importId(models, 'Product', product.slug.uk, target);
-      product.category = category._id;
-      const existingProduct = await findExisting(Product, product, session);
-      if (existingProduct && String(existingProduct.category) !== String(category._id)) {
-        throw safetyError('CATEGORY_LINK_MISMATCH');
+      const resolved = [];
+      for (const entry of prepared.products) {
+        const product = new Product(entry.document.toObject());
+        product._id = importId(models, 'Product', product.slug.uk, target);
+        product.category = category._id;
+        const existingProduct = await findExisting(Product, product, session, target);
+        if (existingProduct && String(existingProduct.category) !== String(category._id)) {
+          throw safetyError('CATEGORY_LINK_MISMATCH');
+        }
+        await product.validate();
+        resolved.push({ product, existingProduct });
       }
+      const { product, existingProduct } = resolved[0];
+      const products = resolved.map(({ product, existingProduct }) => ({
+        legacyUrl: product.importMeta.legacyUrl, slug: product.slug.uk,
+        productId: String(existingProduct?._id ?? product._id),
+        action: existingProduct ? 'reuse' : 'create-draft', existingStatus: existingProduct?.status ?? null,
+      }));
 
       // Validate both final documents with their resolved IDs before the first insert.
       await category.validate();
@@ -294,21 +321,28 @@ export const runPreparedImport = async (prepared, models, {
       assertTargetDatabase(connection.db?.databaseName, target);
       if (confirmed !== true) return {
         mode: 'dry-run', target, database: connection.db.databaseName,
-        planned: { categories: existingCategory ? 'reuse' : 'create-draft', products: existingProduct ? 'reuse' : 'create-draft' },
+        planned: { categories: existingCategory ? 'reuse' : 'create-draft', products: batch ? {
+          createDraft: resolved.filter(item => !item.existingProduct).length,
+          reuse: resolved.filter(item => item.existingProduct).length,
+        } : existingProduct ? 'reuse' : 'create-draft' },
         categoryId: String(category._id), productId: String(existingProduct?._id ?? product._id),
+        ...(batch ? { products, categoryAction: existingCategory ? 'reuse' : 'create-draft' } : {}),
         mongoWrites: 0,
       };
       if (!existingCategory) await Category.create([category.toObject()], { session });
-      if (!existingProduct) await Product.create([product.toObject()], { session });
+      for (const { product, existingProduct } of resolved) {
+        if (!existingProduct) await Product.create([product.toObject()], { session });
+      }
 
       return {
         mode: 'confirmed-import',
         target,
         database: connection.db.databaseName,
-        created: { categories: existingCategory ? 0 : 1, products: existingProduct ? 0 : 1 },
-        reused: { categories: existingCategory ? 1 : 0, products: existingProduct ? 1 : 0 },
+        created: { categories: existingCategory ? 0 : 1, products: resolved.filter(item => !item.existingProduct).length },
+        reused: { categories: existingCategory ? 1 : 0, products: resolved.filter(item => item.existingProduct).length },
         categoryId: String(category._id),
         productId: String(existingProduct?._id ?? product._id),
+        ...(batch ? { products } : {}),
       };
     };
     if (confirmed !== true) return await execute();
@@ -325,11 +359,11 @@ export const runPreparedImport = async (prepared, models, {
 };
 
 const main = async () => {
-  const { inputPath, outputPath, confirmed, target, confirmDatabase } = parseImportArguments(process.argv.slice(2));
+  const { inputPath, outputPath, confirmed, target, confirmDatabase, batch } = parseImportArguments(process.argv.slice(2));
   const manifest = JSON.parse(await fs.readFile(inputPath, 'utf8'));
   const models = await loadModels();
   const prepared = buildImportDocuments(manifest, models);
-  assertImportScope(prepared);
+  assertImportScope(prepared, { batch });
   const validationErrors = await validateImportDocuments(prepared);
   const report = {
     mode: confirmed ? 'confirmed-import' : 'dry-run',
@@ -346,7 +380,7 @@ const main = async () => {
     categories: serializeDocuments(prepared.categories),
     products: serializeDocuments(prepared.products),
   };
-  await fs.writeFile(outputPath, JSON.stringify(report, null, 2), 'utf8');
+  await fs.writeFile(outputPath, JSON.stringify(report, null, 2), { encoding: 'utf8', ...(batch ? { flag: 'wx' } : {}) });
   console.log(JSON.stringify({
     output: path.relative(process.cwd(), outputPath).replace(/\\/g, '/'),
     mode: report.mode,
@@ -360,13 +394,15 @@ const main = async () => {
     process.exitCode = 1;
     return;
   }
-  const result = await runPreparedImport(prepared, models, { confirmed, target, confirmDatabase });
+  const result = await runPreparedImport(prepared, models, { confirmed, target, confirmDatabase, batch });
   report.databaseChecked = Boolean(target);
   report.result = result;
   if (target) {
     report.categories[0].payload._id = result.categoryId;
-    report.products[0].payload._id = result.productId;
-    report.products[0].payload.category = result.categoryId;
+    for (const product of report.products) {
+      product.payload._id = batch ? result.products.find(item => item.legacyUrl === product.payload.importMeta.legacyUrl).productId : result.productId;
+      product.payload.category = result.categoryId;
+    }
   }
   await fs.writeFile(outputPath, JSON.stringify(report, null, 2), 'utf8');
   console.log(JSON.stringify(result, null, 2));
@@ -381,6 +417,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
       'CATEGORY_LINK_MISMATCH', 'DUPLICATE_IDENTITY', 'EXISTING_DOCUMENT_CONFLICT', 'INVALID_DOCUMENTS',
       'TARGET_REQUIRED', 'MAIN_DATABASE_CONFIRMATION_REQUIRED', 'TARGET_ENV_UNAVAILABLE',
       'DB_HOST_REQUIRED', 'UNSAFE_DATABASE_URI',
+      'UNREVIEWED_SOURCE',
     ]);
     console.error(JSON.stringify({ error: safeCodes.has(error.code) ? error.code : 'IMPORT_PREPARATION_FAILED' }));
     process.exitCode = 1;

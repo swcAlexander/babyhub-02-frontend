@@ -16,15 +16,17 @@ export const TARGET = Object.freeze({
   photoUrl: 'https://lutsk.babyservice.ua/images/prods/43_2_avtokreslo-adbor_baby_service__lutsk.jpg',
 });
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
-export const photoIdentity = (target) => {
+export const photoIdentity = (target, photoUrl = TARGET.photoUrl) => {
   const specification = targetFor(target);
   // Preserve existing test ownership/recovery; main has a separate identity and namespace.
-  const key = sha256(`${target === 'test' ? 'baby-service-photo-v1' : 'baby-service-photo-main-v1'}:${TARGET.photoUrl}`);
+  const key = sha256(`${target === 'test' ? 'baby-service-photo-v1' : 'baby-service-photo-main-v1'}:${photoUrl}`);
   return Object.freeze({ publicId: `${specification.namespace}/legacy-photo-${key}`,
     mediaId: key.slice(0, 24), filename: `legacy-photo-${key}.jpg` });
 };
-export const photoJournalPath = (target) => {
+export const photoJournalPath = (target, photoUrl = TARGET.photoUrl) => {
   targetFor(target);
+  if (photoUrl !== TARGET.photoUrl) return path.join(ROOT, 'tools/content-migration/output',
+    `product-photo-journal-${target}-${photoIdentity(target, photoUrl).mediaId}-v1.json`);
   return path.join(ROOT, 'tools/content-migration/output',
     target === 'test' ? 'product-photo-journal-v1.json' : 'product-photo-journal-main-v1.json');
 };
@@ -35,8 +37,20 @@ class PhotoMigrationError extends Error {
 const fail = (code) => { throw new PhotoMigrationError(code); };
 
 export const parsePhotoArguments = (args) => {
-  const { positional, ...selection } = parseTargetArguments(args);
-  return selection;
+  const extra = {};
+  const remaining = args.filter(arg => {
+    for (const [flag, key] of [['--manifest=', 'manifestPath'], ['--product-slug=', 'productSlug'], ['--photo-url=', 'photoUrl']]) {
+      if (arg.startsWith(flag)) {
+        if (extra[key] !== undefined || !arg.slice(flag.length)) fail('INVALID_ARGUMENTS');
+        extra[key] = arg.slice(flag.length);
+        return false;
+      }
+    }
+    return true;
+  });
+  const { positional, ...selection } = parseTargetArguments(remaining);
+  if (Object.keys(extra).length && Object.keys(extra).length !== 3) fail('INVALID_ARGUMENTS');
+  return { ...selection, ...extra };
 };
 
 export const inspectJpeg = (bytes) => {
@@ -70,13 +84,16 @@ export const inspectJpeg = (bytes) => {
   fail('INVALID_JPEG');
 };
 
-export const fetchPhoto = async (fetchImpl = fetch) => {
-  if (new URL(TARGET.photoUrl).protocol !== 'https:') fail('UNSAFE_PHOTO_URL');
-  const response = await fetchImpl(TARGET.photoUrl, {
+export const fetchPhoto = async (fetchImpl = fetch, photoUrl = TARGET.photoUrl) => {
+  const parsed = new URL(photoUrl);
+  if (parsed.protocol !== 'https:' || parsed.origin !== 'https://lutsk.babyservice.ua'
+    || parsed.username || parsed.password || parsed.search || parsed.hash
+    || !/^\/(images\/prods|image)\/[^/]+\.jpg$/i.test(parsed.pathname)) fail('UNSAFE_PHOTO_URL');
+  const response = await fetchImpl(photoUrl, {
     redirect: 'manual', signal: AbortSignal.timeout(15000), headers: { Accept: 'image/jpeg' },
   });
   try {
-    if (response.status !== 200 || response.url !== TARGET.photoUrl) fail('PHOTO_UNAVAILABLE_OR_REDIRECT');
+    if (response.status !== 200 || response.url !== photoUrl) fail('PHOTO_UNAVAILABLE_OR_REDIRECT');
     const mime = response.headers.get('content-type')?.split(';')[0].trim().toLowerCase();
     if (mime !== 'image/jpeg') fail('PHOTO_MIME_MISMATCH');
     const declared = response.headers.get('content-length');
@@ -115,24 +132,28 @@ export const createPhotoJournal = (journalPath = photoJournalPath('test')) => ({
   },
 });
 
-const createPhotoOperations = ({ target, prepared }) => {
+const createPhotoOperations = ({ target, prepared, photoUrl }) => {
   targetFor(target);
   assertImportScope(prepared);
   const entry = prepared.products[0];
   const category = prepared.categories[0].document;
-  if (entry.document.slug.uk !== TARGET.slug || entry.document.importMeta?.legacyUrl !== TARGET.legacyUrl ||
-      entry.record.legacyUrl !== TARGET.legacyUrl ||
-      !entry.record.imageLegacyUrls?.includes(TARGET.photoUrl)) fail('PHOTO_SOURCE_PRODUCT_MISMATCH');
-  const specification = { ...TARGET, database: targetFor(target).dbName, productId: null };
-  return buildOperations(specification, photoIdentity(target),
-    target === 'test' ? 'baby-service-photo-v1' : `baby-service-photo-main-v1:${photoIdentity(target).mediaId}`,
+  const source = photoUrl ? { slug: entry.document.slug.uk, legacyUrl: entry.record.legacyUrl, photoUrl } : TARGET;
+  if (entry.document.slug.uk !== source.slug || entry.document.importMeta?.legacyUrl !== source.legacyUrl ||
+      entry.record.legacyUrl !== source.legacyUrl ||
+      !entry.record.imageLegacyUrls?.includes(source.photoUrl)) fail('PHOTO_SOURCE_PRODUCT_MISMATCH');
+  if (!/^https:\/\/lutsk\.babyservice\.ua\/avtokrisla\/[^/]+\.html$/.test(source.legacyUrl)) fail('PHOTO_SOURCE_PRODUCT_MISMATCH');
+  const specification = { ...source, database: targetFor(target).dbName, productId: null };
+  const identity = photoIdentity(target, source.photoUrl);
+  return buildOperations(specification, identity,
+    target === 'test' && source.photoUrl === TARGET.photoUrl ? 'baby-service-photo-v1' : `baby-service-photo-${target}-v1:${identity.mediaId}`,
     target, category);
 };
 
 const buildOperations = (TARGET, IDENTITY, TOOL, target, category) => {
   const productFilter = () => ({
     ...(TARGET.productId ? { _id: new mongoose.Types.ObjectId(TARGET.productId) } : {}),
-    'slug.uk': TARGET.slug, 'importMeta.legacyUrl': TARGET.legacyUrl, status: 'draft',
+    'slug.uk': TARGET.slug, 'importMeta.legacyUrl': TARGET.legacyUrl,
+    ...(TARGET.status ? { status: TARGET.status } : {}),
   });
 
   const guardTarget = async (connection, session, allowMissing = false) => {
@@ -147,14 +168,16 @@ const buildOperations = (TARGET, IDENTITY, TOOL, target, category) => {
       if (allowMissing && matches === 0) return null;
       fail('TARGET_PRODUCT_MISMATCH');
     }
+    if (!['draft', ...(target === 'main' ? ['published'] : [])].includes(product.status)) fail('TARGET_PRODUCT_MISMATCH');
     if (matches !== 1 || !Array.isArray(product.images)
       || new Set(product.images.map(String)).size !== product.images.length) fail('TARGET_PRODUCT_CONFLICT');
     const linkedCategory = await connection.db.collection('categories').findOne({
       _id: product.category, 'slug.uk': category.slug.uk,
-      'importMeta.legacyUrl': category.importMeta.legacyUrl, status: 'draft',
+      'importMeta.legacyUrl': category.importMeta.legacyUrl,
     }, { session });
-    if (!linkedCategory) fail('TARGET_CATEGORY_MISMATCH');
+    if (!linkedCategory || !['draft', ...(target === 'main' ? ['published'] : [])].includes(linkedCategory.status)) fail('TARGET_CATEGORY_MISMATCH');
     TARGET.productId = String(product._id);
+    TARGET.status = product.status;
     return product;
   };
 
@@ -218,18 +241,18 @@ const buildOperations = (TARGET, IDENTITY, TOOL, target, category) => {
 
 export const runPhotoMigration = async ({
   confirmed = false, target, confirmDatabase, prepared, connection, models, cloudinary, account,
-  journal, fetchImpl = fetch,
+  journal, fetchImpl = fetch, photoUrl,
 }) => {
   assertWriteAuthorization({ confirmed, target, confirmDatabase });
   const selectedTarget = target ?? 'test'; // Legacy dry-run only; writes require explicit target above.
   if ((await validateImportDocuments(prepared)).length) fail('INVALID_DOCUMENTS');
   const { TARGET, IDENTITY, TOOL, productFilter, guardTarget, journalBase, assertJournal,
     assertCloudImage, sameCloudImage, imageRecord, mediaPayload, findMedia, acquireLock } =
-    createPhotoOperations({ target: selectedTarget, prepared });
-  journal ??= createPhotoJournal(photoJournalPath(selectedTarget));
+    createPhotoOperations({ target: selectedTarget, prepared, photoUrl });
+  journal ??= createPhotoJournal(photoJournalPath(selectedTarget, TARGET.photoUrl));
   const product = await guardTarget(connection, undefined, confirmed !== true);
   cloudinary.checkConfiguration();
-  const photo = await fetchPhoto(fetchImpl);
+  const photo = await fetchPhoto(fetchImpl, TARGET.photoUrl);
   const base = journalBase(photo, account);
   const previewImage = { public_id: IDENTITY.publicId, secure_url: `https://res.cloudinary.com/preview/image/upload/${IDENTITY.publicId}.jpg`, width: photo.width, height: photo.height, bytes: photo.sizeBytes, format: 'jpg' };
   // The required URL is a clearly marked placeholder for model validation, never persisted.
@@ -238,20 +261,36 @@ export const runPhotoMigration = async ({
   if (!product && before) fail('MEDIA_WITHOUT_TARGET_PRODUCT');
   const saved = await journal.read();
   assertJournal(saved, base);
+  if (saved?.image) {
+    assertCloudImage(saved.image, photo);
+    await findMedia(connection, photo, account, saved.image);
+  }
   const lock = await connection.db.collection('content_migration_locks').findOne({ _id: TOOL });
   if (lock?.owner != null) fail('PHOTO_MIGRATION_LOCKED');
   if (lock && (lock.sourceUrl !== TARGET.photoUrl || lock.productId !== TARGET.productId)) fail('LOCK_IDENTITY_CONFLICT');
+  if (product?.status === 'published' && (!before || !product.images.some(id => String(id) === IDENTITY.mediaId)
+      || saved?.phase !== 'committed')) fail('PUBLISHED_PRODUCT_IMMUTABLE');
   if (confirmed !== true) return {
     mode: 'dry-run', database: TARGET.database, productId: TARGET.productId, sourceUrl: TARGET.photoUrl,
     target: selectedTarget, dependency: product ? null : 'PRODUCT_IMPORT_REQUIRED',
-    lock: lock ? 'available-existing' : 'absent', journalPath: path.relative(ROOT, photoJournalPath(selectedTarget)).replaceAll('\\', '/'),
-    planned: { media: before ? 'reuse' : 'create-after-confirmed-upload', productImage: !product
+    lock: lock ? 'available-existing' : 'absent', journalPath: path.relative(ROOT, photoJournalPath(selectedTarget, TARGET.photoUrl)).replaceAll('\\', '/'),
+    planned: { media: before ? 'reuse' : !product ? 'wait-for-product-import' : 'create-after-confirmed-upload', productImage: !product
       ? 'wait-for-product-import' : product.images.some(id => String(id) === IDENTITY.mediaId) ? 'reuse-link' : 'add-link' },
     ...IDENTITY, photo: { mimeType: photo.mimeType, format: photo.format, sizeBytes: photo.sizeBytes,
       width: photo.width, height: photo.height, sha256: photo.sha256 },
     mediaModelValidation: 'valid-with-preview-url', existingMedia: Boolean(before), journalPhase: saved?.phase ?? null,
     cloudResource: 'not-checked-in-dry-run', uploads: 0, mongoWrites: 0,
   };
+
+  // Published products are immutable here. A verified completed photo can be reused without even acquiring a lock.
+  if (product?.status === 'published') {
+    if (!before || !product.images.some(id => String(id) === IDENTITY.mediaId)
+      || saved?.phase !== 'committed') fail('PUBLISHED_PRODUCT_IMMUTABLE');
+    assertCloudImage(saved.image, photo);
+    await findMedia(connection, photo, account, saved.image);
+    return { mode: 'confirmed-import', database: TARGET.database, productId: TARGET.productId,
+      ...IDENTITY, uploads: 0, createdMedia: 0, productModified: 0 };
+  }
 
   const owner = randomUUID();
   await acquireLock(connection, owner);
@@ -330,7 +369,7 @@ export const runPhotoMigration = async ({
 };
 
 const main = async () => {
-  const { confirmed, target, confirmDatabase } = parsePhotoArguments(process.argv.slice(2));
+  const { confirmed, target, confirmDatabase, manifestPath, productSlug, photoUrl } = parsePhotoArguments(process.argv.slice(2));
   const config = await loadTargetConfiguration({ target: target ?? 'test' });
   const env = dotenv.parse(await fs.readFile(path.join(ROOT, '.env'), 'utf8'));
   const cloudinary = createCloudinaryService({ env });
@@ -338,12 +377,18 @@ const main = async () => {
   const [{ default: Media }, { default: Product }, { default: Category }] = await Promise.all([
     import('../../src/models/Media.ts'), import('../../src/models/Product.ts'), import('../../src/models/Category.ts'),
   ]);
-  const manifest = JSON.parse(await fs.readFile(path.join(ROOT, 'tools/content-migration/output/candidate-manifest.json'), 'utf8'));
+  let manifest = JSON.parse(await fs.readFile(manifestPath ? path.resolve(manifestPath)
+    : path.join(ROOT, 'tools/content-migration/output/candidate-manifest.json'), 'utf8'));
+  if (productSlug) {
+    const products = manifest.products.filter(record => record.locale === 'uk' && record.slug?.uk === productSlug);
+    if (products.length !== 1) fail('PHOTO_SOURCE_PRODUCT_MISMATCH');
+    manifest = { ...manifest, products };
+  }
   const prepared = buildImportDocuments(manifest, { Category, Product, mongoose });
   assertImportScope(prepared);
   const connection = await openTargetConnection({ mongoose }, config);
   try {
-    const result = await runPhotoMigration({ confirmed, target, confirmDatabase, prepared,
+    const result = await runPhotoMigration({ confirmed, target, confirmDatabase, prepared, photoUrl,
       connection, models: { Media, Product }, cloudinary,
       account: sha256(env.CLOUDINARY_CLOUD_NAME.trim()) });
     console.log(JSON.stringify(result, null, 2));

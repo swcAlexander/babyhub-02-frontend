@@ -1,0 +1,843 @@
+{
+  "mode": "dry-run",
+  "target": "main",
+  "targetDatabase": "db-babyhub",
+  "databaseChecked": true,
+  "sourceManifest": "tools/content-migration/output/avtokrisla-uk-ready-3821.json",
+  "defaultsApplied": {
+    "availability": "in_stock",
+    "currency": "UAH",
+    "price": 0,
+    "status": "draft"
+  },
+  "issues": [],
+  "validation": {
+    "status": "valid",
+    "errors": []
+  },
+  "categories": [
+    {
+      "sourcePageKey": "page:uk:category:avtokrisla",
+      "entityKey": "entity:category:avtokrisla",
+      "payload": {
+        "name": {
+          "uk": "Автокрісла"
+        },
+        "slug": {
+          "uk": "avtokrisla"
+        },
+        "description": {
+          "uk": "Зручні, сертифіковані, перевірені, чисті автокрісла-зручний засіб для перевезення дітей в автомобілі.Прокат оренда Луцьк"
+        },
+        "image": null,
+        "parentCategory": null,
+        "displayOrder": 0,
+        "status": "draft",
+        "importMeta": {
+          "source": "candidate-manifest; defaults applied: status=draft",
+          "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla.html"
+        },
+        "_id": "f1780080e3a428313fa00e67"
+      }
+    }
+  ],
+  "products": [
+    {
+      "sourcePageKey": "page:uk:product:avtokreslo-adbor-capri",
+      "entityKey": "entity:product:avtokreslo-adbor-capri",
+      "payload": {
+        "category": "f1780080e3a428313fa00e67",
+        "name": {
+          "uk": "Автокрісло Adbor Capri (0-10кг)"
+        },
+        "slug": {
+          "uk": "avtokreslo-adbor-capri"
+        },
+        "shortDescription": {
+          "uk": "Дитяче автокрісло-люлька adbor для самих маленьких від 0 до 10кг. Зручна, недорога оренда, прокат в Baby Service Луцьк."
+        },
+        "description": {
+          "uk": "Дитяче автокрісло-люлька adbor для самих маленьких від 0 до 10кг. Зручна, недорога оренда, прокат в Baby Service Луцьк."
+        },
+        "images": [],
+        "pricing": {
+          "currency": "UAH",
+          "rentalRates": []
+        },
+        "availability": "in_stock",
+        "featured": false,
+        "displayOrder": 0,
+        "status": "draft",
+        "importMeta": {
+          "source": "candidate-manifest; defaults applied: availability=in_stock, status=draft, currency=UAH, price=0, rentalRates=[] (unit unconfirmed; deferred price=0 UAH)",
+          "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_adbor_capri.html"
+        },
+        "_id": "1e7f71a16f3c0e7f577c424c",
+        "attributes": []
+      }
+    },
+    {
+      "sourcePageKey": "page:uk:product:avtokrislo-chicco-synthesis-xt-plus-0-13-kg",
+      "entityKey": "entity:product:avtokrislo-chicco-synthesis-xt-plus-0-13-kg",
+      "payload": {
+        "category": "f1780080e3a428313fa00e67",
+        "name": {
+          "uk": "Автокрісло Chicco Synthesis XT Plus 0-13 кг"
+        },
+        "slug": {
+          "uk": "avtokrislo-chicco-synthesis-xt-plus-0-13-kg"
+        },
+        "shortDescription": {
+          "uk": "Автокрісло Chicco Synthesis XT Plus 0-13 кг, прокат,оренда у Baby Servise Луцьк. Зручно купити чи взяти у прокат?"
+        },
+        "description": {
+          "uk": "Автокрісло Chicco Synthesis XT Plus 0-13 кг, прокат,оренда у Baby Servise Луцьк. Зручно купити чи взяти у прокат?"
+        },
+        "images": [],
+        "pricing": {
+          "currency": "UAH",
+          "rentalRates": []
+        },
+        "availability": "in_stock",
+        "featured": false,
+        "displayOrder": 0,
+        "status": "draft",
+        "importMeta": {
+          "source": "candidate-manifest; defaults applied: availability=in_stock, status=draft, currency=UAH, price=0, rentalRates=[] (unit unconfirmed; deferred price=0 UAH)",
+          "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_chicco_synthesis_xt_plus_0_13_kg.html"
+        },
+        "_id": "216ba996fc8766ddc67c9bc9",
+        "attributes": []
+      }
+    },
+    {
+      "sourcePageKey": "page:uk:product:avtokreslo-kolyaska-doona-infant",
+      "entityKey": "entity:product:avtokreslo-kolyaska-doona-infant",
+      "payload": {
+        "category": "f1780080e3a428313fa00e67",
+        "name": {
+          "uk": "Автокрісло -коляска Doona Infant"
+        },
+        "slug": {
+          "uk": "avtokreslo-kolyaska-doona-infant"
+        },
+        "shortDescription": {
+          "uk": "Автокрысло-коляска Doona інноваційне рішення нового покоління, яке розроблено, щоб забезпечити безпечне і практичне рішення мобільності Вашої дитини."
+        },
+        "description": {
+          "uk": "Автокрысло-коляска Doona інноваційне рішення нового покоління, яке розроблено, щоб забезпечити безпечне і практичне рішення мобільності Вашої дитини."
+        },
+        "images": [],
+        "pricing": {
+          "currency": "UAH",
+          "rentalRates": []
+        },
+        "availability": "in_stock",
+        "featured": false,
+        "displayOrder": 0,
+        "status": "draft",
+        "importMeta": {
+          "source": "candidate-manifest; defaults applied: availability=in_stock, status=draft, currency=UAH, price=0, rentalRates=[] (unit unconfirmed; deferred price=0 UAH)",
+          "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/_avtokreslo_kolyaska_doona_infant.html"
+        },
+        "_id": "14e045031f0205db58fa9575",
+        "attributes": []
+      }
+    },
+    {
+      "sourcePageKey": "page:uk:product:avtokrislo-cabrio-fix-4baby-colby-0-13kg",
+      "entityKey": "entity:product:avtokrislo-cabrio-fix-4baby-colby-0-13kg",
+      "payload": {
+        "category": "f1780080e3a428313fa00e67",
+        "name": {
+          "uk": "Автокрісло 4Baby Colby (0-13кг)"
+        },
+        "slug": {
+          "uk": "avtokrislo-cabrio-fix-4baby-colby-0-13kg"
+        },
+        "shortDescription": {
+          "uk": "Baby Service Луцьк здаємо напрокат перевірені дитячі автокрісла 4Baby Colby в яких малюкові буде комфортно і безпечно."
+        },
+        "description": {
+          "uk": "Baby Service Луцьк здаємо напрокат перевірені дитячі автокрісла 4Baby Colby в яких малюкові буде комфортно і безпечно."
+        },
+        "images": [],
+        "pricing": {
+          "currency": "UAH",
+          "rentalRates": []
+        },
+        "availability": "in_stock",
+        "featured": false,
+        "displayOrder": 0,
+        "status": "draft",
+        "importMeta": {
+          "source": "candidate-manifest; defaults applied: availability=in_stock, status=draft, currency=UAH, price=0, rentalRates=[] (unit unconfirmed; deferred price=0 UAH)",
+          "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_cabrio_fix_4baby_colby_0_13kg.html"
+        },
+        "_id": "a72bd74d645131a41d5b9b34",
+        "attributes": []
+      }
+    },
+    {
+      "sourcePageKey": "page:uk:product:avtokreslo-caretero-fly-0-13-kg",
+      "entityKey": "entity:product:avtokreslo-caretero-fly-0-13-kg",
+      "payload": {
+        "category": "f1780080e3a428313fa00e67",
+        "name": {
+          "uk": "Автокрісло Caretero Fly (0-13 кг)"
+        },
+        "slug": {
+          "uk": "avtokreslo-caretero-fly-0-13-kg"
+        },
+        "shortDescription": {
+          "uk": "Baby Service Луцьк здаємо напрокат перевірені дитячі автокрісла-люльки в яких дитині буде комфортно і безпечно у дорозі."
+        },
+        "description": {
+          "uk": "Baby Service Луцьк здаємо напрокат перевірені дитячі автокрісла-люльки в яких дитині буде комфортно і безпечно у дорозі."
+        },
+        "images": [],
+        "pricing": {
+          "currency": "UAH",
+          "rentalRates": []
+        },
+        "availability": "in_stock",
+        "featured": false,
+        "displayOrder": 0,
+        "status": "draft",
+        "importMeta": {
+          "source": "candidate-manifest; defaults applied: availability=in_stock, status=draft, currency=UAH, price=0, rentalRates=[] (unit unconfirmed; deferred price=0 UAH)",
+          "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_caretero_fly_0_13_kg.html"
+        },
+        "_id": "52e9d52ca4bc779478afab20",
+        "attributes": []
+      }
+    },
+    {
+      "sourcePageKey": "page:uk:product:avtokrislo-lionelo-color-violet-0-18-kg",
+      "entityKey": "entity:product:avtokrislo-lionelo-color-violet-0-18-kg",
+      "payload": {
+        "category": "f1780080e3a428313fa00e67",
+        "name": {
+          "uk": "Автокрісло Lionelo Color Violet 0-18 кг"
+        },
+        "slug": {
+          "uk": "avtokrislo-lionelo-color-violet-0-18-kg"
+        },
+        "shortDescription": {
+          "uk": "Автокрісло Lionelo Color Violet 0-18 кг, прокат,оренда у Baby Servise Луцьк. Зручно купити чи взяти у прокат?"
+        },
+        "description": {
+          "uk": "Автокрісло Lionelo Color Violet 0-18 кг, прокат,оренда у Baby Servise Луцьк. Зручно купити чи взяти у прокат?"
+        },
+        "images": [],
+        "pricing": {
+          "currency": "UAH",
+          "rentalRates": []
+        },
+        "availability": "in_stock",
+        "featured": false,
+        "displayOrder": 0,
+        "status": "draft",
+        "importMeta": {
+          "source": "candidate-manifest; defaults applied: availability=in_stock, status=draft, currency=UAH, price=0, rentalRates=[] (unit unconfirmed; deferred price=0 UAH)",
+          "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_lionelo_color_violet_0_18_kg.html"
+        },
+        "_id": "9f418914f8e6b10701931ff9",
+        "attributes": []
+      }
+    },
+    {
+      "sourcePageKey": "page:uk:product:avtokreslo-eternal-shield-sport-star-9-25kg",
+      "entityKey": "entity:product:avtokreslo-eternal-shield-sport-star-9-25kg",
+      "payload": {
+        "category": "f1780080e3a428313fa00e67",
+        "name": {
+          "uk": "Автокрісло Eternal Shield Sport Star 9-25кг"
+        },
+        "slug": {
+          "uk": "avtokreslo-eternal-shield-sport-star-9-25kg"
+        },
+        "shortDescription": {
+          "uk": "Усі категорії автокрісел здаємо напрокат.Сертифіковані та перевірені в яких малюку буде комфортно і безпечно у дорозі"
+        },
+        "description": {
+          "uk": "Усі категорії автокрісел здаємо напрокат.Сертифіковані та перевірені в яких малюку буде комфортно і безпечно у дорозі"
+        },
+        "images": [],
+        "pricing": {
+          "currency": "UAH",
+          "rentalRates": []
+        },
+        "availability": "in_stock",
+        "featured": false,
+        "displayOrder": 0,
+        "status": "draft",
+        "importMeta": {
+          "source": "candidate-manifest; defaults applied: availability=in_stock, status=draft, currency=UAH, price=0, rentalRates=[] (unit unconfirmed; deferred price=0 UAH)",
+          "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_eternal_shield_sport_star_9_25kg.html"
+        },
+        "_id": "4ea9ecf107c9b51ccba032d4",
+        "attributes": []
+      }
+    },
+    {
+      "sourcePageKey": "page:uk:product:avtokreslo-bambi-m-0522-9-36-kg",
+      "entityKey": "entity:product:avtokreslo-bambi-m-0522-9-36-kg",
+      "payload": {
+        "category": "f1780080e3a428313fa00e67",
+        "name": {
+          "uk": "Автокрісло Bambi M 0522 9-36 кг"
+        },
+        "slug": {
+          "uk": "avtokreslo-bambi-m-0522-9-36-kg"
+        },
+        "shortDescription": {
+          "uk": "Baby Service Луцьк здаємо напрокат сертифіковані, перевірені дитячі автокрісла в яких дитині буде комфортно і безпечно."
+        },
+        "description": {
+          "uk": "Baby Service Луцьк здаємо напрокат сертифіковані, перевірені дитячі автокрісла в яких дитині буде комфортно і безпечно."
+        },
+        "images": [],
+        "pricing": {
+          "currency": "UAH",
+          "rentalRates": []
+        },
+        "availability": "in_stock",
+        "featured": false,
+        "displayOrder": 0,
+        "status": "draft",
+        "importMeta": {
+          "source": "candidate-manifest; defaults applied: availability=in_stock, status=draft, currency=UAH, price=0, rentalRates=[] (unit unconfirmed; deferred price=0 UAH)",
+          "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_bambi_m_0522_9_36_kg.html"
+        },
+        "_id": "2788452269ac4567199eb81d",
+        "attributes": []
+      }
+    },
+    {
+      "sourcePageKey": "page:uk:product:avtokreslo-buster-15-36kg-2-3",
+      "entityKey": "entity:product:avtokreslo-buster-15-36kg-2-3",
+      "payload": {
+        "category": "f1780080e3a428313fa00e67",
+        "name": {
+          "uk": "Бустер Heyner Capsula JR4 15-36кг (2/3)"
+        },
+        "slug": {
+          "uk": "avtokreslo-buster-15-36kg-2-3"
+        },
+        "shortDescription": {
+          "uk": "Взяти напрокат чи купити автокрісло-бустер, для діток вагою від 15-36кг?Візьміть в оренду у BabyService Луцьк-це зручно"
+        },
+        "description": {
+          "uk": "Взяти напрокат чи купити автокрісло-бустер, для діток вагою від 15-36кг?Візьміть в оренду у BabyService Луцьк-це зручно"
+        },
+        "images": [],
+        "pricing": {
+          "currency": "UAH",
+          "rentalRates": []
+        },
+        "availability": "in_stock",
+        "featured": false,
+        "displayOrder": 0,
+        "status": "draft",
+        "importMeta": {
+          "source": "candidate-manifest; defaults applied: availability=in_stock, status=draft, currency=UAH, price=0, rentalRates=[] (unit unconfirmed; deferred price=0 UAH)",
+          "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_buster_15_36kg_2_3.html"
+        },
+        "_id": "d688d039223d5aca88c3edd1",
+        "attributes": []
+      }
+    },
+    {
+      "sourcePageKey": "page:uk:product:avtokrislo-4vaby-freeway-0-25-kg",
+      "entityKey": "entity:product:avtokrislo-4vaby-freeway-0-25-kg",
+      "payload": {
+        "category": "f1780080e3a428313fa00e67",
+        "name": {
+          "uk": "Автокрісло 4Вaby Freeway (0-25 кг )"
+        },
+        "slug": {
+          "uk": "avtokrislo-4vaby-freeway-0-25-kg"
+        },
+        "shortDescription": {
+          "uk": "Автокрісло 4Вaby Freeway категорія 0+/2 (0-25 кг), купити чи взяти в прокат, оренду у Baby Service . Замовляйте з доставкою Фо Бейбі Фрівей у Луцьку."
+        },
+        "description": {
+          "uk": "Автокрісло 4Вaby Freeway категорія 0+/2 (0-25 кг), купити чи взяти в прокат, оренду у Baby Service . Замовляйте з доставкою Фо Бейбі Фрівей у Луцьку."
+        },
+        "images": [],
+        "pricing": {
+          "currency": "UAH",
+          "rentalRates": []
+        },
+        "availability": "in_stock",
+        "featured": false,
+        "displayOrder": 0,
+        "status": "draft",
+        "importMeta": {
+          "source": "candidate-manifest; defaults applied: availability=in_stock, status=draft, currency=UAH, price=0, rentalRates=[] (unit unconfirmed; deferred price=0 UAH)",
+          "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_4vaby_freeway_0_25_kg.html"
+        },
+        "_id": "ddeb0eded4aa4374dd8fd91c",
+        "attributes": []
+      }
+    },
+    {
+      "sourcePageKey": "page:uk:product:avtokreslo-4vaby-rodos-0-25-kg",
+      "entityKey": "entity:product:avtokreslo-4vaby-rodos-0-25-kg",
+      "payload": {
+        "category": "f1780080e3a428313fa00e67",
+        "name": {
+          "uk": "Автокрісло 4Вaby Rodos (0-25 кг )"
+        },
+        "slug": {
+          "uk": "avtokreslo-4vaby-rodos-0-25-kg"
+        },
+        "shortDescription": {
+          "uk": "Автокрісло 4Вaby Rodos (0-25 кг ),категорія(0+/1/2), купити або взяти в прокат, оренду в Baby Service. Замовляйте з доставкою Фо Бейбі Радос в Луцьку."
+        },
+        "description": {
+          "uk": "Автокрісло 4Вaby Rodos (0-25 кг ),категорія(0+/1/2), купити або взяти в прокат, оренду в Baby Service. Замовляйте з доставкою Фо Бейбі Радос в Луцьку."
+        },
+        "images": [],
+        "pricing": {
+          "currency": "UAH",
+          "rentalRates": []
+        },
+        "availability": "in_stock",
+        "featured": false,
+        "displayOrder": 0,
+        "status": "draft",
+        "importMeta": {
+          "source": "candidate-manifest; defaults applied: availability=in_stock, status=draft, currency=UAH, price=0, rentalRates=[] (unit unconfirmed; deferred price=0 UAH)",
+          "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_4vaby_rodos_0_25_kg.html"
+        },
+        "_id": "7fed76ef175a9f4ba018ccf9",
+        "attributes": []
+      }
+    },
+    {
+      "sourcePageKey": "page:uk:product:avtokrislo-lionelo-bastiaan-isofix-0-36-kg",
+      "entityKey": "entity:product:avtokrislo-lionelo-bastiaan-isofix-0-36-kg",
+      "payload": {
+        "category": "f1780080e3a428313fa00e67",
+        "name": {
+          "uk": "Автокрісло Lionelo Bastiaan Isofix 0-36 кг"
+        },
+        "slug": {
+          "uk": "avtokrislo-lionelo-bastiaan-isofix-0-36-kg"
+        },
+        "shortDescription": {
+          "uk": "Автокрісло Bastiaan Isofix 0-36 кг- остання модель від польського виробника Lionelo. Дитяче автокрісло прокат, оренда , продаж Baby Service Луцьк."
+        },
+        "description": {
+          "uk": "Автокрісло Bastiaan Isofix 0-36 кг- остання модель від польського виробника Lionelo. Дитяче автокрісло прокат, оренда , продаж Baby Service Луцьк."
+        },
+        "images": [],
+        "pricing": {
+          "currency": "UAH",
+          "rentalRates": []
+        },
+        "availability": "in_stock",
+        "featured": false,
+        "displayOrder": 0,
+        "status": "draft",
+        "importMeta": {
+          "source": "candidate-manifest; defaults applied: availability=in_stock, status=draft, currency=UAH, price=0, rentalRates=[] (unit unconfirmed; deferred price=0 UAH)",
+          "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_lionelo_bastiaan_isofix_0_36_kg.html"
+        },
+        "_id": "98a8eec60f2dff689685e816",
+        "attributes": []
+      }
+    },
+    {
+      "sourcePageKey": "page:uk:product:avtkrislo-lionelo-lo-nico-9-36-kg",
+      "entityKey": "entity:product:avtkrislo-lionelo-lo-nico-9-36-kg",
+      "payload": {
+        "category": "f1780080e3a428313fa00e67",
+        "name": {
+          "uk": "Авткрісло Lionelo Nico 9 - 36 кг"
+        },
+        "slug": {
+          "uk": "avtkrislo-lionelo-lo-nico-9-36-kg"
+        },
+        "shortDescription": {
+          "uk": "Авткрісло Lionelo Nico 9 - 36 кг- має посилену структуру і бокову систему захисту , які відповідають за безпеку дитину під час подорожі.Baby Service Луцьк."
+        },
+        "description": {
+          "uk": "Авткрісло Lionelo Nico 9 - 36 кг- має посилену структуру і бокову систему захисту , які відповідають за безпеку дитину під час подорожі.Baby Service Луцьк."
+        },
+        "images": [],
+        "pricing": {
+          "currency": "UAH",
+          "rentalRates": []
+        },
+        "availability": "in_stock",
+        "featured": false,
+        "displayOrder": 0,
+        "status": "draft",
+        "importMeta": {
+          "source": "candidate-manifest; defaults applied: availability=in_stock, status=draft, currency=UAH, price=0, rentalRates=[] (unit unconfirmed; deferred price=0 UAH)",
+          "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtkrislo_lionelo_lo_nico_9_36_kg.html"
+        },
+        "_id": "9dfce6e21912176e140cc45c",
+        "attributes": []
+      }
+    },
+    {
+      "sourcePageKey": "page:uk:product:avtokrislo-4baby-fly-fix-9-36-kg-z-isofix",
+      "entityKey": "entity:product:avtokrislo-4baby-fly-fix-9-36-kg-z-isofix",
+      "payload": {
+        "category": "f1780080e3a428313fa00e67",
+        "name": {
+          "uk": "Автокрісло 4Baby Fly-Fix 9-36 кг з Isofix"
+        },
+        "slug": {
+          "uk": "avtokrislo-4baby-fly-fix-9-36-kg-z-isofix"
+        },
+        "shortDescription": {
+          "uk": "Автокрісло 4Baby Fly-Fix группа 9-36 кг. Рекомендовано дітям с 9 місяців до 12 років. Сучасне автокрісло 4Baby Fly-Fix в прокат, оренда, продаж в Baby Service Луцьк."
+        },
+        "description": {
+          "uk": "Автокрісло 4Baby Fly-Fix группа 9-36 кг. Рекомендовано дітям с 9 місяців до 12 років. Сучасне автокрісло 4Baby Fly-Fix в прокат, оренда, продаж в Baby Service Луцьк."
+        },
+        "images": [],
+        "pricing": {
+          "currency": "UAH",
+          "rentalRates": []
+        },
+        "availability": "in_stock",
+        "featured": false,
+        "displayOrder": 0,
+        "status": "draft",
+        "importMeta": {
+          "source": "candidate-manifest; defaults applied: availability=in_stock, status=draft, currency=UAH, price=0, rentalRates=[] (unit unconfirmed; deferred price=0 UAH)",
+          "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_4baby_fly_fix_9_36_kg_z_isofix.html"
+        },
+        "_id": "0870f65a2e4d36ca5401fd8b",
+        "attributes": []
+      }
+    },
+    {
+      "sourcePageKey": "page:uk:product:avtokreslo-4baby-star-fix-9-36-kg-s-isofix",
+      "entityKey": "entity:product:avtokreslo-4baby-star-fix-9-36-kg-s-isofix",
+      "payload": {
+        "category": "f1780080e3a428313fa00e67",
+        "name": {
+          "uk": "Автокрісло 4Baby Star-Fix 9-36 кг з Isofix"
+        },
+        "slug": {
+          "uk": "avtokreslo-4baby-star-fix-9-36-kg-s-isofix"
+        },
+        "shortDescription": {
+          "uk": "Автокрісло 4Baby Star-Fix группа 9-36 кг. Рекомендовано дітям с 9 місяців до 12 років. Сучасне автокрісло 4Baby Star -Fix в прокат, оренда, продаж в Baby Service Луцьк."
+        },
+        "description": {
+          "uk": "Автокрісло 4Baby Star-Fix группа 9-36 кг. Рекомендовано дітям с 9 місяців до 12 років. Сучасне автокрісло 4Baby Star -Fix в прокат, оренда, продаж в Baby Service Луцьк."
+        },
+        "images": [],
+        "pricing": {
+          "currency": "UAH",
+          "rentalRates": []
+        },
+        "availability": "in_stock",
+        "featured": false,
+        "displayOrder": 0,
+        "status": "draft",
+        "importMeta": {
+          "source": "candidate-manifest; defaults applied: availability=in_stock, status=draft, currency=UAH, price=0, rentalRates=[] (unit unconfirmed; deferred price=0 UAH)",
+          "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_4baby_star_fix_9_36_kg_s_isofix.html"
+        },
+        "_id": "fbd5c5bae1a04952018b94ac",
+        "attributes": []
+      }
+    },
+    {
+      "sourcePageKey": "page:uk:product:avtokrislo-4baby-pro-fix-15-36-kg-z-isofix",
+      "entityKey": "entity:product:avtokrislo-4baby-pro-fix-15-36-kg-z-isofix",
+      "payload": {
+        "category": "f1780080e3a428313fa00e67",
+        "name": {
+          "uk": "Автокрісло 4Baby Pro-Fix 15-36 кг з Isofix"
+        },
+        "slug": {
+          "uk": "avtokrislo-4baby-pro-fix-15-36-kg-z-isofix"
+        },
+        "shortDescription": {
+          "uk": "Автокрісло 4Baby Pro-Fix группа 15-36 кг. Сучасне автокрісло 4Baby Pro-Fix в прокат, оренда, продаж в Baby Service Луцьк."
+        },
+        "description": {
+          "uk": "Автокрісло 4Baby Pro-Fix группа 15-36 кг. Сучасне автокрісло 4Baby Pro-Fix в прокат, оренда, продаж в Baby Service Луцьк."
+        },
+        "images": [],
+        "pricing": {
+          "currency": "UAH",
+          "rentalRates": []
+        },
+        "availability": "in_stock",
+        "featured": false,
+        "displayOrder": 0,
+        "status": "draft",
+        "importMeta": {
+          "source": "candidate-manifest; defaults applied: availability=in_stock, status=draft, currency=UAH, price=0, rentalRates=[] (unit unconfirmed; deferred price=0 UAH)",
+          "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_4baby_pro_fix_15_36_kg_z_isofix.html"
+        },
+        "_id": "c72ead1c17f2eca8a0b46294",
+        "attributes": []
+      }
+    },
+    {
+      "sourcePageKey": "page:uk:product:avtokrislo-lionelo-sander-isofix-0-36-kg",
+      "entityKey": "entity:product:avtokrislo-lionelo-sander-isofix-0-36-kg",
+      "payload": {
+        "category": "f1780080e3a428313fa00e67",
+        "name": {
+          "uk": "Автокрісло Lionelo Sander ISOFIX 0 - 36 кг"
+        },
+        "slug": {
+          "uk": "avtokrislo-lionelo-sander-isofix-0-36-kg"
+        },
+        "shortDescription": {
+          "uk": "Автокрісло Lionelo Sander ISOFIX 0 - 36 кг, підійде для дітей від народження до 12 років . Прокат, оренда, продаж автокрісел у Луцьку, в Baby Servise."
+        },
+        "description": {
+          "uk": "Автокрісло Lionelo Sander ISOFIX 0 - 36 кг, підійде для дітей від народження до 12 років . Прокат, оренда, продаж автокрісел у Луцьку, в Baby Servise."
+        },
+        "images": [],
+        "pricing": {
+          "currency": "UAH",
+          "rentalRates": []
+        },
+        "availability": "in_stock",
+        "featured": false,
+        "displayOrder": 0,
+        "status": "draft",
+        "importMeta": {
+          "source": "candidate-manifest; defaults applied: availability=in_stock, status=draft, currency=UAH, price=0, rentalRates=[] (unit unconfirmed; deferred price=0 UAH)",
+          "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_lionelo_sander_isofix_0_36_kg.html"
+        },
+        "_id": "f2b5d63cf23068520096e404",
+        "attributes": []
+      }
+    },
+    {
+      "sourcePageKey": "page:uk:product:avtokrislo-carrello-asteroid-0-36-kg",
+      "entityKey": "entity:product:avtokrislo-carrello-asteroid-0-36-kg",
+      "payload": {
+        "category": "f1780080e3a428313fa00e67",
+        "name": {
+          "uk": "Автокрісло Carrello Asteroid 0-36 кг"
+        },
+        "slug": {
+          "uk": "avtokrislo-carrello-asteroid-0-36-kg"
+        },
+        "shortDescription": {
+          "uk": "Автокрісло Carrello Asteroid ISOFIX 0-36 кг, найкраще автокрісло для дітей від народження до 12 років. Прокат, оренда, продаж автокрісел у Луцьку, в Baby Servise. Купити автокрісло в Луцьку можна у нас."
+        },
+        "description": {
+          "uk": "Автокрісло Carrello Asteroid ISOFIX 0-36 кг, найкраще автокрісло для дітей від народження до 12 років. Прокат, оренда, продаж автокрісел у Луцьку, в Baby Servise. Купити автокрісло в Луцьку можна у нас."
+        },
+        "images": [],
+        "pricing": {
+          "currency": "UAH",
+          "rentalRates": []
+        },
+        "availability": "in_stock",
+        "featured": false,
+        "displayOrder": 0,
+        "status": "draft",
+        "importMeta": {
+          "source": "candidate-manifest; defaults applied: availability=in_stock, status=draft, currency=UAH, price=0, rentalRates=[] (unit unconfirmed; deferred price=0 UAH)",
+          "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_carrello_asteroid_0_36_kg.html"
+        },
+        "_id": "88956c338f1163f842610ca2",
+        "attributes": []
+      }
+    },
+    {
+      "sourcePageKey": "page:uk:product:avtokrislo-lorelli-9-36-kg-x-drive-plus",
+      "entityKey": "entity:product:avtokrislo-lorelli-9-36-kg-x-drive-plus",
+      "payload": {
+        "category": "f1780080e3a428313fa00e67",
+        "name": {
+          "uk": "Автокрісло Lorelli 9-36 кг (X-DRIVE PLUS)"
+        },
+        "slug": {
+          "uk": "avtokrislo-lorelli-9-36-kg-x-drive-plus"
+        },
+        "shortDescription": {
+          "uk": "Прокат , оренда зручного дитячого автокрісла Автокрісло Lorelli 9-36 кг (X-DRIVE PLUS) у Луцьку , з милим ведмедиком Teddi."
+        },
+        "description": {
+          "uk": "Прокат , оренда зручного дитячого автокрісла Автокрісло Lorelli 9-36 кг (X-DRIVE PLUS) у Луцьку , з милим ведмедиком Teddi."
+        },
+        "images": [],
+        "pricing": {
+          "currency": "UAH",
+          "rentalRates": []
+        },
+        "availability": "in_stock",
+        "featured": false,
+        "displayOrder": 0,
+        "status": "draft",
+        "importMeta": {
+          "source": "candidate-manifest; defaults applied: availability=in_stock, status=draft, currency=UAH, price=0, rentalRates=[] (unit unconfirmed; deferred price=0 UAH)",
+          "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_lorelli_9_36_kg_x_drive_plus.html"
+        },
+        "_id": "6c16fc3be2776c4e061b4b06",
+        "attributes": []
+      }
+    }
+  ],
+  "result": {
+    "mode": "dry-run",
+    "target": "main",
+    "database": "db-babyhub",
+    "planned": {
+      "categories": "reuse",
+      "products": {
+        "createDraft": 18,
+        "reuse": 1
+      }
+    },
+    "categoryId": "f1780080e3a428313fa00e67",
+    "productId": "1e7f71a16f3c0e7f577c424c",
+    "products": [
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_adbor_capri.html",
+        "slug": "avtokreslo-adbor-capri",
+        "productId": "1e7f71a16f3c0e7f577c424c",
+        "action": "reuse",
+        "existingStatus": "published"
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_chicco_synthesis_xt_plus_0_13_kg.html",
+        "slug": "avtokrislo-chicco-synthesis-xt-plus-0-13-kg",
+        "productId": "216ba996fc8766ddc67c9bc9",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/_avtokreslo_kolyaska_doona_infant.html",
+        "slug": "avtokreslo-kolyaska-doona-infant",
+        "productId": "14e045031f0205db58fa9575",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_cabrio_fix_4baby_colby_0_13kg.html",
+        "slug": "avtokrislo-cabrio-fix-4baby-colby-0-13kg",
+        "productId": "a72bd74d645131a41d5b9b34",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_caretero_fly_0_13_kg.html",
+        "slug": "avtokreslo-caretero-fly-0-13-kg",
+        "productId": "52e9d52ca4bc779478afab20",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_lionelo_color_violet_0_18_kg.html",
+        "slug": "avtokrislo-lionelo-color-violet-0-18-kg",
+        "productId": "9f418914f8e6b10701931ff9",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_eternal_shield_sport_star_9_25kg.html",
+        "slug": "avtokreslo-eternal-shield-sport-star-9-25kg",
+        "productId": "4ea9ecf107c9b51ccba032d4",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_bambi_m_0522_9_36_kg.html",
+        "slug": "avtokreslo-bambi-m-0522-9-36-kg",
+        "productId": "2788452269ac4567199eb81d",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_buster_15_36kg_2_3.html",
+        "slug": "avtokreslo-buster-15-36kg-2-3",
+        "productId": "d688d039223d5aca88c3edd1",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_4vaby_freeway_0_25_kg.html",
+        "slug": "avtokrislo-4vaby-freeway-0-25-kg",
+        "productId": "ddeb0eded4aa4374dd8fd91c",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_4vaby_rodos_0_25_kg.html",
+        "slug": "avtokreslo-4vaby-rodos-0-25-kg",
+        "productId": "7fed76ef175a9f4ba018ccf9",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_lionelo_bastiaan_isofix_0_36_kg.html",
+        "slug": "avtokrislo-lionelo-bastiaan-isofix-0-36-kg",
+        "productId": "98a8eec60f2dff689685e816",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtkrislo_lionelo_lo_nico_9_36_kg.html",
+        "slug": "avtkrislo-lionelo-lo-nico-9-36-kg",
+        "productId": "9dfce6e21912176e140cc45c",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_4baby_fly_fix_9_36_kg_z_isofix.html",
+        "slug": "avtokrislo-4baby-fly-fix-9-36-kg-z-isofix",
+        "productId": "0870f65a2e4d36ca5401fd8b",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_4baby_star_fix_9_36_kg_s_isofix.html",
+        "slug": "avtokreslo-4baby-star-fix-9-36-kg-s-isofix",
+        "productId": "fbd5c5bae1a04952018b94ac",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_4baby_pro_fix_15_36_kg_z_isofix.html",
+        "slug": "avtokrislo-4baby-pro-fix-15-36-kg-z-isofix",
+        "productId": "c72ead1c17f2eca8a0b46294",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_lionelo_sander_isofix_0_36_kg.html",
+        "slug": "avtokrislo-lionelo-sander-isofix-0-36-kg",
+        "productId": "f2b5d63cf23068520096e404",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_carrello_asteroid_0_36_kg.html",
+        "slug": "avtokrislo-carrello-asteroid-0-36-kg",
+        "productId": "88956c338f1163f842610ca2",
+        "action": "create-draft",
+        "existingStatus": null
+      },
+      {
+        "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokrislo_lorelli_9_36_kg_x_drive_plus.html",
+        "slug": "avtokrislo-lorelli-9-36-kg-x-drive-plus",
+        "productId": "6c16fc3be2776c4e061b4b06",
+        "action": "create-draft",
+        "existingStatus": null
+      }
+    ],
+    "categoryAction": "reuse",
+    "mongoWrites": 0
+  }
+}

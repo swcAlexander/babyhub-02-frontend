@@ -164,12 +164,13 @@ const configuration = { target: 'test', uri: 'mongodb://offline.invalid/db-babyh
 const prepare = () => buildImportDocuments(manifest(), models);
 
 // An in-memory transactional double. No network connection or MongoDB writes occur.
-const memoryDatabase = ({ target = 'test', databaseName = target === 'main' ? 'db-babyhub' : TEST_DATABASE, failProductInsert = false } = {}) => {
+const memoryDatabase = ({ target = 'test', databaseName = target === 'main' ? 'db-babyhub' : TEST_DATABASE, failProductInsert = false, failProductInsertAt } = {}) => {
   const state = {
     categories: [], products: [], connected: 0, closed: 0, sessions: 0, ended: 0,
     inserts: 0, validationsBeforeFirstInsert: [],
   };
   let activeSession;
+  let productInsertAttempts = 0;
   const fakeModel = (ActualModel, collection) => {
     const Fake = function (payload) {
       const document = new ActualModel(payload);
@@ -198,7 +199,7 @@ const memoryDatabase = ({ target = 'test', databaseName = target === 'main' ? 'd
     };
     Fake.create = async (payloads, { session }) => {
       assert.equal(session, activeSession);
-      if (collection === 'products' && failProductInsert) throw new Error('SIMULATED_INSERT_FAILURE');
+      if (collection === 'products' && (failProductInsert || ++productInsertAttempts === failProductInsertAt)) throw new Error('SIMULATED_INSERT_FAILURE');
       for (const payload of payloads) {
         if (state[collection].some(doc => String(doc._id) === String(payload._id))) {
           throw Object.assign(new Error('SIMULATED_DUPLICATE_ID'), { code: 11000 });
@@ -450,11 +451,62 @@ test('main dry-run перевіряє конфлікти без сесій/вс�
   assert.equal(memory.state.sessions, 0);
   assert.equal(memory.state.inserts, 0);
   const conflict = prepare().categories[0].document;
-  conflict.status = 'published';
+  conflict.status = 'archived';
   memory.state.categories.push(conflict);
   await assert.rejects(runPreparedImport(prepare(), models, { ...memory.options, confirmed: false }),
     { code: 'EXISTING_DOCUMENT_CONFLICT' });
   assert.equal(memory.state.inserts, 0);
+});
+
+const batchSource = () => {
+  const source = manifest();
+  source.products.push({ ...structuredClone(source.products[0]),
+    sourcePageKey: 'page:uk:product:seat-two', entityKey: 'entity:product:seat-two',
+    legacyUrl: 'https://legacy.example/seats/seat-two.html', slug: { uk: 'seat-two' } });
+  return source;
+};
+
+test('batch main повторно використовує published документи без зміни даних і створює решту draft', async () => {
+  const memory = memoryDatabase({ target: 'main' });
+  await runPreparedImport(prepare(), models, memory.options);
+  for (const doc of [...memory.state.categories, ...memory.state.products]) doc.status = 'published';
+  const before = JSON.stringify([memory.state.categories[0], memory.state.products[0]]);
+  const prepared = buildImportDocuments(batchSource(), models);
+  const dry = await runPreparedImport(prepared, models, { ...memory.options, confirmed: false, batch: true });
+  assert.deepEqual(dry.products.map(item => item.action), ['reuse', 'create-draft']);
+  assert.equal(dry.products[0].existingStatus, 'published');
+  const result = await runPreparedImport(prepared, models, { ...memory.options, batch: true });
+  assert.deepEqual(result.created, { categories: 0, products: 1 });
+  assert.equal(JSON.stringify([memory.state.categories[0], memory.state.products[0]]), before);
+  assert.equal(memory.state.products[1].status, 'draft');
+  const second = await runPreparedImport(buildImportDocuments(batchSource(), models), models, { ...memory.options, batch: true });
+  assert.deepEqual(second.created, { categories: 0, products: 0 });
+  assert.deepEqual(second.reused, { categories: 1, products: 2 });
+});
+
+test('batch rollback після другої вставки та відновлення не залишають часткового набору', async () => {
+  const memory = memoryDatabase({ target: 'main', failProductInsertAt: 2 });
+  const options = { ...memory.options, batch: true };
+  await assert.rejects(runPreparedImport(buildImportDocuments(batchSource(), models), models, options), /SIMULATED_INSERT_FAILURE/);
+  assert.equal(memory.state.categories.length + memory.state.products.length, 0);
+  const result = await runPreparedImport(buildImportDocuments(batchSource(), models), models, options);
+  assert.deepEqual(result.created, { categories: 1, products: 2 });
+});
+
+test('batch вимагає явний прапорець, унікальну ідентичність і перевірені джерела до підключення', async () => {
+  assert.equal(parseImportArguments(['--batch']).batch, true);
+  assert.throws(() => parseImportArguments(['--batch', '--batch']));
+  const memory = memoryDatabase({ target: 'main' });
+  await assert.rejects(runPreparedImport(buildImportDocuments(batchSource(), models), models, memory.options), { code: 'SINGLE_PAIR_REQUIRED' });
+  for (const change of [
+    source => { source.products[1].slug = source.products[0].slug; },
+    source => { source.products[1].legacyUrl = source.products[0].legacyUrl; },
+    source => { source.products[1].status = 'review'; },
+  ]) {
+    const source = batchSource(); change(source);
+    await assert.rejects(runPreparedImport(buildImportDocuments(source, models), models, { ...memory.options, batch: true }));
+  }
+  assert.equal(memory.state.connected, 0);
 });
 
 test('main і test мають різні стабільні ID; main повторний запис і rollback перевіряються тільки в пам’яті', async () => {
