@@ -160,6 +160,35 @@ node --use-system-ca --experimental-strip-types tools/content-migration/prepare-
 підготовлені payload із тимчасовими ObjectId до запису. Це не копія документів із БД і не
 окремий журнал commit транзакції; фактичні ID та результати прямого читання зафіксовані вище.
 
+### Cloudinary: готовність серверного модуля — етап 3.8.14
+
+Для майбутнього перенесення зображень доступний `src/lib/cloudinary.ts`:
+`checkConfiguration()`, `uploadImage(source, { folder?, public_id? })`, `getImageInfo(publicId)`,
+`deleteImage(publicId)`. Це серверна бібліотека; публічних upload/delete API не додано.
+Існуючий legacy upload helper делегує цьому модулю. Міграційні інструменти поки його
+не викликають, Media/MongoDB-моделі не змінені.
+
+Credentials: `CLOUDINARY_CLOUD_NAME`, основний `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`.
+Якщо основний ключ порожній, підтримується наявний `CLOUDINARY_APY_KEY`. Конфігурація
+перевіряється ліниво, без глобальної мутації SDK або логування значень. `.env` не змінено.
+Next.js сам завантажує env; майбутній окремий Node.js-скрипт має завантажувати його явно,
+а через `server-only` запускати імпорт модуля з `--conditions=react-server`.
+
+```bash
+node --use-system-ca --conditions=react-server --experimental-strip-types --test src/lib/cloudinary.test.mjs
+```
+
+14/14 Cloudinary-тестів пройдено на mock SDK: пріоритет ключів, неповна конфігурація,
+валідація аргументів/відповідей, upload/info/delete, безпечні помилки, сумісність helper
+та серверна межа. Разом із міграційними тестами — 53/53. Typecheck, lint і production build
+успішні; lint має 4 попередження в незміненому legacy-коді. Окремий read-only Admin API `ping`
+успішний із фактичним legacy-ключем; секрети не виводилися.
+
+Upload примусово використовує `overwrite: false`, відповіді повертають тільки безпечні
+метадані й HTTPS URL. Реальні завантаження, видалення та міграція не виконувалися;
+поведінка цих операцій у Cloudinary залишається неперевіреною до окремо погодженого етапу.
+Повний контракт описано в [архітектурі проєкту](../../docs/PROJECT_ARCHITECTURE.md#91-реалізована-серверна-інтеграція-cloudinary-3814).
+
 ## Дозволені URL
 
 - https://lutsk.babyservice.ua/avtokrisla.html

@@ -317,6 +317,44 @@ export const connectToDatabase = async () => {
 
 Тут не слід змішувати фронтенд і MongoDB доступ. Підключення має відбуватись в сервісному шарі або в server-side route handlers після перевірки авторизації.
 
+## 9.1. Реалізована серверна інтеграція Cloudinary (3.8.14)
+
+Цей підрозділ описує фактичну реалізацію, незалежно від цільової структури вище.
+
+- Залежність `cloudinary` існувала до 3.8.14. Legacy helper
+  `src/app/api/helpers/cloudinary.js` глобально конфігурував SDK через `CLOUDINARY_APY_KEY`;
+  `itemController.add` використовував `cloudinary.uploader.upload(..., { folder: 'items' })`.
+  Наявний `src/app/api/items.ts` обробляє лише GET; нових публічних upload/delete маршрутів немає.
+- Єдиний модуль інтеграції тепер — `src/lib/cloudinary.ts`. Маркер `server-only` (окрема пряма
+  залежність) забороняє використання з Client Components. Legacy helper зберігає лише сумісний
+  `uploader.upload`, делегуючи новому модулю; сирий SDK та конфігурація через нього не експортуються.
+- `CLOUDINARY_API_KEY` — основна назва; непорожнє значення має пріоритет над старим
+  `CLOUDINARY_APY_KEY`. Обов'язкові також `CLOUDINARY_CLOUD_NAME` і `CLOUDINARY_API_SECRET`.
+  Значення читаються ліниво з `process.env`, без зміни глобальної конфігурації SDK.
+  У Next.js env завантажує framework; окремий Node.js-скрипт має явно завантажити env сам.
+  `.env.example` документує основну назву та legacy fallback; `.env` не змінено.
+- `checkConfiguration()` перевіряє непорожні значення без мережі й повертає лише
+  `{ configured: true, apiKeyVariable }`. Це перевірка наявності, а не автентифікації.
+- `uploadImage(source, { folder?, public_id? })` приймає шлях/URL/data URI, передає `resource_type: 'image'`,
+  `type: 'upload'`, `secure: true`, `overwrite: false`. Перезапис наявних зображень не дозволяється.
+- `getImageInfo(publicId)` читає метадані image/upload через Admin API.
+  `deleteImage(publicId)` викликає destroy лише для image/upload із `invalidate: true`;
+  повертає `ok` або `not found`. Функція видалення в 3.8.14 перевірена лише на mock SDK.
+- Завантаження й читання повертають тільки `public_id`, `secure_url`, HTTPS-аліас `url`,
+  `width`, `height`, `bytes`, `format`. Ресурс має бути зображенням із коректними розмірами
+  та HTTPS URL. Сирі відповіді, підписи й credentials не передаються викликачам.
+- `CloudinaryServiceError` містить безпечні `code`, `status`, `message`. Помилки SDK не логуються
+  й не зберігаються в `cause`; input paths, signed URL та секрети відкидаються.
+  Factory `createCloudinaryService({ env, sdk })` дозволяє тести без реальної мережі.
+
+Перевірка 3.8.14: 14/14 Cloudinary-тестів без завантажень/видалень, разом із міграційними —
+53/53. TypeScript, lint і production build пройдено; lint має 4 попередження в незмінених
+legacy-файлах. Перевірка 43 файлів `.next/static` не виявила значень Cloudinary API key/secret.
+Фактична конфігурація `.env` використовує legacy `CLOUDINARY_APY_KEY`; окремий
+автентифікований read-only Cloudinary Admin API `ping` із системними CA успішний. Це підтверджує
+підключення й credentials, але не є перевіркою реального upload/delete. Міграція зображень
+не запускалася; запис у Media/MongoDB і прив'язка зображень до товарів залишаються майбутнім етапом.
+
 ## 10. Основні обмеження архітектури
 
 - Не робити глибокі вкладені зв’язки без потреби
