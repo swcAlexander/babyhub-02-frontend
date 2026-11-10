@@ -165,8 +165,8 @@ node --use-system-ca --experimental-strip-types tools/content-migration/prepare-
 Для майбутнього перенесення зображень доступний `src/lib/cloudinary.ts`:
 `checkConfiguration()`, `uploadImage(source, { folder?, public_id? })`, `getImageInfo(publicId)`,
 `deleteImage(publicId)`. Це серверна бібліотека; публічних upload/delete API не додано.
-Існуючий legacy upload helper делегує цьому модулю. Міграційні інструменти поки його
-не викликають, Media/MongoDB-моделі не змінені.
+Існуючий legacy upload helper делегує цьому модулю. На момент завершення 3.8.14 міграційні
+інструменти ще його не викликали; окремий інструмент 3.8.15 описано нижче. Media/MongoDB-моделі не змінені.
 
 Credentials: `CLOUDINARY_CLOUD_NAME`, основний `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`.
 Якщо основний ключ порожній, підтримується наявний `CLOUDINARY_APY_KEY`. Конфігурація
@@ -188,6 +188,101 @@ Upload примусово використовує `overwrite: false`, відп�
 метадані й HTTPS URL. Реальні завантаження, видалення та міграція не виконувалися;
 поведінка цих операцій у Cloudinary залишається неперевіреною до окремо погодженого етапу.
 Повний контракт описано в [архітектурі проєкту](../../docs/PROJECT_ARCHITECTURE.md#91-реалізована-серверна-інтеграція-cloudinary-3814).
+
+### Одна фотографія товару — інструмент 3.8.15
+
+`migrate-product-photo.mjs` має незмінні межі, без аргументів для іншого URL, товару чи бази:
+
+- `DB_HOST_TEST` із кореневого `.env`, фактична база тільки `db-babyhub-test`;
+- Product `_id: 1e9f418c65cc80c3d3a56184`, `slug.uk: avtokreslo-adbor-capri`;
+- Product `importMeta.legacyUrl: https://lutsk.babyservice.ua/avtokrisla/avtokreslo_adbor_capri.html`;
+- єдине фото: `https://lutsk.babyservice.ua/images/prods/43_2_avtokreslo-adbor_baby_service__lutsk.jpg`.
+
+Dry-run за замовчуванням (читає MongoDB і завантажує фото лише в оперативну пам'ять):
+
+```bash
+node --use-system-ca --conditions=react-server --experimental-strip-types tools/content-migration/migrate-product-photo.mjs
+```
+
+Майбутній запис, лише після окремого дозволу; у поточному етапі **не запускався**:
+
+```bash
+node --use-system-ca --conditions=react-server --experimental-strip-types tools/content-migration/migrate-product-photo.mjs --confirm-import
+```
+
+Перевірки й межі:
+
+- Використовуються наявні `src/lib/cloudinary.ts`, Mongoose-моделі та захищене ізольоване
+  підключення з `prepare-import.mjs`. Схеми, `.env`, основна БД і Category не змінюються.
+- Перед кожною мутацією повторно перевіряються фактична база та точний draft-товар.
+  Додаткові збіги за slug/legacy URL, дублікати в `images`, неправильний статус блокують операцію.
+- Фіксований HTTPS GET із тайм-аутом 15 с, без редиректів; потрібні HTTP 200, `image/jpeg`,
+  фактичні JPEG-маркери SOI/SOF/SOS/EOI, додатні розміри до 10000×10000, максимум 5 MiB.
+  Розмір перевіряється за потоком і доступним Content-Length. Обчислюється SHA-256 байтів.
+  Це перевірка формату/структури заголовків, не повне декодування JPEG-пікселів.
+- SHA-256 від `baby-service-photo-v1:<source URL>` задає стабільні Cloudinary `public_id`,
+  Media `_id` (перші 24 hex) і `filename`. Логотип із manifest не використовується.
+- Dry-run не викликає Cloudinary API, не пише журнал, lock, Media чи Product і не створює
+  колекцій/індексів. Media валідовується локально з явно позначеним preview URL; справжній
+  Cloudinary URL до запису невідомий. Результат виводиться у stdout без секретів.
+- Лише підтверджений режим створює/захоплює один службовий запис
+  `content_migration_locks`, `_id: 'baby-service-photo-v1'`. Атомарний upsert та обов'язкова
+  унікальність `_id` блокують одночасні запуски з різних процесів/комп'ютерів.
+  Після завершення `owner` скидається в `null`, запис не видаляється. Автоматичного TTL/перехоплення немає.
+- Перед upload виконується `getImageInfo(public_id)`. Лише `CloudinaryServiceError` із кодом
+  `CLOUDINARY_REQUEST_FAILED` і статусом 404 підтверджує відсутність. Мережеві, auth та інші
+  помилки блокують перенесення. Upload отримує data URI **саме перевірених байтів**, а не URL для
+  повторного завантаження Cloudinary; модуль примусово встановлює `overwrite: false`.
+- Наявний ресурс приймається лише з підтвердженням у журналі `uploaded`/`committed` або
+  власному provenance Media. Перевіряються public_id, HTTPS URL, format, bytes, width/height.
+  Невідоме походження, зміна джерела/акаунта або інші конфлікти зупиняють операцію.
+- Кандидати Media перевіряються за `_id`, filename, source URL і відомим Cloudinary URL.
+  Наявна Media повинна точно відповідати source SHA-256, ідентифікаторам і метаданим.
+  Конфліктні записи не змінюються. Додаткові унікальні індекси для захисту не потрібні:
+  операцію серіалізує lock, а стабільний Media `_id` не дозволяє повторну вставку.
+- В одній MongoDB-транзакції створюється максимум одна валідована Media (`storageType: cloudinary`,
+  JPEG MIME, розміри, bytes, originalName, timestamps, source URL/provenance в `importMeta`)
+  та виконується `$addToSet` лише для `Product.images`. Наявні зображення зберігаються;
+  статус, Category та решта полів Product не змінюються. `matchedCount`/`modifiedCount`,
+  Media й одиничне посилання перевіряються в транзакції та повторним читанням після commit.
+
+Журнал і відновлення:
+
+- `output/product-photo-journal-v1.json` створюється тільки в режимі запису. Містить source URL,
+  public_id, Media ID/filename, SHA-256 і розміри байтів, fingerprint cloud name та безпечні
+  метадані Cloudinary; credentials і самі байти не зберігаються. Оновлення — через flush
+  тимчасового файла й atomic rename. Журнал слід зберігати між запусками.
+- Послідовність: `upload-intent` **до upload**, `uploaded` з підтвердженою відповіддю **до
+  транзакції Media/Product**, `committed` після прямого читання результату.
+- Якщо транзакція не завершилася, стан `uploaded` дозволяє повторно перевірити ресурс і
+  завершити MongoDB-частину без нового upload. Якщо commit відбувся, але журнал не оновився,
+  повторний запуск використовує наявну Media, `$addToSet` не дублює посилання.
+- Якщо журнал втрачено, відновлення можливе через точний provenance вже збереженої Media.
+  Самого `upload-intent` недостатньо для прийняття наявного ресурсу: після втрати відповіді
+  upload/помилки диска операція блокується для ручної перевірки. Якщо ресурс усе ще підтверджено
+  відсутній (новий 404), `upload-intent` можна безпечно повторити. Ресурс, раніше підтверджений
+  як `uploaded`/`committed`, при подальшому 404 автоматично не відновлюється.
+- Після жорсткого завершення процесу lock може залишитися зайнятим. Спочатку потрібно
+  окремо перевірити, що попередній процес не працює, звірити власника, журнал і ресурс;
+  звільнення цього lock потребує окремо дозволеної операції. Інструмент не має команди force-unlock.
+  Якщо товар утратив відповідність/draft, автоматичне звільнення також блокується.
+- Cloudinary не входить у MongoDB-транзакцію. За помилок ресурс не видаляється й не перезаписується.
+  Після дискової помилки може лишитися `.tmp` журнала; він не є підтвердженням завершеного upload.
+
+Локальні перевірки:
+
+```bash
+node --use-system-ca --conditions=react-server --experimental-strip-types --test tools/content-migration/migrate-product-photo.test.mjs src/lib/cloudinary.test.mjs tools/content-migration/prepare-import.test.mjs tools/content-migration/validate-manifest.test.mjs
+```
+
+Фактичний dry-run 3.8.15 успішний: точний товар знайдено в `db-babyhub-test`, Media відсутня;
+фото HTTP 200, `image/jpeg`, JPEG **249×270**, **9079 байтів**,
+SHA-256 `916854470160e1ae0a0f1a8d70546538ac602ec10339452c946ffd5a5b0c9425`.
+Пройдено **77/77 тестів** (24 нового інструмента, 53 попередніх) і TypeScript typecheck.
+Dry-run також виконано з примусово заблокованими методами мутацій MongoDB та Cloudinary.
+Прямі знімки до/після підтвердили: Media — 0, lock-записів — 0, журнал не створений,
+повний вміст Product і Category не змінився. Upload і записи в MongoDB не виконувалися. Реальна підтверджена
+транзакція й upload залишаються неперевіреними до наступного окремо дозволеного кроку.
 
 ## Дозволені URL
 
