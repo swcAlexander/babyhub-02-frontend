@@ -15,6 +15,7 @@
 Результати підготовки нижче зафіксовані до першого main-імпорту. Фактичне виконання
 3.8.18 описане в [окремому розділі](#етап-3818-перший-контрольований-імпорт-у-main).
 Наступне дозволене перенесення main-фото описане в [етапі 3.8.19](#етап-3819-перенесення-фотографії-для-main).
+Публікація пари й фактичний показ у штатному каталозі описані в [етапі 3.8.20](#етап-3820-публікація-пари-й-штатний-каталог).
 
 Цей розділ описує поточний код після 3.8.16. Нижчі описи 3.8.10–3.8.16 збережені як
 історія перевірок; їх старі команди запису лише з `--confirm-import` тепер **відхиляються**.
@@ -272,6 +273,85 @@ node --use-system-ca --conditions=react-server --experimental-strip-types tools/
 ресурси не видаляли/не перезаписували, commit/push не виконували. Перевірки цього етапу —
 фактичні DB/Cloudinary-читання, HTTP GET і порівняння байтів/знімків; відображення main-фото
 в браузері та новий build/typecheck не перевіряли. `git diff --check` пройдено.
+
+## Етап 3.8.20: публікація пари й штатний каталог
+
+За явним дозволом транзакційно опубліковано тільки Category
+`f1780080e3a428313fa00e67` і Product `1e7f71a16f3c0e7f577c424c` в основній `db-babyhub`.
+До запису фактичну БД, обидва точні slug/legacyUrl із підготовленого manifest,
+Product → Category та рівно одне посилання Product.images → Media
+`cf32e0fd119d5555e07a2400` перевірено прямим читанням. Media URL/provenance звірені
+з committed main-журналом. Обидва документи перед публікацією були draft.
+
+В одній MongoDB-транзакції змінено **2 документи**, лише поля `status: published`
+та `updatedAt` (для обох `2026-11-10T14:03:33.026Z`). Пряме читання після commit
+підтвердило обидва статуси й точну незмінність решти полів та Media. Журнали й `.env`
+не змінилися за контрольними сумами. Нових документів не створювали, повторний імпорт
+не запускали. Якщо обидва документи вже published, повторний запис не потрібний;
+перевірка після запуску сайту виконувалася лише читанням.
+
+### Необхідне виправлення показу фото
+
+Штатний каталог уже читав правильні Category/Product через `DB_HOST`, але сторінка
+товару не рендерила фотографії. Мінімально змінено:
+
+- `src/services/product.service.ts`: `getProductBySlug` після незмінених published-перевірок
+  читає тільки пов'язані Media за Product.images. `ProductDetail` додає `media` з
+  `id/url/width/height/alt`; порядок відповідає Product.images, відсутні Media чи записи
+  без розмірів пропускаються. Старий контракт `ProductSummary.images: string[]` з ID
+  та список товарів не змінено; немає обходу draft-фільтрів.
+- `src/app/catalog/[categorySlug]/[productSlug]/page.tsx`: українська сторінка показує
+  пов'язані Media через `next/image`, використовує реальні розміри та український alt
+  або назву товару. Уже наявного Cloudinary remotePattern достатньо; конфіг не змінено.
+- `src/services/product.service.test.mjs`: ізольовані тести закритих draft category/product,
+  порядку/відсутніх Media, незмінного контракту ID та відсутності вигаданої ціни.
+
+У цього Product `salePrice` відсутній і `rentalRates: []`; deferred 0 у importMeta
+не перетворюється на безкоштовну оренду й не показується як ціна. Даних, яких немає
+в джерелі, не додавали. Availability відображається за наявним полем/default `in_stock`;
+це не нова перевірка фактичної наявності. Російський renderer та development preview
+не змінювалися.
+
+### Звичайний локальний запуск через DB_HOST
+
+PowerShell, з кореня проєкту. Присвоєння читає DB_HOST із файла без його зміни та
+без друку URI, перекриваючи можливу стару підміну в терміналі:
+
+```powershell
+Set-Location E:\Projects\babyhub-02-frontend
+$env:DB_HOST = (node --input-type=module -e "import fs from 'node:fs'; import dotenv from 'dotenv'; process.stdout.write(dotenv.parse(fs.readFileSync('.env')).DB_HOST);")
+node --use-system-ca node_modules/next/dist/bin/next dev --hostname 127.0.0.1 --port 3002
+```
+
+Використано порт 3002, бо 3000 зайнятий; IPv4 binding працює, localhost через IPv6
+binding у цьому середовищі відхилено. Сайт слухає loopback. Робочі маршрути визначені
+з наявного коду та slug документів:
+
+- <http://localhost:3002/catalog>
+- <http://localhost:3002/catalog/avtokrisla>
+- <http://localhost:3002/catalog/avtokrisla/avtokreslo-adbor-capri>
+
+### Фактична перевірка
+
+- **Візуальну перевірку в браузері виконано.** Headless Chromium відкрив штатний
+  `/catalog`, натисканням на категорію перейшов до списку товарів, натисканням на Adbor
+  Capri відкрив сторінку товару. Отримано й переглянуто скриншоти всіх трьох сторінок:
+  видно категорію, товар у категорії та реальне фото автокрісла на сторінці товару.
+  Dev preview не використовувався. Для Chromium у цьому середовищі потрібен `--no-sandbox`.
+- Усі 3 сторінки — HTTP 200. Браузер підтвердив завантажене зображення
+  (`complete`, `naturalWidth > 0`), URL оптимізатора містить main Cloudinary resource,
+  image response HTTP 200. Помилок даних/зображень, console errors чи runtime exceptions
+  у пройденому сценарії немає. Міграційний default 0 як ціна не відображається.
+- Скриншоти — `.next/stage-3820-catalog.png`, `.next/stage-3820-category.png`,
+  `.next/stage-3820-product.png`; технічний звіт — `.next/stage-3820-browser.json`.
+  Це тимчасові локальні артефакти: Next.js може очищати `.next` при наступному старті/build.
+- **101/101 тестів**, typecheck, lint (4 попередні legacy-попередження) та
+  `git diff --check` пройдено. Production build/deployment у цьому етапі не запускали;
+  браузерна перевірка є окремою фактично виконаною перевіркою, а не висновком із typecheck.
+- Після перевірки сайту пряме читання main повторно підтвердило правильні published
+  пару та зв'язки; у main лишається 1 Category, 1 Product і 1 Media, main-журнал committed.
+  Test і legacy-колекції не змінювали; test не підключали. Upload/delete, повторних
+  імпортів, змін схем/public-фільтрів, deployment, commit/push не було. Журнали збережено.
 
 ## Запуск
 

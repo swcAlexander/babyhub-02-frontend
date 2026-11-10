@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 
 import { getProductBySlug } from '@/services/product.service';
@@ -25,6 +26,7 @@ export default async function ProductPage({
   const shortDescription = typeof product.shortDescription?.uk === 'string' && product.shortDescription.uk.trim() !== '' ? product.shortDescription.uk : null;
   const description = typeof product.description?.uk === 'string' && product.description.uk.trim() !== '' ? product.description.uk : null;
   const salePrice = typeof product.pricing?.salePrice === 'number' && Number.isFinite(product.pricing.salePrice) ? product.pricing.salePrice : null;
+  const productName = product.name.uk;
   const availability = availabilityLabels[product.availability] ?? product.availability;
   const attributes = Array.isArray(product.attributes)
     ? product.attributes.filter(
@@ -44,6 +46,19 @@ export default async function ProductPage({
 
       <article>
         <h1 style={{ marginBottom: '12px' }}>{product.name.uk}</h1>
+
+        {product.media.map((image, index) => (
+          <Image
+            key={image.id}
+            src={image.url}
+            alt={image.alt.uk || productName}
+            width={image.width}
+            height={image.height}
+            sizes="(max-width: 600px) calc(100vw - 32px), 480px"
+            priority={index === 0}
+            style={{ display: 'block', maxWidth: '100%', height: 'auto', marginBottom: '24px' }}
+          />
+        ))}
 
         {shortDescription ? <p style={{ marginBottom: '16px' }}>{shortDescription}</p> : null}
 

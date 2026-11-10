@@ -1077,3 +1077,48 @@ HTTPS GET після обох запусків — HTTP 200, image/jpeg, 9079 б
 новий build/typecheck не запускався, оскільки код не змінено. `git diff --check` успішний.
 Деталі та точна команда наведені в
 [README, етап 3.8.19](../tools/content-migration/README.md#етап-3819-перенесення-фотографії-для-main).
+
+## 23. Публікація пари та фактичний показ у штатному каталозі — 3.8.20
+
+За окремим явним дозволом змінено `draft → published` тільки для Category
+`f1780080e3a428313fa00e67` та Product `1e7f71a16f3c0e7f577c424c` у `db-babyhub`.
+До запису перевірено фактичну БД, точні source legacyUrl/slug обох документів із manifest,
+Product.category та Product.images → Media `cf32e0fd119d5555e07a2400`, Media URL/provenance
+і committed main-журнал. Обидва документи були draft; в одній транзакції змінено тільки
+status та updatedAt (`2026-11-10T14:03:33.026Z`). Пряме читання після commit підтвердило
+точну незмінність решти полів, Media, `.env` і журналів. Нових документів немає.
+
+Для показу реальної фотографії мінімально розширено `getProductBySlug`:
+після чинних published-перевірок Product/Category читаються лише пов'язані Media;
+новий `ProductDetail.media` містить URL/розміри/alt у порядку Product.images.
+`ProductSummary.images` зі строковими Media ID та public list-контракт збережено.
+Українська сторінка товару рендерить ці Media через `next/image` з реальними розмірами
+та alt/назвою товару. Відсутні Media без придатних розмірів пропускаються.
+Наявний Cloudinary remotePattern придатний, схеми й фільтри не змінено.
+Default 0 у importMeta не показується як ціна: salePrice відсутній, rentalRates порожній.
+
+Звичайний dev-сайт запущено через **DB_HOST**, із `--use-system-ca`, loopback IPv4,
+порт 3002 (3000 зайнятий). Точні маршрути з коду й даних:
+
+- <http://localhost:3002/catalog>
+- <http://localhost:3002/catalog/avtokrisla>
+- <http://localhost:3002/catalog/avtokrisla/avtokreslo-adbor-capri>
+
+**Браузерну візуальну перевірку виконано:** Chromium пройшов штатні посилання
+каталог → категорія → товар, отримано та переглянуто скриншоти кожної сторінки.
+Категорію й Adbor Capri видно, на сторінці товару реально завантажене Cloudinary-фото.
+HTTP сторінок/оптимізованого зображення 200; complete/naturalWidth підтверджують
+завантаження фото, помилок даних/зображення/console/runtime в цьому сценарії немає.
+Dev preview не використовували; ціна 0 чи твердження про безкоштовну оренду відсутні.
+
+101/101 тестів (зокрема нові перевірки draft-фільтрів і Media), typecheck, lint
+(4 попередні legacy-попередження) й git diff --check успішні. Production build та
+deployment не запускали; візуальна перевірка незалежна від typecheck. Після браузера
+main повторно прочитано: правильна published-пара/зв'язки, 1 Category/1 Product/1 Media,
+журнал committed. Legacy, test, `.env`, схеми й public-фільтри не змінювали; upload/delete,
+повторного імпорту, видалення журналів, commit/push не було. Availability лишається
+наявним default in_stock, не новим підтвердженням складської наявності.
+
+Точна PowerShell-команда без виведення DB_HOST, тимчасові скриншоти та деталі
+контракту сервісу наведені в
+[README, етап 3.8.20](../tools/content-migration/README.md#етап-3820-публікація-пари-й-штатний-каталог).

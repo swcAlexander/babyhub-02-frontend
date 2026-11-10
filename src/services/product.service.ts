@@ -4,6 +4,7 @@ import { DEFAULT_LOCALE, type Locale } from '@/lib/locale';
 import connectToDatabase from '@/lib/mongodb';
 import Category, { type ICategory } from '@/models/Category';
 import Product, { type IProduct } from '@/models/Product';
+import Media, { type IMedia } from '@/models/Media';
 
 export type ProductListOptions = {
   category?: string;
@@ -63,6 +64,31 @@ export type ProductSummary = {
 type LeanProduct = Partial<IProduct> & {
   _id: Types.ObjectId;
   category?: Types.ObjectId | null;
+};
+
+export type ProductImage = {
+  id: string;
+  url: string;
+  width: number;
+  height: number;
+  alt: LocalizedValue;
+};
+
+export type ProductDetail = ProductSummary & { media: ProductImage[] };
+
+const resolveProductMedia = async (images: IProduct['images']): Promise<ProductImage[]> => {
+  if (!images?.length) return [];
+  const media = await Media.find({ _id: { $in: images } })
+    .select({ url: 1, width: 1, height: 1, alt: 1 })
+    .lean<Array<Pick<IMedia, 'url' | 'width' | 'height' | 'alt'> & { _id: Types.ObjectId }>>()
+    .exec();
+  const byId = new Map(media.map((image) => [String(image._id), image]));
+  return images.flatMap((id) => {
+    const image = byId.get(String(id));
+    if (!image || !image.url || !image.width || !image.height) return [];
+    return [{ id: String(id), url: image.url, width: image.width, height: image.height,
+      alt: cloneLocalized(image.alt) }];
+  });
 };
 
 const normalizeLimit = (value?: number): number => {
@@ -304,7 +330,7 @@ export async function getProductBySlug(
   categorySlug: string,
   productSlug: string,
   locale: Locale = DEFAULT_LOCALE
-): Promise<ProductSummary | null> {
+): Promise<ProductDetail | null> {
   if (!categorySlug || !productSlug) {
     return null;
   }
@@ -335,5 +361,5 @@ export async function getProductBySlug(
     return null;
   }
 
-  return serializeProduct(product);
+  return { ...serializeProduct(product), media: await resolveProductMedia(product.images) };
 }
