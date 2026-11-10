@@ -7,7 +7,7 @@
 - Публічний legacy сайт є єдиним доступним source of truth за умовами поточного етапу: [docs/PUBLIC_CONTENT_SOURCE_AUDIT.md](./PUBLIC_CONTENT_SOURCE_AUDIT.md).
 - MongoDB не має бути використаний на цьому етапі; описаний формат є проміжним, read-only і dry-run-орієнтованим.
 
-### Обмеження етапу
+### Обмеження етапу 3.8.4 (історична межа первинного проєктування)
 - Не змінювати код проєкту, моделі, сервіси, API, маршрути, `.env` або MongoDB.
 - Не виконувати імпорт або seed.
 - Не створювати робочий HTML-парсер чи імпортер.
@@ -32,7 +32,7 @@
 - `importMeta?: ImportMeta`
 
 Правила локалізації в [src/models/common.ts](../src/models/common.ts):
-- `slug.uk` є обов'язковим
+- `slug.uk` є обов'язковим для `Category` і `Product`
 - `slug.ru` має бути порожнім лише якщо не задано
 - локалізовані строки не можуть бути порожніми
 
@@ -89,10 +89,17 @@ type LocalizedValue = {
 };
 
 type SourceEvidence = {
+  id?: string;
   url: string;
-  sourceType: 'html' | 'meta' | 'form' | 'navigation' | 'sitemap' | 'unknown';
+  sourceType: 'html' | 'meta' | 'form' | 'navigation' | 'sitemap' | 'unknown' | 'manual';
   capturedAt?: string;
   note?: string;
+};
+
+type LocaleMatchEvidence = {
+  verified: true;
+  method: 'explicit' | 'manual';
+  reference: string;
 };
 
 type ValidationIssue = {
@@ -124,6 +131,7 @@ type CategoryManifest = {
   sourcePageKey: SourcePageKey;
   entityKey?: EntityKey | null;
   localeMatch: LocaleMatchStatus;
+  localeMatchEvidence?: LocaleMatchEvidence | null;
   legacyUrl: string;
   normalizedUrl: string;
   locale: Locale;
@@ -146,6 +154,7 @@ type ProductManifest = {
   sourcePageKey: SourcePageKey;
   entityKey?: EntityKey | null;
   localeMatch: LocaleMatchStatus;
+  localeMatchEvidence?: LocaleMatchEvidence | null;
   legacyUrl: string;
   normalizedUrl: string;
   categoryEntityKey?: EntityKey | null;
@@ -161,6 +170,7 @@ type ProductManifest = {
     type?: 'sale' | 'rental' | 'unknown';
     amount?: number | null;
     periodDays?: number | null;
+    unit?: string | null;
     isConfirmed: boolean;
   };
   availabilityRaw?: {
@@ -184,6 +194,7 @@ type MediaManifest = {
   legacyUrl: string;
   normalizedUrl: string;
   filename?: string | null;
+  storageType?: 'local' | 'cloudinary' | 's3' | null;
   mimeType?: string | null;
   width?: number | null;
   height?: number | null;
@@ -224,12 +235,36 @@ type ArticleManifest = {
 };
 
 type ValidationReport = {
-  totalRecords: number;
-  accepted: number;
-  reviewRequired: number;
-  rejected: number;
-  issuesByCode: Record<string, number>;
-  blockers: string[];
+  validatorVersion: string;
+  sourceManifest: string;
+  structuralValidation: {
+    status: 'valid' | 'invalid';
+    recordsChecked: number;
+    errors: Array<{ code: string; message: string; collection?: string; index?: number; field?: string }>;
+  };
+  migrationReadiness: {
+    status: 'ready' | 'review';
+    totalRecords: number;
+    accepted: number;
+    reviewRequired: number;
+    issuesByCode: Record<string, number>;
+    records: Array<{
+      collection: string;
+      index: number;
+      sourcePageKey: string | null;
+      status: ValidationStatus;
+      structuralStatus: 'valid' | 'invalid';
+      readinessStatus: 'accept' | 'review';
+      identity: { effectiveEntityKey: string | null; localeMatch: LocaleMatchStatus | null };
+      issues: ValidationIssue[];
+    }>;
+  };
+  summary: {
+    totalRecords: number;
+    accepted: number;
+    reviewRequired: number;
+    rejected: number;
+  };
 };
 ```
 
@@ -237,7 +272,8 @@ type ValidationReport = {
 - `legacyUrl` зберігається унікально для кожного record.
 - `sourcePageKey` — це стабільний ключ конкретної мовної сторінки; він не повинен збігатися з логічним ключем сутності.
 - `entityKey` — це стабільний ключ логічної сутності, наприклад одного товару або категорії з двома мовними версіями.
-- `entityKey` не формуються автоматично з URL або назви; його можна призначити лише після підтвердження відповідності між мовними сторінками.
+- `entityKey` не генерується автоматично з URL або назви. Для окремої сторінки він може бути її підтвердженою логічною ідентичністю; спільний `entityKey` для різних мов дозволений лише після підтвердження відповідності між сторінками.
+- `Category` і `Product` у цільових Mongoose-моделях обов'язково мають непорожній `slug.uk`. Його відсутність є структурною помилкою контракту для цих типів записів. `slug.ru` необов'язковий. Для `Media` поле `slug` моделлю не передбачене.
 - `null` позначає відсутність поля, а `review` — поле, яке присутнє, але потребує ручної перевірки.
 - raw values зберігаються окремо від normalized fields.
 
@@ -256,7 +292,7 @@ type ValidationReport = {
 3. `sourcePageKey` сформувати як стабільний ключ на основі нормалізованого URL + мови + типу сторінки, наприклад:
    - `page:uk:category:avtokrisla`
    - `page:uk:product:avtokreslo-adbor-capri`
-4. `entityKey` формувати лише після підтвердження відповідності мовних сторінок, наприклад:
+4. `entityKey` не виводити зі slug чи назви; окрему ідентичність призначати лише після перевірки, а спільний ключ для мовних сторінок — лише після підтвердження їх відповідності, наприклад:
    - `entity:category:avtokrisla`
    - `entity:product:avtokreslo-adbor-capri`
 
@@ -267,13 +303,19 @@ type ValidationReport = {
 ### 4.3. Мовні пари
 Формальне правило:
 - `sourcePageKey` = normalized legacy URL + locale + entity type
-- `entityKey` = логічний ключ сутності, який призначається лише після підтвердження відповідності
+- `entityKey` = ключ підтвердженої логічної сутності; спільний між локалями — лише після підтвердження відповідності
 - `localeMatch` = `confirmed` | `unconfirmed` | `conflict` | `duplicate`
+- `localeMatchEvidence` містить `verified: true`, метод `explicit` або `manual` та спільний непорожній `reference`.
+
+Підтвердження спирається на конкретне джерело: наприклад, явне посилання мовної версії/`hreflang` у перевіреній HTML-сторінці або зафіксовану ручну перевірку. Запис доказу має `id`, на який посилається `localeMatchEvidence.reference`; обидві сторінки пари містять цей доказ. Для ручного зіставлення `sourceType` доказу — `manual`, а `note` коротко описує, що саме перевірено. Валідатор перевіряє однаковий `reference` і наявність відповідного `evidence.id` у обох записах, але не може самостійно встановити достовірність висновку людини.
+
+Схожість slug, назви, структури URL або однаковий шаблон маршруту не є доказом. Такі ознаки можуть лише вказати на пару-кандидат для перевірки. Без належного доказу обидва записи мають `localeMatch: 'unconfirmed'`, readiness `review`, а спільний `effectiveEntityKey` не присвоюється. `entityKey` не можна розділяти між uk/ru кандидатами на підставі лише схожості.
 
 Приклад підтвердженої відповідності:
 - `page:uk:product:avtokreslo-adbor-capri`
 - `page:ru:product:avtokreslo-adbor-capri`
 - спільний `entityKey`: `entity:product:avtokreslo-adbor-capri`
+- в обох записах `localeMatch: 'confirmed'`, однакові `localeMatchEvidence` і `evidence.id`, що вказує на перевірене джерело відповідності.
 
 Якщо будь-яка зі сторінок має відмінні title/slug/price/URL і немає чіткого доказу відповідності, маніфест ставить `localeMatch: 'unconfirmed'` або `conflict`, але не об'єднує записи автоматично.
 
@@ -283,9 +325,10 @@ type ValidationReport = {
 - якщо той самий URL знову з'являється, поле `duplicateOf` або `mergeCandidate` зберігається в manifest, але без автоматичного злиття непідтверджених записів.
 
 ### 4.5. Конфлікти
-- якщо один URL має дві неузгоджені версії title/slug/price — `review`
-- якщо один productPage з'являється в обох мовах з однаковим `sourcePageKey` без підтвердженого словника — `reject` або `review`
-- якщо два різні `sourcePageKey` претендують на один `entityKey` без підтвердження — `localeMatch: 'conflict'` і `entityKey` залишається `null` або змінюється лише після ручної перевірки
+- повторний `sourcePageKey` у кількох сторінкових записах — структурний `reject`; різні версії вмісту потрібно розв'язати до валідації, а не трактувати як окремі мовні сутності
+- спільний `entityKey` для різних типів записів або кількох сторінок тієї самої мови — структурний `reject`
+- можливий uk/ru pair із тим самим `entityKey` або відповідним шляхом без доказу — readiness `review`, `localeMatch: 'unconfirmed'`, без спільного `effectiveEntityKey`
+- підтверджений конфлікт між двома ідентичностями має `localeMatch: 'conflict'`; конфлікт `entityKey` не можна розв'язувати евристичним перейменуванням, потрібна ручна перевірка й виправлений manifest
 
 ## 5. Локалізація
 
@@ -294,46 +337,42 @@ type ValidationReport = {
 - українська — корінь, без `/uk`
 - російська — `/ru`
 - локалізовані поля `{ uk, ru }`
-- `slug.uk` обов'язковий
+- `slug.uk` обов'язковий для Category/Product і перевіряється структурно; `Media` slug не має
 - `slug.ru` необов'язковий
 - strict slug lookup
 - автоматичний fallback між мовами заборонений
 
 ### 5.2. Обробка типів записів
 
-#### A. Запис з обома мовами
-- `name.uk` + `name.ru` зберігаються як `LocalizedValue`
-- `slug.uk` і `slug.ru` зберігаються окремо
-- якщо `slug.uk` або `slug.ru` порожні -> `review`
-- якщо сторінки мають підтверджену відповідність, вони отримують один і той самий `entityKey`
+#### A. Запис з підтвердженими мовними полями
+- `name.uk` / `name.ru` та `slug.uk` / `slug.ru` зберігаються тільки за наявності доказів для кожної локалізованої сторінки.
+- `slug.uk` є обов'язковим для target `Category` і `Product`; відсутнє або порожнє значення — structural validation `invalid` і статус запису `reject`.
+- `slug.ru` необов'язковий. Відсутність російського варіанта сама по собі не вимагає `review`.
+- Спільний `entityKey` призначається тільки після підтвердження мовної відповідності за правилами розділу 4.3.
 
-#### B. Запис лише українською
-- `name.uk` заповнений; `name.ru` = null
-- `slug.uk` обов'язковий
-- `slug.ru` = null
-- статус = `review` для перевірки, чи не потребує запис ручного російського variant
-- `entityKey` може залишатися `null`, якщо немає підтвердженої російської відповіді
+#### B. Самостійний український запис
+- Українські `name.uk` і `slug.uk` зберігаються без штучного російського варіанта.
+- Відсутність відповідної `/ru` сторінки сама по собі не змінює readiness на `review`.
+- `entityKey` може бути відсутнім, якщо немає потреби або доказу групувати сторінку з іншою локалізацією.
 
-#### C. Запис лише російською
-- `name.ru` заповнений; `name.uk` = null
-- `slug.ru` може бути валідний, але `slug.uk` відсутній
-- такий запис не отримує автоматичного українського fallback
-- статус = `review` або `reject` залежно від того, чи заповнені інші обов'язкові вимоги моделі
+#### C. Російськомовне джерело
+- Російські значення зберігаються в `name.ru` та `slug.ru`; українські поля не заповнюються копіюванням чи fallback.
+- Якщо запис `Category` або `Product` призначений для цільової моделі, для нього все одно потрібен справжній, підтверджений `slug.uk`. Не зіставлений український slug не вигадується: його відсутність є структурним `reject`, доки дані не будуть безпечно зібрані у валідний target-кандидат.
+- Непідтверджена пара лишається окремим кандидатом; сама схожість slug/URL не дає спільного `entityKey`.
 
 #### D. Порожні локалізовані поля
-- `LocalizedValue` може мати `''` / whitespace
-- у manifest це має бути нормалізовано до `null`, а не до порожнього рядка
+- Порожні рядки та значення з пробілів не є локалізованим значенням; нормалізуй їх до `null` або не включай поле.
+- Не заповнюй відсутню локаль значенням іншої мови.
 
-#### E. Конфліктні slug
-- якщо `slug.uk` і `slug.ru` дублюють один і той самий значення і це не підтверджено як одна логічна сутність, запис вважається `review`
-
-#### F. Непідтверджена мовна відповідність
-- якщо URL або title схожі, але немає підтвердження через `lang`, реальний HTML або інше достовірне джерело, тоді `review`
-- автоматичне злиття таких записів заборонено
+#### E. Непідтверджена мовна відповідність
+- Без `localeMatchEvidence` із джерелом, яке є в `evidence`, пара має `localeMatch: 'unconfirmed'` і readiness `review`.
+- `localeMatch: 'confirmed'` без підтвердженої пари та спільного доказу не приймається валідатором як підтвердження.
+- Автоматичне злиття чи fallback між мовами заборонено.
 
 ### 5.3. Заборона fallback
 - manifest не повинен автозаповнювати `uk` з `ru` або навпаки
-- якщо один із локалізованих полів відсутній, то на етапі dry-run він залишається `null` і проходить перевірку лише як `review`, а не `accept`
+- необов'язкова відсутня локаль лишається `null` і не створює `review` сама по собі
+- відсутній обов'язковий `slug.uk` у Category/Product є structural помилкою, а не readiness-only попередженням
 
 ## 6. Ціни й оренда
 
@@ -353,76 +392,80 @@ type ValidationReport = {
 ```json
 {
   "pricingRaw": {
-    "rawText": "авансовий платіж 600.00 грн; 100 грн/доба; 200 грн/тиждень; 450 грн/місяць",
-    "currency": "UAH",
+    "rawText": "авансовий платіж ...; ... грн/доба; ... грн/тиждень",
+    "currency": null,
     "type": "rental",
     "amount": null,
     "periodDays": null,
+    "unit": null,
     "isConfirmed": false
   }
 }
 ```
 
 ### 6.3. Правила
-- raw текст зберігається обов'язково
-- `currency` зберігається лише якщо підтверджена або очевидна з тексту
-- `salePrice` не заповнювати автоматично з `rental` даних
-- `rentalRates` в Mongoose model [src/models/Product.ts](../src/models/Product.ts) приймають структуру `{ periodDays, price, unit, currency, deposit, isActive }`
-- якщо legacy HTML містить тільки рентальні умови і не містить `salePrice`, then `salePrice` must remain `null` in manifest and `review`
+- `pricingRaw` зберігає отримані дані окремо від нормалізованого `Product.pricing`; `rawText` — джерельний текст, а не підтверджена числова ціна.
+- У поточному контракті `pricingRaw` описує один тариф-кандидат: `type`, `amount`, `currency`, `periodDays`, `unit` та `isConfirmed`. Поля, яких немає в джерелі або які не можна однозначно розібрати, залишаються `null`/відсутні; `isConfirmed` має бути `false`.
+- Для sale `amount` і `currency` можна зіставити з `pricing.salePrice` та `pricing.currency` лише після підтвердження, що сума є саме ціною продажу. Не виводь продаж із депозиту або орендної ставки.
+- Для rental кожен підтверджений тариф зіставляється з елементом `pricing.rentalRates`: `amount` → `price`, `unit` → `unit`, `currency` → `currency`, `periodDays` → `periodDays` лише за наявності доказу. `deposit` додається лише коли депозит та його сума прямо підтверджені.
+- Модель допускає необов'язковий `salePrice` і порожній масив `rentalRates`; модельні defaults для валюти не є доказом валюти legacy-ціни. Не підставляй `UAH`, нулі, інші числа, період або `salePrice` за припущенням.
+- Оскільки поточний `pricingRaw` містить лише один тариф-кандидат, кілька різних legacy rental rates не можна звести до нього без втрати даних. Зберігай повний `rawText`, став `review`, а окреме представлення масиву тарифів погодь як майбутню зміну контракту.
+- Непідтверджена ціна, відсутній числовий `amount`, непідтверджена валюта або невідомий тип дають readiness `review` із конкретними кодами причин. Для rental додатково потрібні підтверджені `periodDays` і `unit`; `salePrice` для товару, призначеного лише для оренди, не вимагається.
 
 ### 6.4. Архітектурний конфлікт
-- Legacy data may mix rent, deposit, amount and conditions in one block.
-- This is not equivalent to a simple `price` field in the old model [src/app/api/models/item.ts](../src/app/api/models/item.ts).
-- The manifest should preserve the ambiguity and not normalize it into a guessed product price.
+- Legacy-джерело може змішувати оренду, депозит, суму та умови в одному блоці.
+- Це не еквівалент простого поля `price` у старій моделі [src/app/api/models/item.ts](../src/app/api/models/item.ts).
+- Manifest зберігає неоднозначність для ручного розгляду; перетворення можливе лише з підтвердженими компонентами тарифу.
 
 ## 7. Media mapping
 
 ### 7.1. Факти
 Підтверджено на товарній сторінці: `img src="/images/prods/43_2_avtokreslo-adbor_baby_service__lutsk.jpg"`.
 Модель `Media` потребує: [src/models/Media.ts](../src/models/Media.ts)
-- `filename`
-- `url`
-- `mimeType`
-- `width`
-- `height`
-- `alt`
-- `storageType`
-- `importMeta`
+- обов'язкові: `filename`, `url`, `storageType`
+- необов'язкові: `originalName`, `mimeType`, `sizeBytes`, `width`, `height`, `alt`, `importMeta`
+- модель має унікальні індекси для `url` та `filename`; унікальність — контракт цільової сутності Media, а не доказ того, що повторне посилання на asset є помилковим.
 
 ### 7.2. MediaManifest structure
 
 ```ts
 type MediaManifest = {
-  sourceKey: string;
+  sourcePageKey: SourcePageKey;
+  entityKey?: EntityKey | null;
   legacyUrl: string;
   normalizedUrl: string;
   filename?: string | null;
-  mimeType?: 'image/jpeg' | 'image/png' | 'image/webp' | null;
+  mimeType?: string | null;
   width?: number | null;
   height?: number | null;
   alt?: LocalizedValue;
-  linkedProductSourceKeys: string[];
-  linkedCategorySourceKeys: string[];
+  linkedProductEntityKeys: EntityKey[];
+  linkedCategoryEntityKeys: EntityKey[];
   availability: 'available' | 'missing' | 'unknown';
   duplicateOf?: string | null;
   status: ValidationStatus;
+  issues: ValidationIssue[];
   evidence: SourceEvidence[];
 };
 ```
 
 ### 7.3. Правила
-- `sourceUrl` — absolute legacy URL or relative path normalized to absolute canonical form
-- `filename` — збереження тільки якщо можна достовірно витягнути із URL
-- `alt` — зберігати тільки якщо підтверджено в HTML attribute
-- `storageType` — не заповнювати автоматично, якщо не підтверджено; прив'язка до `local`/`cloudinary`/`s3` лише після доступу до реального media storage
-- `duplicateOf` — заповнювати при знаходженні дублікатів по URL / hash candidate
-- `availability` ставиться тільки після перевірки, а не на основі припущення
+- `legacyUrl` зберігає джерельну адресу, `normalizedUrl` — валідний нормалізований URL; доступність URL мережею не перевіряється.
+- `filename` та `storageType` обов'язкові для target-моделі Media, але відсутність MIME, розмірів, checksum чи alt сама по собі не є структурною помилкою. Якщо ім'я файла не можна достовірно визначити з URL або storage backend не підтверджений, не вигадуй значення: readiness потребує `review`.
+- `alt` зберігається лише коли підтверджений атрибутом у джерелі.
+- `storageType` обов'язковий у Mongoose-моделі, але не можна приписувати `local`/`cloudinary`/`s3` як факт про legacy storage без підтвердження. До такого підтвердження запис Media не готовий до перенесення.
+- Одне зображення, використане кількома сторінками/товарами, є однією логічною Media-сутністю з кількома зв'язками. У manifest краще мати один запис asset і перелічити відомі `linkedProductEntityKeys` / `linkedCategoryEntityKeys`.
+- Повтор URL у записах із різними `sourcePageKey` означає повторне використання або спостереження одного asset; це не structural error і саме по собі не дає `review`. Валідація перевіряє зв'язки з записами, але не завантажує зображення.
+- Кілька записів з тим самим URL у межах одного `sourcePageKey` можуть означати дубль рядка manifest і потребують явного усунення/підтвердження (`review`). Сам URL, повторений на різних сторінках, не є конфліктом ідентичності.
+- Справжній конфлікт виникає, коли той самий `entityKey` Media вказує на різні URL або однаковий унікальний `filename` ідентифікує різні URL; це суперечність ідентичності цільової моделі та structural `reject`. Різні `entityKey` для одного URL слід звести до одного asset без втрати всіх зв'язків.
+- `duplicateOf` використовуй лише для явного посилання на відомий запис/ключ; не виводь його автоматично з однакового URL чи hash-кандидата.
+- `availability` ставиться тільки за перевіреним джерелом, не за фактом наявності URL у HTML.
 
 ### 7.4. Порядок створення
 1. Спочатку зібрати media URLs
 2. Потім сформувати MediaManifest
-3. Потім пов'язати Product → Media через `linkedProductSourceKeys`
-4. Після цього перевірити галерею order і дублікати
+3. Дедуплікувати asset за підтвердженою ідентичністю URL та зв'язати його з усіма відомими Product/Category через `linkedProductEntityKeys` і `linkedCategoryEntityKeys`
+4. Перевірити конфлікти `entityKey`/`filename`, порядок галереї та явні дублікати; повторне використання URL між сторінками не відхиляти автоматично
 
 ## 8. Валідація
 
@@ -430,7 +473,7 @@ type MediaManifest = {
 
 ```ts
 type ValidationIssue = {
-  code: 'MISSING_REQUIRED_FIELD' | 'INVALID_SLUG' | 'UNMATCHED_LOCALE' | 'AMBIGUOUS_PRICE' | 'MISSING_MEDIA' | 'DUPLICATE_RECORD' | 'UNRESOLVED_RELATION' | 'INVALID_URL';
+  code: string;
   severity: 'error' | 'warning' | 'info';
   status: 'accept' | 'review' | 'reject';
   message: string;
@@ -442,55 +485,46 @@ type ValidationIssue = {
 ### 8.2. Правила статусів
 
 #### Accept
-- URL доступний і відомо, що це category/product/page
-- required fields підтверджені
-- локалізований контент зберігся в відповідному `LocalizedValue`
-- посилання на media/relations відомі й є логічно валідними
-- ціни і availability не є амбівалентними або надають явну інформацію без припущень
-- для записів з двома мовами підтверджено, що вони належать до одного `entityKey`
+- запис структурно валідний
+- усі потрібні для цільової моделі значення та зв'язки підтверджені
+- `Category`/`Product` мають непорожній `slug.uk`
+- ціна та availability не є неоднозначними і не містять вигаданих значень
+- мовні пари об'єднані лише за наявності перевіреного доказу; самостійний uk-запис не потребує ru-варіанта
 
 #### Review
 - значення присутні, але є неоднозначність або неповнота
-- `slug.uk` є, але `slug.ru` відсутній або не підтверджений
+- необов'язкове локалізоване поле чи варіант мови відсутній і його потрібно оцінити в бізнес-контексті; сама відсутність ru для самостійного uk-запису не є підставою
 - `localeMatch` = `unconfirmed` або `conflict`
-- `priceRaw` є, але не можна з упевненістю визначити `salePrice` або `rentalRate`
-- media URL доступний, але `mimeType` / alt / width/height не підтверджені
+- `pricingRaw` не дозволяє підтвердити суму/валюту/тип, або rental не має потрібного підтвердженого періоду чи одиниці
+- Product не має підтвердженої availability
+- Media повторюється в межах тієї самої source page і потребує розв'язання дублювання
 - запис не є безповоротно непридатним, але потребує ручної перевірки
 
 #### Reject
-- відсутній кореневий source або `sourcePageKey`
-- URL не може бути пов'язаний жодним чином зі схемою даних
-- required fields відсутні в усіх мовах
-- product не має хоча б одного валідного candidate category link
-- `slug.uk` відсутній у записі, що має бути українськими за правилами моделі
-- `entityKey` конфліктує між різними записами без підтвердження
-- record contradicts required schema
+- JSON або структура запису неінтерпретовані, відсутній обов'язковий `sourcePageKey` чи некоректні обов'язкові технічні поля
+- для `Category` або `Product` відсутній/порожній обов'язковий `slug.uk`
+- `entityKey` використано конфліктно (зокрема для різних типів чи кількох сторінок тієї самої мови), або однаковий media `filename` вказує на різні URL
+- посилання порушують цілісність manifest або суперечать контракту
 
-Примітка: відсутнє необов'язкове поле не блокує запис; відсутнє обов'язкове поле вимагає `review`, а відсутність критичних required-полів або конфліктних ключів може перейти в `reject`.
+Валідатор відображає структурний результат окремо від readiness: структурно коректний, але бізнесово неповний запис може бути `review`; структурна помилка дає `reject`. Відсутність необов'язкового поля сама по собі не спричиняє ні `review`, ні `reject`. Media без необов'язкових `mimeType`, `width`, `height`, `checksum` чи `alt` не відхиляється через ці поля.
 
 ### 8.3. Типи перевірок
-- required поля
-- типи даних
-- локалізація
-- slug validation
-- duplicates
-- media presence
-- URL validity
-- category/product linkage
-- pricing validity
-- status conflicts
+- **Structural validation:** коректність JSON, коренева структура manifest, обов'язковий `sourcePageKey`, типи, значення enum, унікальність ключів сторінок, обов'язковий `slug.uk` для Category/Product, цілісність посилань і конфлікти ідентичності.
+- **Migration readiness:** підтвердження локалізації та `entityKey`, необхідні бізнес-дані, цінові/availability питання і можливість відобразити дані на цільові Mongoose-моделі.
+- MIME, width, height, checksum та alt медіа необов'язкові; URL медіа перевіряється синтаксично та на зв'язки, не мережею.
 
 ### 8.4. Зіставлення з Mongoose-моделями
 Підтверджено в [src/models/common.ts](../src/models/common.ts), [src/models/Category.ts](../src/models/Category.ts), [src/models/Product.ts](../src/models/Product.ts) і [src/models/Media.ts](../src/models/Media.ts):
 
-- `Category`: required `name`, `slug`, `status`; `slug.uk` обов'язковий; `slug.ru` допустимо пропускати, але не як порожній рядок; `image`, `parentCategory`, `description` є необов'язковими.
-- `Product`: required `category`, `name`, `slug`, `pricing`, `status`; `pricing.currency` і `rentalRates` мають бути присутніми в схемі, хоча `salePrice` є необов'язковим. `availability` обмежений enum: `in_stock | on_order | out_of_stock`.
-- `Media`: required `filename`, `url`, `storageType`; `alt`, `mimeType`, `width`, `height` є необов'язковими, але якщо вони відсутні, запис не переходить автоматично в `reject`.
+- `Category`: required `name`, `slug`, `status`; Mongoose validator вимагає непорожній `slug.uk`; `slug.ru`, `image`, `parentCategory`, `description` можуть бути відсутні.
+- `Product`: required `category`, `name`, `slug`, `pricing`, `status`; Mongoose validator вимагає непорожній `slug.uk`; `pricing.currency` має model default, але це не підтверджує currency джерела; `salePrice` необов'язковий, `rentalRates` за замовчуванням порожній; `availability` має enum `in_stock | on_order | out_of_stock` і model default не є доказом наявності товару.
+- `Media`: required `filename`, `url`, `storageType`; `alt`, `mimeType`, `sizeBytes`, `width`, `height` необов'язкові. Валідатор не відхиляє запис за відсутність необов'язкових медіа-метаданих; невідомі `filename`/`storageType` не вигадуються та блокують readiness, оскільки потрібні цільовій моделі.
 - `common`: `LocalizedString` підтримує лише `uk` і `ru`; порожні значення заборонені; автоматичний fallback між мовами заборонений.
 
 Поточна несумісність між legacy source і target schema залишається в pricing:
 - legacy HTML часто містить орендні ціни/депозит/період, а `Product.pricing` в моделі передбачає структурований `salePrice` + `rentalRates`.
-- це є архітектурним конфліктом, який маніфест має фіксувати як `review`, а не перекладати в догадку про ціну продажу.
+- поточний `pricingRaw` описує один тариф-кандидат; кілька ставок потрібно представити окремо до формування повного `rentalRates`.
+- це є архітектурною невідповідністю, яку manifest має фіксувати як `review`, а не перекладати в здогад про ціну продажу.
 
 ## 9. Dry-run architecture
 
@@ -520,22 +554,27 @@ legacy HTML source
 
 ```json
 {
-  "totalRecords": 154,
-  "accepted": 78,
-  "reviewRequired": 49,
-  "rejected": 27,
-  "issuesByCode": {
-    "MISSING_REQUIRED_FIELD": 14,
-    "INVALID_SLUG": 6,
-    "AMBIGUOUS_PRICE": 18,
-    "MISSING_MEDIA": 9,
-    "DUPLICATE_RECORD": 4
+  "validatorVersion": "2.0.0",
+  "sourceManifest": "candidate-manifest.json",
+  "structuralValidation": {
+    "status": "valid",
+    "recordsChecked": 8,
+    "errors": []
   },
-  "blockers": [
-    "No verified legacy DB export",
-    "No confirmed ru/uk pairing for all products",
-    "Some category-to-product links are only inferred from URL navigation"
-  ]
+  "migrationReadiness": {
+    "status": "review",
+    "totalRecords": 8,
+    "accepted": 0,
+    "reviewRequired": 8,
+    "issuesByCode": {},
+    "records": []
+  },
+  "summary": {
+    "totalRecords": 8,
+    "accepted": 0,
+    "reviewRequired": 8,
+    "rejected": 0
+  }
 }
 ```
 
@@ -591,16 +630,26 @@ Manifest повинен зберігати legacy mappings окремо від r
 
 ### 12.1. Товар із двома підтвердженими мовними сторінками
 
+Фрагменти нижче демонструють тільки правило ідентичності, а не повні валідні записи. Пара вважається підтвердженою, якщо обидва записи посилаються на один перевірений доказ. Для цільового Product необхідний непорожній `slug.uk`; `status` залежить також від перевірених pricing, availability та інших readiness-вимог.
+
 ```json
 {
   "sourcePageKey": "page:uk:product:avtokreslo-adbor-capri",
   "entityKey": "entity:product:avtokreslo-adbor-capri",
   "localeMatch": "confirmed",
-  "legacyUrl": "/avtokrisla/avtokreslo_adbor_capri.html",
+  "localeMatchEvidence": {
+    "verified": true,
+    "method": "manual",
+    "reference": "locale-match:avtokreslo-adbor-capri"
+  },
+  "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_adbor_capri.html",
   "locale": "uk",
-  "name": { "uk": "Автокрісло Adbor Capri (0-10кг)", "ru": null },
-  "slug": { "uk": "avtokreslo-adbor-capri", "ru": null },
-  "status": "accept"
+  "name": { "uk": "Автокрісло Adbor Capri (0-10кг)", "ru": "Автокресло Adbor Capri (0-10кг)" },
+  "slug": { "uk": "avtokreslo-adbor-capri", "ru": "avtokreslo-adbor-capri" },
+  "evidence": [
+    { "id": "locale-match:avtokreslo-adbor-capri", "url": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_adbor_capri.html", "sourceType": "manual", "note": "Сторінки зіставлено вручну." }
+  ],
+  "status": "review"
 }
 ```
 
@@ -609,15 +658,25 @@ Manifest повинен зберігати legacy mappings окремо від r
   "sourcePageKey": "page:ru:product:avtokreslo-adbor-capri",
   "entityKey": "entity:product:avtokreslo-adbor-capri",
   "localeMatch": "confirmed",
-  "legacyUrl": "/ru/avtokrisla/avtokreslo_adbor_capri.html",
+  "localeMatchEvidence": {
+    "verified": true,
+    "method": "manual",
+    "reference": "locale-match:avtokreslo-adbor-capri"
+  },
+  "legacyUrl": "https://lutsk.babyservice.ua/ru/avtokrisla/avtokreslo_adbor_capri.html",
   "locale": "ru",
-  "name": { "uk": null, "ru": "Автокресло Adbor Capri (0-10кг)" },
-  "slug": { "uk": null, "ru": "avtokreslo-adbor-capri" },
-  "status": "accept"
+  "name": { "uk": "Автокрісло Adbor Capri (0-10кг)", "ru": "Автокресло Adbor Capri (0-10кг)" },
+  "slug": { "uk": "avtokreslo-adbor-capri", "ru": "avtokreslo-adbor-capri" },
+  "evidence": [
+    { "id": "locale-match:avtokreslo-adbor-capri", "url": "https://lutsk.babyservice.ua/ru/avtokrisla/avtokreslo_adbor_capri.html", "sourceType": "manual", "note": "Сторінки зіставлено вручну." }
+  ],
+  "status": "review"
 }
 ```
 
 ### 12.2. Дві мовні сторінки з непідтвердженою відповідністю
+
+Це фрагменти ідентичності, не повні валідні записи. Український запис може лишатися readiness `review`, якщо його бізнес-дані ще не підтверджені. Російський фрагмент без `slug.uk` є structural `reject` за контрактом target Product.
 
 ```json
 {
@@ -641,9 +700,11 @@ Manifest повинен зберігати legacy mappings окремо від r
   "locale": "ru",
   "name": { "uk": null, "ru": "Новый товар" },
   "slug": { "uk": null, "ru": "noviy-tovar" },
-  "status": "review"
+  "status": "reject"
 }
 ```
+
+Другий фрагмент не має обов'язкового `slug.uk` для target Product і тому не проходить structural validation. Не заповнюй його slug-ом з української сторінки, доки відповідність не підтверджена; після підтвердження сформуй цілісний target-кандидат із реальними значеннями обох локалей.
 
 ### 12.3. Повторна екстракція тієї самої сторінки
 
@@ -653,12 +714,11 @@ Manifest повинен зберігати legacy mappings окремо від r
   "entityKey": "entity:product:avtokreslo-adbor-capri",
   "legacyUrl": "/avtokrisla/avtokreslo_adbor_capri.html",
   "locale": "uk",
-  "duplicateOf": "page:uk:product:avtokreslo-adbor-capri",
   "status": "review"
 }
 ```
 
-Принцип: повторна екстракція має повертати той самий `sourcePageKey`, а не створювати новий запис на основі того самого URL.
+Фрагмент показує канонічний запис. Повторна екстракція тієї самої сторінки має оновлювати/повторно використовувати цей запис, а не додавати другий рядок із тим самим `sourcePageKey`; наявність двох сторінкових записів із цим ключем є structural `reject`.
 
 ### 12.4. Зміна URL існуючого товару
 
@@ -678,13 +738,15 @@ Manifest повинен зберігати legacy mappings окремо від r
 
 ### 12.5. Конфлікт entityKey
 
+Приклади показують тільки поля конфлікту, не повну структуру manifest record.
+
 ```json
 {
   "sourcePageKey": "page:uk:product:konflikt-1",
   "entityKey": "entity:product:common-name",
   "localeMatch": "conflict",
   "legacyUrl": "/product-1.html",
-  "status": "review"
+  "status": "reject"
 }
 ```
 
@@ -694,18 +756,18 @@ Manifest повинен зберігати legacy mappings окремо від r
   "entityKey": "entity:product:common-name",
   "localeMatch": "conflict",
   "legacyUrl": "/product-2.html",
-  "status": "review"
+  "status": "reject"
 }
 ```
 
-У цьому випадку різні `sourcePageKey` претендують на один і той самий `entityKey`, але відповідність не підтверджена; відбувається ручна перевірка, а не автоматичне об'єднання.
+У цьому випадку різні `sourcePageKey` тієї самої мови претендують на один `entityKey`; валідатор вважає це структурним конфліктом і відхиляє обидва записи. Після ручного розгляду потрібен виправлений manifest; автоматичного об'єднання чи перепризначення ключа немає.
 
 ## 13. Архітектурні конфлікти
 
 ### Підтверджено
 - Legacy HTML not tied to real DB; some data can be inferred but not guaranteed.
 - Product schema expects structured `pricing` with `salePrice` + `rentalRates`, while old pages may provide only a rent block and deposit info. This is a structural mismatch, not a model bug. Verified in [src/models/Product.ts](../src/models/Product.ts) and [docs/DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md).
-- `slug` validation requires `slug.uk` mandatory and Russian optional. Verified in [src/models/common.ts](../src/models/common.ts).
+- `Category` and `Product` validators require non-empty `slug.uk`; `slug.ru` is optional. `Media` has no slug. Verified in [src/models/Category.ts](../src/models/Category.ts), [src/models/Product.ts](../src/models/Product.ts), and [src/models/common.ts](../src/models/common.ts).
 - `category` and `product` are separate real entities in new architecture, but legacy site stores them as HTML pages, not as structured records. Verified in [docs/CONTENT_MODEL_MAPPING.md](./CONTENT_MODEL_MAPPING.md).
 
 ### Гіпотеза
@@ -771,12 +833,15 @@ Manifest повинен зберігати legacy mappings окремо від r
 
 ### Перевірений факт
 - Публічний legacy сайт містить достатньо структури для формування стартового manifest.
-- Цільова модель даних вже описана, і вона чітко визначає required поля, locale rules, media mapping і pricing contract.
+- `Category` і `Product` вимагають `slug.uk`; для Media slug не передбачений.
+- Locale pair потребує спільного посилання на підтверджене джерело чи ручне зіставлення; URL/slug similarity не підтверджує зв'язок.
+- Product pricing має різні `salePrice` і `rentalRates`; неповні або неоднозначні raw values не можна автоматично нормалізувати.
+- Повторне використання Media URL між сторінками не є конфліктом; конфліктом є один ідентифікатор/унікальне filename, що вказує на різні URL.
 
 ### Запропоноване рішення
 - Не імпортувати в MongoDB, а спочатку створити read-only manifest + validation pipeline.
 - Зберігати raw legacy values і результати валідації окремо.
-- Класифікувати записи як `accept`, `review`, `reject` без автоматичного запису в базу.
+- Окремо повертати structural validation та migration readiness без автоматичного запису в базу.
 
 ### Непідтверджене припущення
 - Якщо доступ до legacy DB / export не з'явиться, повна автоматична міграція не є безпечною і потребуватиме значної ручної верифікації.
