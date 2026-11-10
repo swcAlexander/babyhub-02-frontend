@@ -110,7 +110,7 @@ test('відсутня підтверджена availability дає review', () 
   assert.ok(result.issues.some((issue) => issue.code === 'AVAILABILITY_UNCONFIRMED'));
 });
 
-test('uk/ru пара без доказів не зливається; кожен статус лишається незалежним від структурних помилок', () => {
+test('uk/ru пара без доказів не зливається; російський source залишається structural-valid', () => {
   const candidate = manifest();
   candidate.products.push({
     ...product(),
@@ -126,14 +126,15 @@ test('uk/ru пара без доказів не зливається; кожен
   const ru = recordResult(report, 'products', 1);
 
   assert.equal(uk.status, 'review');
-  assert.equal(ru.status, 'reject');
-  assert.equal(ru.structuralStatus, 'invalid');
+  assert.equal(ru.status, 'review');
+  assert.equal(ru.structuralStatus, 'valid');
   assert.equal(uk.identity.localeMatch, 'unconfirmed');
   assert.equal(uk.identity.effectiveEntityKey, null);
   assert.ok(uk.issues.some((issue) => issue.code === 'UNCONFIRMED_LOCALE_PAIR'));
+  assert.ok(ru.issues.some((issue) => issue.code === 'TARGET_UK_SLUG_MISSING'));
 });
 
-test('явне ручне підтвердження дозволяє підтвердити localeMatch', () => {
+test('підтверджена мовна пара дає slug.uk готовій MongoDB-сутності без fallback', () => {
   const candidate = manifest();
   const evidence = {
     verified: true,
@@ -161,14 +162,18 @@ test('явне ручне підтвердження дозволяє підтв
       sourceType: 'manual',
     }],
     name: { uk: null, ru: 'Крісло один' },
-    slug: { uk: 'seat-one', ru: 'seat-one' },
+    slug: { uk: null, ru: 'seat-one' },
   });
   const report = validateManifest(candidate);
   const uk = recordResult(report, 'products', 0);
+  const ru = recordResult(report, 'products', 1);
 
   assert.equal(uk.identity.localeMatch, 'confirmed');
   assert.equal(uk.identity.effectiveEntityKey, 'entity:product:uk:seat-one');
   assert.equal(uk.issues.some((issue) => issue.code === 'UNCONFIRMED_LOCALE_PAIR'), false);
+  assert.equal(ru.structuralStatus, 'valid');
+  assert.equal(ru.status, 'accept');
+  assert.equal(ru.issues.some((issue) => issue.code === 'TARGET_UK_SLUG_MISSING'), false);
 });
 
 test('самостійний український Product не потребує російської версії', () => {
@@ -176,6 +181,26 @@ test('самостійний український Product не потребу�
 
   assert.equal(result.status, 'accept');
   assert.equal(result.issues.some((issue) => issue.code === 'UNCONFIRMED_LOCALE_PAIR'), false);
+});
+
+test('російський source Product без української пари проходить структуру, але потребує review', () => {
+  const candidate = manifest();
+  candidate.products.push({
+    ...product(),
+    sourcePageKey: 'page:ru:product:seat-two',
+    entityKey: 'entity:product:ru:seat-two',
+    legacyUrl: 'https://legacy.example/ru/seats/seat-two.html',
+    normalizedUrl: '/ru/seats/seat-two.html',
+    locale: 'ru',
+    name: { uk: null, ru: 'Крісло два' },
+    slug: { uk: null, ru: 'seat-two' },
+  });
+  const report = validateManifest(candidate);
+  const result = recordResult(report, 'products', 1);
+
+  assert.equal(result.structuralStatus, 'valid');
+  assert.equal(result.status, 'review');
+  assert.ok(result.issues.some((issue) => issue.code === 'TARGET_UK_SLUG_MISSING'));
 });
 
 test('localeMatch confirmed без підтвердженої пари скидається до unconfirmed', () => {
@@ -220,7 +245,7 @@ test('конфлікт entityKey у межах однієї мови призв�
   assert.ok(report.structuralValidation.errors.some((error) => error.code === 'ENTITY_KEY_CONFLICT'));
 });
 
-test('відсутній slug.uk у Category та Product є structural reject', () => {
+test('source Category та Product потребують slug відповідної мови', () => {
   const candidate = manifest();
   candidate.categories[0].slug = { uk: null, ru: 'seats' };
   candidate.products[0].slug = { uk: null, ru: 'seat-one' };
@@ -229,7 +254,7 @@ test('відсутній slug.uk у Category та Product є structural reject',
   assert.equal(report.structuralValidation.status, 'invalid');
   assert.equal(recordResult(report, 'categories').status, 'reject');
   assert.equal(recordResult(report, 'products').status, 'reject');
-  assert.ok(report.structuralValidation.errors.filter((error) => error.code === 'REQUIRED_TARGET_FIELD_MISSING').length === 2);
+  assert.equal(report.structuralValidation.errors.filter((error) => error.code === 'REQUIRED_SOURCE_LOCALE_SLUG_MISSING').length, 2);
 });
 
 test('Media без MIME, width, height та checksum не отримує reject', () => {

@@ -200,8 +200,9 @@ const validateRecordShape = (record, result, report) => {
   if (result.collection === 'categories') {
     validateLocalizedValue(record.name, result, report, 'name');
     validateLocalizedValue(record.slug, result, report, 'slug');
-    if (!isObject(record.slug) || !isNonEmptyString(record.slug.uk)) {
-      pushStructuralError(report, result, 'REQUIRED_TARGET_FIELD_MISSING', 'Category requires a non-empty slug.uk for the target Mongoose model.', 'slug.uk');
+    const sourceLocale = getRecordLocale(record);
+    if (sourceLocale && (!isObject(record.slug) || !isNonEmptyString(record.slug[sourceLocale]))) {
+      pushStructuralError(report, result, 'REQUIRED_SOURCE_LOCALE_SLUG_MISSING', `Category source record requires a non-empty slug.${sourceLocale}.`, `slug.${sourceLocale}`);
     }
     validateLocalizedValue(record.description, result, report, 'description');
     validateSeo(record.seo, result, report);
@@ -212,8 +213,9 @@ const validateRecordShape = (record, result, report) => {
   if (result.collection === 'products') {
     validateLocalizedValue(record.name, result, report, 'name');
     validateLocalizedValue(record.slug, result, report, 'slug');
-    if (!isObject(record.slug) || !isNonEmptyString(record.slug.uk)) {
-      pushStructuralError(report, result, 'REQUIRED_TARGET_FIELD_MISSING', 'Product requires a non-empty slug.uk for the target Mongoose model.', 'slug.uk');
+    const sourceLocale = getRecordLocale(record);
+    if (sourceLocale && (!isObject(record.slug) || !isNonEmptyString(record.slug[sourceLocale]))) {
+      pushStructuralError(report, result, 'REQUIRED_SOURCE_LOCALE_SLUG_MISSING', `Product source record requires a non-empty slug.${sourceLocale}.`, `slug.${sourceLocale}`);
     }
     validateLocalizedValue(record.shortDescription, result, report, 'shortDescription');
     validateLocalizedValue(record.description, result, report, 'description');
@@ -383,6 +385,10 @@ const validateMigrationReadiness = (result, record, context) => {
       addReadinessIssue(result, 'NAME_MISSING', 'No non-empty localized name is available for the target model.', 'name');
     } else if (locale && !isNonEmptyString(name[locale])) {
       addReadinessIssue(result, 'SOURCE_LOCALE_NAME_MISSING', `name.${locale} is not confirmed for this source page.`, `name.${locale}`);
+    }
+    if (!isNonEmptyString(record.slug?.uk)
+      && !context.confirmedEntityKeysWithUkSlug.has(context.identityPairs.get(result)?.effectiveEntityKey)) {
+      addReadinessIssue(result, 'TARGET_UK_SLUG_MISSING', 'A ready MongoDB entity requires a confirmed slug.uk; no value was inferred from another language.', 'slug.uk');
     }
   }
 
@@ -681,7 +687,15 @@ export const validateManifest = (manifest, sourceManifest = 'candidate-manifest.
     }
   }
 
-  const context = { uncertainEntityKeys };
+  const confirmedEntityKeysWithUkSlug = new Set();
+  for (const [result, identity] of identityPairs) {
+    const record = manifest[result.collection]?.[result.index];
+    if (getRecordLocale(record) === 'uk' && isNonEmptyString(record.slug?.uk)) {
+      confirmedEntityKeysWithUkSlug.add(identity.effectiveEntityKey);
+    }
+  }
+
+  const context = { uncertainEntityKeys, identityPairs, confirmedEntityKeysWithUkSlug };
   for (const result of results) {
     const record = manifest[result.collection]?.[result.index];
     if (isObject(record)) validateMigrationReadiness(result, record, context);

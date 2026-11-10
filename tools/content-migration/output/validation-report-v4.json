@@ -1,0 +1,359 @@
+{
+  "validatorVersion": "2.0.0",
+  "sourceManifest": "tools/content-migration/output/candidate-manifest.json",
+  "structuralValidation": {
+    "status": "valid",
+    "recordsChecked": 8,
+    "errors": []
+  },
+  "migrationReadiness": {
+    "status": "review",
+    "totalRecords": 8,
+    "accepted": 0,
+    "reviewRequired": 8,
+    "issuesByCode": {
+      "UNCONFIRMED_LOCALE_PAIR": 4,
+      "ENTITY_KEY_UNCONFIRMED": 2,
+      "TARGET_UK_SLUG_MISSING": 2,
+      "CATEGORY_IDENTITY_UNCONFIRMED": 2,
+      "PRICE_NOT_CONFIRMED": 2,
+      "PRICE_AMOUNT_MISSING": 2,
+      "PRICE_CURRENCY_UNCONFIRMED": 2,
+      "RENTAL_PERIOD_UNCONFIRMED": 2,
+      "RENTAL_UNIT_UNCONFIRMED": 2,
+      "AVAILABILITY_UNCONFIRMED": 2,
+      "MEDIA_STORAGE_TYPE_UNCONFIRMED": 4,
+      "MEDIA_PRODUCT_IDENTITY_UNCONFIRMED": 4
+    },
+    "records": [
+      {
+        "collection": "categories",
+        "index": 0,
+        "sourcePageKey": "page:uk:category:avtokrisla",
+        "status": "review",
+        "structuralStatus": "valid",
+        "readinessStatus": "review",
+        "identity": {
+          "effectiveEntityKey": null,
+          "localeMatch": "unconfirmed"
+        },
+        "issues": [
+          {
+            "code": "UNCONFIRMED_LOCALE_PAIR",
+            "severity": "warning",
+            "status": "review",
+            "message": "A possible uk/ru counterpart exists, but no explicit or manually verified matching evidence supports merging.",
+            "field": "localeMatch"
+          },
+          {
+            "code": "ENTITY_KEY_UNCONFIRMED",
+            "severity": "warning",
+            "status": "review",
+            "message": "This entityKey is shared by an unconfirmed locale pair.",
+            "field": "entityKey"
+          }
+        ]
+      },
+      {
+        "collection": "categories",
+        "index": 1,
+        "sourcePageKey": "page:ru:category:avtokrisla",
+        "status": "review",
+        "structuralStatus": "valid",
+        "readinessStatus": "review",
+        "identity": {
+          "effectiveEntityKey": null,
+          "localeMatch": "unconfirmed"
+        },
+        "issues": [
+          {
+            "code": "UNCONFIRMED_LOCALE_PAIR",
+            "severity": "warning",
+            "status": "review",
+            "message": "A possible uk/ru counterpart exists, but no explicit or manually verified matching evidence supports merging.",
+            "field": "localeMatch"
+          },
+          {
+            "code": "TARGET_UK_SLUG_MISSING",
+            "severity": "warning",
+            "status": "review",
+            "message": "A ready MongoDB entity requires a confirmed slug.uk; no value was inferred from another language.",
+            "field": "slug.uk"
+          },
+          {
+            "code": "ENTITY_KEY_UNCONFIRMED",
+            "severity": "warning",
+            "status": "review",
+            "message": "This entityKey is shared by an unconfirmed locale pair.",
+            "field": "entityKey"
+          }
+        ]
+      },
+      {
+        "collection": "products",
+        "index": 0,
+        "sourcePageKey": "page:uk:product:avtokreslo-adbor-capri",
+        "status": "review",
+        "structuralStatus": "valid",
+        "readinessStatus": "review",
+        "identity": {
+          "effectiveEntityKey": null,
+          "localeMatch": "unconfirmed"
+        },
+        "issues": [
+          {
+            "code": "UNCONFIRMED_LOCALE_PAIR",
+            "severity": "warning",
+            "status": "review",
+            "message": "A possible uk/ru counterpart exists, but no explicit or manually verified matching evidence supports merging.",
+            "field": "localeMatch"
+          },
+          {
+            "code": "CATEGORY_IDENTITY_UNCONFIRMED",
+            "severity": "warning",
+            "status": "review",
+            "message": "The referenced category entity has an unconfirmed locale identity.",
+            "field": "categoryEntityKey"
+          },
+          {
+            "code": "PRICE_NOT_CONFIRMED",
+            "severity": "warning",
+            "status": "review",
+            "message": "Pricing is explicitly unconfirmed or lacks confirmation.",
+            "field": "pricingRaw.isConfirmed"
+          },
+          {
+            "code": "PRICE_AMOUNT_MISSING",
+            "severity": "warning",
+            "status": "review",
+            "message": "A non-negative numeric price is required; no value was invented.",
+            "field": "pricingRaw.amount"
+          },
+          {
+            "code": "PRICE_CURRENCY_UNCONFIRMED",
+            "severity": "warning",
+            "status": "review",
+            "message": "A confirmed currency is required.",
+            "field": "pricingRaw.currency"
+          },
+          {
+            "code": "RENTAL_PERIOD_UNCONFIRMED",
+            "severity": "warning",
+            "status": "review",
+            "message": "Rental pricing requires a confirmed period; it cannot be converted to salePrice.",
+            "field": "pricingRaw.periodDays"
+          },
+          {
+            "code": "RENTAL_UNIT_UNCONFIRMED",
+            "severity": "warning",
+            "status": "review",
+            "message": "The target rentalRates schema requires a confirmed unit.",
+            "field": "pricingRaw.unit"
+          },
+          {
+            "code": "AVAILABILITY_UNCONFIRMED",
+            "severity": "warning",
+            "status": "review",
+            "message": "Product availability must be explicitly confirmed; no default was applied.",
+            "field": "availabilityRaw"
+          }
+        ]
+      },
+      {
+        "collection": "products",
+        "index": 1,
+        "sourcePageKey": "page:ru:product:avtokreslo-adbor-capri",
+        "status": "review",
+        "structuralStatus": "valid",
+        "readinessStatus": "review",
+        "identity": {
+          "effectiveEntityKey": null,
+          "localeMatch": "unconfirmed"
+        },
+        "issues": [
+          {
+            "code": "UNCONFIRMED_LOCALE_PAIR",
+            "severity": "warning",
+            "status": "review",
+            "message": "A possible uk/ru counterpart exists, but no explicit or manually verified matching evidence supports merging.",
+            "field": "localeMatch"
+          },
+          {
+            "code": "TARGET_UK_SLUG_MISSING",
+            "severity": "warning",
+            "status": "review",
+            "message": "A ready MongoDB entity requires a confirmed slug.uk; no value was inferred from another language.",
+            "field": "slug.uk"
+          },
+          {
+            "code": "CATEGORY_IDENTITY_UNCONFIRMED",
+            "severity": "warning",
+            "status": "review",
+            "message": "The referenced category entity has an unconfirmed locale identity.",
+            "field": "categoryEntityKey"
+          },
+          {
+            "code": "PRICE_NOT_CONFIRMED",
+            "severity": "warning",
+            "status": "review",
+            "message": "Pricing is explicitly unconfirmed or lacks confirmation.",
+            "field": "pricingRaw.isConfirmed"
+          },
+          {
+            "code": "PRICE_AMOUNT_MISSING",
+            "severity": "warning",
+            "status": "review",
+            "message": "A non-negative numeric price is required; no value was invented.",
+            "field": "pricingRaw.amount"
+          },
+          {
+            "code": "PRICE_CURRENCY_UNCONFIRMED",
+            "severity": "warning",
+            "status": "review",
+            "message": "A confirmed currency is required.",
+            "field": "pricingRaw.currency"
+          },
+          {
+            "code": "RENTAL_PERIOD_UNCONFIRMED",
+            "severity": "warning",
+            "status": "review",
+            "message": "Rental pricing requires a confirmed period; it cannot be converted to salePrice.",
+            "field": "pricingRaw.periodDays"
+          },
+          {
+            "code": "RENTAL_UNIT_UNCONFIRMED",
+            "severity": "warning",
+            "status": "review",
+            "message": "The target rentalRates schema requires a confirmed unit.",
+            "field": "pricingRaw.unit"
+          },
+          {
+            "code": "AVAILABILITY_UNCONFIRMED",
+            "severity": "warning",
+            "status": "review",
+            "message": "Product availability must be explicitly confirmed; no default was applied.",
+            "field": "availabilityRaw"
+          }
+        ]
+      },
+      {
+        "collection": "media",
+        "index": 0,
+        "sourcePageKey": "page:uk:product:avtokreslo-adbor-capri",
+        "status": "review",
+        "structuralStatus": "valid",
+        "readinessStatus": "review",
+        "identity": {
+          "effectiveEntityKey": "entity:product:avtokreslo-adbor-capri:media:0",
+          "localeMatch": null
+        },
+        "issues": [
+          {
+            "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+            "severity": "warning",
+            "status": "review",
+            "message": "The target Media model requires a confirmed storageType; none was inferred.",
+            "field": "storageType"
+          },
+          {
+            "code": "MEDIA_PRODUCT_IDENTITY_UNCONFIRMED",
+            "severity": "warning",
+            "status": "review",
+            "message": "Media links to a Product identity with an unconfirmed locale match.",
+            "field": "linkedProductEntityKeys"
+          }
+        ]
+      },
+      {
+        "collection": "media",
+        "index": 1,
+        "sourcePageKey": "page:uk:product:avtokreslo-adbor-capri",
+        "status": "review",
+        "structuralStatus": "valid",
+        "readinessStatus": "review",
+        "identity": {
+          "effectiveEntityKey": "entity:product:avtokreslo-adbor-capri:media:1",
+          "localeMatch": null
+        },
+        "issues": [
+          {
+            "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+            "severity": "warning",
+            "status": "review",
+            "message": "The target Media model requires a confirmed storageType; none was inferred.",
+            "field": "storageType"
+          },
+          {
+            "code": "MEDIA_PRODUCT_IDENTITY_UNCONFIRMED",
+            "severity": "warning",
+            "status": "review",
+            "message": "Media links to a Product identity with an unconfirmed locale match.",
+            "field": "linkedProductEntityKeys"
+          }
+        ]
+      },
+      {
+        "collection": "media",
+        "index": 2,
+        "sourcePageKey": "page:ru:product:avtokreslo-adbor-capri",
+        "status": "review",
+        "structuralStatus": "valid",
+        "readinessStatus": "review",
+        "identity": {
+          "effectiveEntityKey": "entity:product:avtokreslo-adbor-capri:media:0",
+          "localeMatch": null
+        },
+        "issues": [
+          {
+            "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+            "severity": "warning",
+            "status": "review",
+            "message": "The target Media model requires a confirmed storageType; none was inferred.",
+            "field": "storageType"
+          },
+          {
+            "code": "MEDIA_PRODUCT_IDENTITY_UNCONFIRMED",
+            "severity": "warning",
+            "status": "review",
+            "message": "Media links to a Product identity with an unconfirmed locale match.",
+            "field": "linkedProductEntityKeys"
+          }
+        ]
+      },
+      {
+        "collection": "media",
+        "index": 3,
+        "sourcePageKey": "page:ru:product:avtokreslo-adbor-capri",
+        "status": "review",
+        "structuralStatus": "valid",
+        "readinessStatus": "review",
+        "identity": {
+          "effectiveEntityKey": "entity:product:avtokreslo-adbor-capri:media:1",
+          "localeMatch": null
+        },
+        "issues": [
+          {
+            "code": "MEDIA_STORAGE_TYPE_UNCONFIRMED",
+            "severity": "warning",
+            "status": "review",
+            "message": "The target Media model requires a confirmed storageType; none was inferred.",
+            "field": "storageType"
+          },
+          {
+            "code": "MEDIA_PRODUCT_IDENTITY_UNCONFIRMED",
+            "severity": "warning",
+            "status": "review",
+            "message": "Media links to a Product identity with an unconfirmed locale match.",
+            "field": "linkedProductEntityKeys"
+          }
+        ]
+      }
+    ]
+  },
+  "summary": {
+    "totalRecords": 8,
+    "accepted": 0,
+    "reviewRequired": 8,
+    "rejected": 0
+  }
+}
