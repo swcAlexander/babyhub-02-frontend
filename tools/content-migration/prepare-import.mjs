@@ -2,11 +2,49 @@ import fs from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { registerHooks } from 'node:module';
+import { createHash } from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import dotenv from 'dotenv';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const OUTPUT_DIR = path.join(__dirname, 'output');
+export const TEST_DATABASE = 'db-babyhub-test';
+const ENV_PATH = path.resolve(__dirname, '../../.env');
+const safetyError = (code) => Object.assign(new Error(code), { code });
+
+export const assertTestDatabase = (databaseName) => {
+  if (databaseName !== TEST_DATABASE) throw safetyError('UNSAFE_DATABASE');
+};
+
+export const loadImportConfiguration = async ({ readFile = fs.readFile } = {}) => {
+  let values;
+  try {
+    values = dotenv.parse(await readFile(ENV_PATH, 'utf8'));
+  } catch {
+    throw safetyError('TEST_ENV_UNAVAILABLE');
+  }
+  const uri = values.DB_HOST_TEST?.trim();
+  if (!uri) throw safetyError('DB_HOST_TEST_REQUIRED');
+  // Never fall back to DB_HOST, MONGODB_URI or inherited environment variables.
+  return Object.freeze({ uri, dbName: TEST_DATABASE });
+};
+
+export const parseImportArguments = (args) => {
+  const positional = [];
+  let confirmed = false;
+  for (const arg of args) {
+    if (arg === '--confirm-import' && !confirmed) confirmed = true;
+    else if (arg.startsWith('--')) throw safetyError('INVALID_ARGUMENTS');
+    else positional.push(arg);
+  }
+  if (positional.length > 2) throw safetyError('INVALID_ARGUMENTS');
+  return {
+    confirmed,
+    inputPath: path.resolve(positional[0] || path.join(OUTPUT_DIR, 'candidate-manifest.json')),
+    outputPath: path.resolve(positional[1] || path.join(OUTPUT_DIR, 'import-dry-run-v1.json')),
+  };
+};
 const DEFAULTS_APPLIED = {
   availability: 'in_stock',
   currency: 'UAH',
@@ -186,39 +224,133 @@ const serializeDocuments = (entries) => entries.map(({ record, document }) => ({
   payload: document.toObject({ depopulate: true, versionKey: false }),
 }));
 
-const importTransaction = async (prepared, models) => {
-  const uri = process.env.MONGODB_URI;
-  if (!uri) throw new Error('MONGODB_URI is required when --confirm-import is provided.');
+export const assertImportScope = (prepared) => {
+  if (prepared.issues.length || prepared.categories.length !== 1 || prepared.products.length !== 1) {
+    throw safetyError('SINGLE_PAIR_REQUIRED');
+  }
+  for (const { record, document } of [...prepared.categories, ...prepared.products]) {
+    if (sourceLocale(record) !== 'uk' || document.status !== 'draft') throw safetyError('UK_DRAFT_REQUIRED');
+    const legacyUrl = document.importMeta?.legacyUrl;
+    if (typeof legacyUrl !== 'string' || !/^https?:\/\//.test(legacyUrl)) {
+      throw safetyError('SOURCE_IDENTITY_REQUIRED');
+    }
+  }
+  if (String(prepared.products[0].document.category) !== String(prepared.categories[0].document._id)) {
+    throw safetyError('CATEGORY_LINK_MISMATCH');
+  }
+};
 
-  await models.mongoose.connect(uri);
-  const session = await models.mongoose.startSession();
+export const openTestConnection = async (models, configuration) => {
+  assertTestDatabase(configuration.dbName);
+  const connection = models.mongoose.createConnection(configuration.uri, {
+    dbName: TEST_DATABASE,
+    autoCreate: false,
+    autoIndex: false,
+    bufferCommands: false,
+    serverSelectionTimeoutMS: 10000,
+  });
   try {
-    await session.withTransaction(async () => {
-      await models.Category.create(
-        prepared.categories.map(({ document }) => document.toObject()),
-        { session },
-      );
-      await models.Product.create(
-        prepared.products.map(({ document }) => document.toObject()),
-        { session },
-      );
-    });
+    await connection.asPromise();
+    return connection;
+  } catch (error) {
+    await connection.close().catch(() => {});
+    throw error;
+  }
+};
+
+// The mandatory unique _id index also protects simultaneous runs of the same slug,
+// even in a new collection without the optional model indexes.
+const importId = (models, type, slug) => new models.mongoose.Types.ObjectId(
+  createHash('sha256').update(`babyhub-test-import-v1:${type}:${slug}`).digest('hex').slice(0, 24),
+);
+
+const findExisting = async (Model, document, session) => {
+  const matches = await Model.find({ $or: [
+    { _id: document._id },
+    { 'slug.uk': document.slug.uk },
+    { 'importMeta.legacyUrl': document.importMeta.legacyUrl },
+  ] }).session(session).limit(2).exec();
+  if (matches.length > 1) throw safetyError('DUPLICATE_IDENTITY');
+  const existing = matches[0];
+  if (existing) {
+    if (existing.slug?.uk !== document.slug.uk
+      || existing.importMeta?.legacyUrl !== document.importMeta.legacyUrl
+      || existing.status !== 'draft') throw safetyError('EXISTING_DOCUMENT_CONFLICT');
+    await existing.validate();
+  }
+  return existing;
+};
+
+export const runPreparedImport = async (prepared, models, {
+  confirmed = false,
+  configuration,
+  openConnection = openTestConnection,
+} = {}) => {
+  assertImportScope(prepared);
+  if ((await validateImportDocuments(prepared)).length) throw safetyError('INVALID_DOCUMENTS');
+  // This branch must not read .env, open connections, start sessions or write documents.
+  if (confirmed !== true) return { mode: 'dry-run', created: { categories: 0, products: 0 } };
+  const target = configuration ?? await loadImportConfiguration();
+  assertTestDatabase(target.dbName);
+  if (!target.uri) throw safetyError('DB_HOST_TEST_REQUIRED');
+
+  const connection = await openConnection(models, target);
+  let session;
+  try {
+    assertTestDatabase(connection.db?.databaseName);
+    const Category = connection.model('Category', models.Category.schema);
+    const Product = connection.model('Product', models.Product.schema);
+    session = await connection.startSession();
+    return await session.withTransaction(async () => {
+      assertTestDatabase(connection.db?.databaseName);
+      const category = new Category(prepared.categories[0].document.toObject());
+      category._id = importId(models, 'Category', category.slug.uk);
+      const existingCategory = await findExisting(Category, category, session);
+      if (existingCategory) category._id = existingCategory._id;
+
+      const product = new Product(prepared.products[0].document.toObject());
+      product._id = importId(models, 'Product', product.slug.uk);
+      product.category = category._id;
+      const existingProduct = await findExisting(Product, product, session);
+      if (existingProduct && String(existingProduct.category) !== String(category._id)) {
+        throw safetyError('CATEGORY_LINK_MISMATCH');
+      }
+
+      // Validate both final documents with their resolved IDs before the first insert.
+      await category.validate();
+      await product.validate();
+      assertTestDatabase(connection.db?.databaseName);
+      if (!existingCategory) await Category.create([category.toObject()], { session });
+      if (!existingProduct) await Product.create([product.toObject()], { session });
+
+      return {
+        mode: 'confirmed-import',
+        database: connection.db.databaseName,
+        created: { categories: existingCategory ? 0 : 1, products: existingProduct ? 0 : 1 },
+        reused: { categories: existingCategory ? 1 : 0, products: existingProduct ? 1 : 0 },
+        categoryId: String(category._id),
+        productId: String(existingProduct?._id ?? product._id),
+      };
+    }, { readConcern: { level: 'snapshot' }, writeConcern: { w: 'majority' } });
   } finally {
-    await session.endSession();
-    await models.mongoose.disconnect();
+    try {
+      if (session) await session.endSession();
+    } finally {
+      await connection.close();
+    }
   }
 };
 
 const main = async () => {
-  const inputPath = path.resolve(process.argv[2] || path.join(OUTPUT_DIR, 'candidate-manifest.json'));
-  const outputPath = path.resolve(process.argv[3] || path.join(OUTPUT_DIR, 'import-dry-run-v1.json'));
-  const confirmed = process.argv.includes('--confirm-import');
+  const { inputPath, outputPath, confirmed } = parseImportArguments(process.argv.slice(2));
   const manifest = JSON.parse(await fs.readFile(inputPath, 'utf8'));
   const models = await loadModels();
   const prepared = buildImportDocuments(manifest, models);
+  assertImportScope(prepared);
   const validationErrors = await validateImportDocuments(prepared);
   const report = {
     mode: confirmed ? 'confirmed-import' : 'dry-run',
+    targetDatabase: TEST_DATABASE,
     sourceManifest: path.relative(process.cwd(), inputPath).replace(/\\/g, '/'),
     defaultsApplied: prepared.defaultsApplied,
     issues: prepared.issues,
@@ -243,12 +375,19 @@ const main = async () => {
     process.exitCode = 1;
     return;
   }
-  if (confirmed) await importTransaction(prepared, models);
+  const result = await runPreparedImport(prepared, models, { confirmed });
+  console.log(JSON.stringify(result, null, 2));
 };
 
 if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
   main().catch((error) => {
-    console.error(error);
+    // Driver errors may contain credentials/URIs. Only emit our fixed safety codes.
+    const safeCodes = new Set([
+      'UNSAFE_DATABASE', 'TEST_ENV_UNAVAILABLE', 'DB_HOST_TEST_REQUIRED', 'INVALID_ARGUMENTS',
+      'SINGLE_PAIR_REQUIRED', 'UK_DRAFT_REQUIRED', 'SOURCE_IDENTITY_REQUIRED',
+      'CATEGORY_LINK_MISMATCH', 'DUPLICATE_IDENTITY', 'EXISTING_DOCUMENT_CONFLICT', 'INVALID_DOCUMENTS',
+    ]);
+    console.error(JSON.stringify({ error: safeCodes.has(error.code) ? error.code : 'IMPORT_PREPARATION_FAILED' }));
     process.exitCode = 1;
   });
 }

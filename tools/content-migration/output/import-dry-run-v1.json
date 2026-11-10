@@ -1,5 +1,6 @@
 {
-  "mode": "dry-run",
+  "mode": "confirmed-import",
+  "targetDatabase": "db-babyhub-test",
   "sourceManifest": "tools/content-migration/output/candidate-manifest.json",
   "defaultsApplied": {
     "availability": "in_stock",
@@ -34,7 +35,7 @@
           "source": "candidate-manifest; defaults applied: status=draft",
           "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla.html"
         },
-        "_id": "6af2dd8b3752d965ac67fe5e"
+        "_id": "6af2edef4b369bf835eb3fb0"
       }
     }
   ],
@@ -43,7 +44,7 @@
       "sourcePageKey": "page:uk:product:avtokreslo-adbor-capri",
       "entityKey": "entity:product:avtokreslo-adbor-capri",
       "payload": {
-        "category": "6af2dd8b3752d965ac67fe5e",
+        "category": "6af2edef4b369bf835eb3fb0",
         "name": {
           "uk": "Автокрісло adbor напрокат, в оренду Baby Service Луцьк"
         },
@@ -69,7 +70,7 @@
           "source": "candidate-manifest; defaults applied: availability=in_stock, status=draft, currency=UAH, price=0, rentalRates=[] (unit unconfirmed; deferred price=0 UAH)",
           "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_adbor_capri.html"
         },
-        "_id": "6af2dd8b3752d965ac67fe5f",
+        "_id": "6af2edef4b369bf835eb3fb1",
         "attributes": []
       }
     }
