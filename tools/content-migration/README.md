@@ -363,6 +363,60 @@ Dry-run успішний: JPEG 249×270, 9079 байтів, Media відсутн
 Cloudinary namespace; `.env`, схеми, production-база й статуси не змінювалися. Перевірка
 відображення на сайті та публікація не виконувалися. Журнал потрібно зберегти для відновлення.
 
+## Локальний перегляд перенесеного товару (3.8.16)
+
+Реалізовано окремий маршрут `/dev/preview/avtokreslo-adbor-capri`. Він читає лише
+Product `1e9f418c65cc80c3d3a56184` зі slug `avtokreslo-adbor-capri` та статусом `draft`,
+перевіряє пов'язану draft-категорію та наявність Media `2f19079efd10749817072a2d`
+у `Product.images`. URL, розміри й alt беруться з реального документа Media; фото
+рендериться через `next/image`. Cloudinary SDK та міграційний інструмент не викликаються.
+
+Сервіс `src/services/local-product-preview.service.ts` використовує ізольоване Mongoose
+підключення тільки з `DB_HOST_TEST`, примусово задає `dbName: db-babyhub-test` та перевіряє
+`connection.db.databaseName` перед будь-яким читанням. URI може не містити назви бази;
+якщо назва вказана, дозволена лише `db-babyhub-test`. Відсутній/некоректний URI блокує
+перегляд без fallback на `DB_HOST`. Нативні `findOne` не ініціалізують моделі, колекції
+чи індекси; підключення закривається у `finally`.
+
+Запуск із кореня проєкту у Windows PowerShell (наявний `DB_HOST_TEST` завантажується з
+`.env` самим Next.js; файл не змінюється):
+
+```powershell
+Set-Location E:\Projects\babyhub-02-frontend
+$env:DB_HOST = 'mongodb://127.0.0.1:1/disabled-for-local-preview'
+node --use-system-ca node_modules/next/dist/bin/next dev --hostname 127.0.0.1 --port 3000
+```
+
+Відкрити: <http://127.0.0.1:3000/dev/preview/avtokreslo-adbor-capri>.
+Підміна `DB_HOST` діє тільки в поточному PowerShell та його дочірніх процесах:
+це блокує випадкове звернення інших сторінок до основної БД. Публічні DB-маршрути
+в цьому запуску не працюватимуть. Для звичайного запуску використати новий термінал.
+`--use-system-ca` зберігає TLS-перевірку; dev-сервер слухає тільки loopback.
+
+Маршрут і сервіс окремо перевіряють `NODE_ENV === 'development'`. У production маршрут
+повертає 404 до імпорту сервісу/підключення. Сторінка динамічна та має `noindex, nofollow`.
+Публічні `getPublishedProducts` і `getProductBySlug` не змінено: draft-товари та товари
+draft-категорій залишаються прихованими. Загального адміністративного preview у `src`
+не знайдено. Публічний сервіс досі серіалізує `images` як ID, а публічні сторінки товару
+не рендерять фото: їх розширення лишається окремим завданням.
+
+У `next.config.mjs` дозволено лише HTTPS Cloudinary image/upload для акаунта `dmvl4lxnq`.
+Схеми, `.env`, статуси й документи MongoDB не змінювалися; міграцію не повторювали.
+
+Перевірки 3.8.16:
+
+- `node --use-system-ca --conditions=react-server --experimental-strip-types --test src/services/local-product-preview.test.mjs`:
+  6/6 тестів без мережі/записів; production/test, некоректний URI й URI основної бази,
+  фактична назва бази до читання, точні фільтри та зв'язок Product → Media, закриття підключення.
+- `node node_modules/typescript/bin/tsc --noEmit --incremental false` — успішно.
+- `node node_modules/next/dist/bin/next lint` — успішно, 4 попередження в незмінених legacy-файлах.
+- Production build із недоступним локальним `DB_HOST` — успішно. Запущений production-сервер
+  повернув **404** для preview навіть із навмисно некоректним `DB_HOST_TEST`; фото/товар відсутні.
+- Development: сторінка **HTTP 200**, оптимізоване фото `/_next/image` — **HTTP 200**, `image/jpeg`.
+- **Фактична візуальна перевірка виконана:** відкрито маршрут у headless Chromium, отримано
+  й переглянуто скриншот; видно назву, опис і фотографію автокрісла. Це окрема перевірка,
+  незалежна від typecheck/build. Для Chromium в цьому середовищі знадобився `--no-sandbox`.
+
 ## Дозволені URL
 
 - https://lutsk.babyservice.ua/avtokrisla.html

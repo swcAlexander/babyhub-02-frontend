@@ -878,3 +878,32 @@ Manifest повинен зберігати legacy mappings окремо від r
 - Чи дозволяється приймати `review` записи в manifest для публічної міграції?
 - Чи є допустимим підхід “manifest + review queue” без legacy DB export?
 - Чи потрібен окремий owner-approval для `pricing`/`media`/`locale` conflicts?
+
+## 19. Реалізований локальний перегляд тестового товару (3.8.16)
+
+Після завершеного перенесення одного фото додано development-only маршрут
+`/dev/preview/avtokreslo-adbor-capri`. Це вузький перегляд Product
+`1e9f418c65cc80c3d3a56184`, а не публікація чи загальний CMS preview.
+
+- Окремий серверний сервіс `src/services/local-product-preview.service.ts` не імпортує
+  публічні сервіси чи `src/lib/mongodb.ts`. Джерело URI — виключно `DB_HOST_TEST`;
+  URI з іншою назвою бази відхиляється до підключення. Для URI без назви явно задається
+  `dbName: db-babyhub-test`; фактичне `connection.db.databaseName` перевіряється до читання.
+- Виконуються тільки нативні `findOne` у `products`, `categories`, `media`; автостворення
+  колекцій/індексів вимкнено. Перевіряються точні ID/slug товару, draft-статуси товару
+  й пов'язаної категорії та посилання на Media `2f19079efd10749817072a2d` в `Product.images`.
+- URL, width/height та український alt читаються з Media; fallback alt — назва товару.
+  URL перевіряється як HTTPS `res.cloudinary.com/dmvl4lxnq/image/upload/...`,
+  а `next.config.mjs` дозволяє цей самий Cloudinary account/path для `next/image`.
+- Маршрут і сервіс закриті поза `development`; production HTTP-перевірка підтвердила 404
+  навіть із некоректним тестовим URI. `force-dynamic` виключає статичну генерацію preview;
+  robots забороняє індексацію.
+- Правила public-сервісів не змінено. Публічний контракт `images: string[]` досі містить
+  Media ID; публічні сторінки ще не показують фото. Їх розширення — окремий наступний етап.
+- Дані/схеми/статуси, `.env` та основна база не змінювалися; імпорт не повторювався.
+
+Точна команда Windows із `--use-system-ca` та блокуванням `DB_HOST` наведена у
+[README інструментів](../tools/content-migration/README.md#локальний-перегляд-перенесеного-товару-3816).
+Підтверджено 6/6 ізольованих тестів, typecheck, lint (4 попередні legacy-попередження),
+production build, HTTP 200 сторінки й оптимізованого JPEG. Окремо виконано фактичну
+візуальну перевірку скриншота Chromium: товар і фотографію видно.
