@@ -160,11 +160,11 @@ test('зберігає підтверджену ціну продажу, вкл�
 });
 
 const models = { Category, Product, mongoose };
-const configuration = { uri: 'mongodb://offline.invalid/production', dbName: TEST_DATABASE };
+const configuration = { target: 'test', uri: 'mongodb://offline.invalid/db-babyhub-test', dbName: TEST_DATABASE };
 const prepare = () => buildImportDocuments(manifest(), models);
 
 // An in-memory transactional double. No network connection or MongoDB writes occur.
-const memoryDatabase = ({ databaseName = TEST_DATABASE, failProductInsert = false } = {}) => {
+const memoryDatabase = ({ target = 'test', databaseName = target === 'main' ? 'db-babyhub' : TEST_DATABASE, failProductInsert = false } = {}) => {
   const state = {
     categories: [], products: [], connected: 0, closed: 0, sessions: 0, ended: 0,
     inserts: 0, validationsBeforeFirstInsert: [],
@@ -234,9 +234,10 @@ const memoryDatabase = ({ databaseName = TEST_DATABASE, failProductInsert = fals
     },
   };
   const options = {
-    confirmed: true, configuration,
+    confirmed: true, target, confirmDatabase: target === 'main' ? 'db-babyhub' : undefined,
+    configuration: { ...configuration, target, dbName: target === 'main' ? 'db-babyhub' : TEST_DATABASE },
     async openConnection(_models, config) {
-      assert.equal(config.dbName, TEST_DATABASE);
+      assert.equal(config.dbName, target === 'main' ? 'db-babyhub' : TEST_DATABASE);
       state.connected++;
       return connection;
     },
@@ -248,23 +249,23 @@ test('конфігурація читає лише DB_HOST_TEST із корен�
   let readPath;
   const config = await loadImportConfiguration({ readFile: async (file) => {
     readPath = file;
-    return 'DB_HOST=mongodb://main.invalid/main\nMONGODB_URI=mongodb://other.invalid/other\nDB_HOST_TEST=mongodb://test.invalid/production\n';
+    return 'DB_HOST=mongodb://main.invalid/main\nMONGODB_URI=mongodb://other.invalid/other\nDB_HOST_TEST=mongodb://test.invalid/db-babyhub-test\n';
   } });
-  assert.match(readPath.replaceAll('\\', '/'), /babyhub-02-frontend\/\.env$/);
-  assert.equal(config.uri, 'mongodb://test.invalid/production');
+  assert.match(String(readPath), /babyhub-02-frontend\/\.env$/);
+  assert.equal(config.uri, 'mongodb://test.invalid/db-babyhub-test');
   assert.equal(config.dbName, 'db-babyhub-test');
   assert.equal(Object.isFrozen(config), true);
   for (const content of ['', 'DB_HOST=mongodb://main.invalid/main', 'DB_HOST_TEST=   ']) {
     await assert.rejects(loadImportConfiguration({ readFile: async () => content }), { code: 'DB_HOST_TEST_REQUIRED' });
   }
   await assert.rejects(loadImportConfiguration({ readFile: async () => { throw new Error('secret error'); } }),
-    { code: 'TEST_ENV_UNAVAILABLE', message: 'TEST_ENV_UNAVAILABLE' });
+    { code: 'TARGET_ENV_UNAVAILABLE', message: 'TARGET_ENV_UNAVAILABLE' });
 });
 
 test('опції ізольованого підключення перекривають базу з URI та вимикають autoCreate/autoIndex', async () => {
   let options;
   let closed = 0;
-  const connection = { async asPromise() {}, async close() { closed++; } };
+  const connection = { db: { databaseName: TEST_DATABASE }, async asPromise() {}, async close() { closed++; } };
   const fake = { mongoose: { createConnection(uri, opts) {
     assert.equal(uri, configuration.uri);
     options = opts;
@@ -284,8 +285,8 @@ test('опції ізольованого підключення перекри�
 
 test('CLI має dry-run за замовчуванням і строго розбирає прапорець незалежно від позиції', () => {
   assert.equal(parseImportArguments([]).confirmed, false);
-  for (const args of [['--confirm-import'], ['--confirm-import', 'input.json', 'output.json'],
-    ['input.json', 'output.json', '--confirm-import']]) {
+  for (const args of [['--target=test', '--confirm-import'], ['--target=test', '--confirm-import', 'input.json', 'output.json'],
+    ['input.json', 'output.json', '--target=test', '--confirm-import']]) {
     const parsed = parseImportArguments(args);
     assert.equal(parsed.confirmed, true);
     assert.doesNotMatch(parsed.inputPath, /--confirm-import/);
@@ -298,7 +299,7 @@ test('CLI має dry-run за замовчуванням і строго роз�
 
 test('dry-run не підключається, не починає транзакцій і не створює документів', async () => {
   const memory = memoryDatabase();
-  const result = await runPreparedImport(prepare(), models, { ...memory.options, confirmed: false });
+  const result = await runPreparedImport(prepare(), models, { ...memory.options, target: undefined, confirmed: false });
   assert.deepEqual(result, { mode: 'dry-run', created: { categories: 0, products: 0 } });
   assert.equal(memory.state.connected, 0);
   assert.equal(memory.state.sessions, 0);
@@ -435,4 +436,38 @@ test('стабільні ObjectId блокують дублікати навіт
   assert.equal(JSON.stringify([memory.state.categories, memory.state.products]), before);
   assert.equal(memory.state.categories.length, 1);
   assert.equal(memory.state.products.length, 1);
+});
+
+test('main dry-run перевіряє конфлікти без сесій/вставок; захист запису діє й поза CLI', async () => {
+  const memory = memoryDatabase({ target: 'main' });
+  for (const override of [{ target: undefined }, { confirmDatabase: undefined }, { confirmDatabase: 'db-babyhub-test' }]) {
+    await assert.rejects(runPreparedImport(prepare(), models, { ...memory.options, ...override }));
+    assert.equal(memory.state.connected, 0);
+  }
+  const plan = await runPreparedImport(prepare(), models, { ...memory.options, confirmed: false });
+  assert.deepEqual(plan.planned, { categories: 'create-draft', products: 'create-draft' });
+  assert.equal(plan.database, 'db-babyhub');
+  assert.equal(memory.state.sessions, 0);
+  assert.equal(memory.state.inserts, 0);
+  const conflict = prepare().categories[0].document;
+  conflict.status = 'published';
+  memory.state.categories.push(conflict);
+  await assert.rejects(runPreparedImport(prepare(), models, { ...memory.options, confirmed: false }),
+    { code: 'EXISTING_DOCUMENT_CONFLICT' });
+  assert.equal(memory.state.inserts, 0);
+});
+
+test('main і test мають різні стабільні ID; main повторний запис і rollback перевіряються тільки в пам’яті', async () => {
+  const main = memoryDatabase({ target: 'main' });
+  const test = memoryDatabase();
+  const a = await runPreparedImport(prepare(), models, main.options);
+  const b = await runPreparedImport(prepare(), models, test.options);
+  assert.notEqual(a.productId, b.productId);
+  assert.notEqual(a.categoryId, b.categoryId);
+  const repeated = await runPreparedImport(prepare(), models, main.options);
+  assert.deepEqual(repeated.reused, { categories: 1, products: 1 });
+  assert.deepEqual(repeated.created, { categories: 0, products: 0 });
+  const broken = memoryDatabase({ target: 'main', failProductInsert: true });
+  await assert.rejects(runPreparedImport(prepare(), models, broken.options));
+  assert.equal(broken.state.categories.length + broken.state.products.length, 0);
 });

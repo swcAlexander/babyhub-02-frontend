@@ -5,11 +5,17 @@ import os from 'node:os';
 import path from 'node:path';
 import mongoose from 'mongoose';
 import { CloudinaryServiceError, createCloudinaryService } from '../../src/lib/cloudinary.ts';
-import { TARGET, IDENTITY, MAX_PHOTO_BYTES, parsePhotoArguments, inspectJpeg,
+import { TARGET, photoIdentity, photoJournalPath, MAX_PHOTO_BYTES, parsePhotoArguments, inspectJpeg,
   fetchPhoto, createPhotoJournal, runPhotoMigration } from './migrate-product-photo.mjs';
 const [{ default: Media }, { default: Product }] = await Promise.all([
   import('../../src/models/Media.ts'), import('../../src/models/Product.ts'),
 ]);
+const { buildImportDocuments } = await import('./prepare-import.mjs');
+const { default: Category } = await import('../../src/models/Category.ts');
+const manifest = JSON.parse(await fs.readFile(new URL('./output/candidate-manifest.json', import.meta.url), 'utf8'));
+const prepared = buildImportDocuments(manifest, { Category, Product, mongoose });
+const TEST_PRODUCT_ID = '1e9f418c65cc80c3d3a56184';
+const IDENTITY = photoIdentity('test');
 const models = { Media, Product };
 const oid = value => new mongoose.Types.ObjectId(value);
 // Minimal JPEG headers + scan data for format/dimension parsing, not an upload fixture.
@@ -31,19 +37,21 @@ const get = (object, field) => field.split('.').reduce((value, part) => value?.[
 const matches = (doc, query) => Object.entries(query).every(([key, value]) => key === '$or'
   ? value.some(condition => matches(doc, condition))
   : value === null ? get(doc, key) == null : String(get(doc, key)) === String(value));
-const fixture = () => {
+const fixture = (target = 'test') => {
+  const IDENTITY = photoIdentity(target);
   const state = {
-    products: [{ _id: oid(TARGET.productId), name: { uk: 'Автокрісло' }, slug: { uk: TARGET.slug },
+    products: [{ _id: oid(TEST_PRODUCT_ID), name: { uk: 'Автокрісло' }, slug: { uk: TARGET.slug },
       status: 'draft', importMeta: { legacyUrl: TARGET.legacyUrl }, images: [],
       category: oid('1b04529bcd47ae89a17fdad1') }],
+    categories: [{ _id: oid('1b04529bcd47ae89a17fdad1'), slug: { uk: prepared.categories[0].document.slug.uk }, status: 'draft', importMeta: { legacyUrl: prepared.categories[0].document.importMeta.legacyUrl } }],
     media: [], content_migration_locks: [], writes: [], cloudCalls: [], journalSaves: [],
     journal: null, cloudImage: null, fetches: 0, sessionsEnded: 0,
   };
   const connection = {
     db: {
-      databaseName: TARGET.database,
+      databaseName: target === 'main' ? 'db-babyhub' : 'db-babyhub-test',
       collection(name) {
-        assert.ok(['products', 'media', 'content_migration_locks'].includes(name), 'No other collection may be used');
+        assert.ok(['products', 'categories', 'media', 'content_migration_locks'].includes(name), 'No other collection may be used');
         return {
           async findOne(query) { return copy(state[name].find(doc => matches(doc, query)) ?? null); },
           async countDocuments(query) { return state[name].filter(doc => matches(doc, query)).length; },
@@ -122,7 +130,7 @@ const fixture = () => {
       if (state.afterJournalSave) state.afterJournalSave(record);
     },
   };
-  const options = { connection, models, cloudinary, journal, account: 'a'.repeat(64),
+  const options = { target, confirmDatabase: target === 'main' ? 'db-babyhub' : undefined, prepared, connection, models, cloudinary, journal, account: 'a'.repeat(64),
     async fetchImpl(url, options) {
       state.fetches++;
       assert.equal(url, TARGET.photoUrl);
@@ -132,9 +140,10 @@ const fixture = () => {
   return { state, options, run: confirmed => runPhotoMigration({ ...options, confirmed }) };
 };
 
-test('CLI дозволяє лише dry-run або єдиний явний --confirm-import', () => {
-  assert.deepEqual(parsePhotoArguments([]), { confirmed: false });
-  assert.deepEqual(parsePhotoArguments(['--confirm-import']), { confirmed: true });
+test('CLI вимагає явну ціль для запису та зберігає legacy dry-run', () => {
+  assert.equal(parsePhotoArguments([]).confirmed, false);
+  assert.equal(parsePhotoArguments(['--target=test', '--confirm-import']).confirmed, true);
+  assert.throws(() => parsePhotoArguments(['--confirm-import']), { code: 'TARGET_REQUIRED' });
   for (const args of [['--url=other'], ['--db=main'], ['file'], ['--confirm-import', '--confirm-import']]) {
     assert.throws(() => parsePhotoArguments(args), { code: 'INVALID_ARGUMENTS' });
   }
@@ -183,10 +192,9 @@ test('dry-run читає товар і фото, але не змінює MongoD
   assert.deepEqual(state.products[0].images, []);
 });
 
-test('назва БД, _id, slug, legacyUrl і draft перевіряються до GET або записів', async () => {
+test('назва БД, slug, legacyUrl і draft перевіряються до GET або записів', async () => {
   for (const mutate of [
     (s, o) => { o.connection.db.databaseName = 'db-babyhub'; },
-    s => { s.products[0]._id = oid('aaaaaaaaaaaaaaaaaaaaaaaa'); },
     s => { s.products[0].slug.uk = 'other'; },
     s => { s.products[0].importMeta.legacyUrl = 'https://example.test/other'; },
     s => { s.products[0].status = 'published'; },
@@ -250,6 +258,8 @@ test('повторний запуск використовує ресурс і M
   assert.equal(repeat.productModified, 0);
   assert.equal(state.cloudCalls.filter(c => c === 'upload').length, 1);
   assert.equal(JSON.stringify([state.products, state.media]), snapshot);
+  const plan = await run(false);
+  assert.deepEqual(plan.planned, { media: 'reuse', productImage: 'reuse-link' });
 });
 
 test('лише типізований підтверджений 404 дозволяє upload', async () => {
@@ -447,4 +457,84 @@ test('журнал фізично записується та читається
     assert.equal((await journal.read()).phase, 'uploaded');
     assert.deepEqual(await fs.readdir(directory), ['journal.json']);
   } finally { await fs.unlink(file).catch(() => {}); await fs.rmdir(directory); }
+});
+
+test('товар визначається точним legacyUrl, а не тестовим ObjectId', async () => {
+  const { state, run } = fixture('main');
+  state.products[0]._id = oid('aaaaaaaaaaaaaaaaaaaaaaaa');
+  const result = await run(false);
+  assert.equal(result.productId, 'aaaaaaaaaaaaaaaaaaaaaaaa');
+  assert.equal(result.database, 'db-babyhub');
+  assert.deepEqual(state.writes, []);
+});
+
+test('main без Product повертає залежність у плані; підтверджений режим не доходить до upload/lock', async () => {
+  const { state, run } = fixture('main');
+  state.products = [];
+  const result = await run(false);
+  assert.equal(result.dependency, 'PRODUCT_IMPORT_REQUIRED');
+  assert.equal(result.productId, null);
+  assert.equal(result.mongoWrites, 0);
+  assert.deepEqual(state.cloudCalls, []);
+  assert.deepEqual(state.writes, []);
+  await assert.rejects(run(true), { code: 'TARGET_PRODUCT_MISMATCH' });
+  assert.deepEqual(state.writes, []);
+});
+
+test('main вимагає окреме підтвердження до читань, fetch і будь-яких мутацій', async () => {
+  const { options, state } = fixture('main');
+  for (const override of [{ target: undefined }, { confirmDatabase: undefined }, { confirmDatabase: 'db-babyhub-test' }]) {
+    await assert.rejects(runPhotoMigration({ ...options, confirmed: true, ...override }));
+  }
+  assert.equal(state.fetches, 0);
+  assert.deepEqual(state.cloudCalls, []);
+  assert.deepEqual(state.writes, []);
+});
+
+test('main не приймає test журнал/Media; publicId, filename, Media ID, locks і шляхи ізольовані', async () => {
+  assert.notEqual(photoJournalPath('main'), photoJournalPath('test'));
+  const mainIdentity = photoIdentity('main');
+  assert.ok(mainIdentity.publicId.startsWith('baby-service/'));
+  for (const field of ['publicId', 'filename', 'mediaId']) assert.notEqual(mainIdentity[field], IDENTITY[field]);
+  const testRun = fixture();
+  await testRun.run(true);
+  const main = fixture('main');
+  main.state.journal = copy(testRun.state.journal);
+  await assert.rejects(main.run(false), { code: 'JOURNAL_IDENTITY_CONFLICT' });
+  main.state.journal = null;
+  main.state.media = copy(testRun.state.media);
+  await assert.rejects(main.run(false), { code: 'MEDIA_IDENTITY_CONFLICT' });
+  main.state.media = [];
+  const first = await main.run(true); // Entirely in-memory; no external mutations.
+  assert.equal(first.uploads, 1);
+  assert.notEqual(main.state.content_migration_locks[0]._id, testRun.state.content_migration_locks[0]._id);
+  const second = await main.run(true);
+  assert.equal(second.uploads, 0);
+  assert.equal(second.createdMedia, 0);
+  assert.equal(second.productModified, 0);
+});
+
+test('main зберігає відновлення після часткового збою, транзакційність і provenance', async () => {
+  const { state, run } = fixture('main');
+  state.failProductUpdate = true;
+  await assert.rejects(run(true), { code: 'PRODUCT_UPDATE_FAILED' });
+  assert.equal(state.media.length, 0);
+  assert.equal(state.journal.phase, 'uploaded');
+  state.failProductUpdate = false;
+  const restored = await run(true);
+  assert.equal(restored.uploads, 0);
+  assert.equal(restored.createdMedia, 1);
+  assert.equal(state.journal.database, 'db-babyhub');
+  assert.ok(state.journal.publicId.startsWith('baby-service/'));
+});
+
+test('фото має бути в підготовленому записі цього товару; draft-категорія мусить відповідати джерелу', async () => {
+  const main = fixture('main');
+  main.options.prepared = { ...prepared, products: [{ ...prepared.products[0], record: { ...prepared.products[0].record, imageLegacyUrls: [] } }] };
+  await assert.rejects(main.run(false), { code: 'PHOTO_SOURCE_PRODUCT_MISMATCH' });
+  assert.equal(main.state.fetches, 0);
+  const other = fixture('main');
+  other.state.categories[0].importMeta.legacyUrl = 'https://example.test/other-category';
+  await assert.rejects(other.run(false), { code: 'TARGET_CATEGORY_MISMATCH' });
+  assert.equal(other.state.fetches, 0);
 });

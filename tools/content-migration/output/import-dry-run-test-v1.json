@@ -1,0 +1,92 @@
+{
+  "mode": "dry-run",
+  "target": "test",
+  "targetDatabase": "db-babyhub-test",
+  "databaseChecked": true,
+  "sourceManifest": "tools/content-migration/output/candidate-manifest.json",
+  "defaultsApplied": {
+    "availability": "in_stock",
+    "currency": "UAH",
+    "price": 0,
+    "status": "draft"
+  },
+  "issues": [],
+  "validation": {
+    "status": "valid",
+    "errors": []
+  },
+  "categories": [
+    {
+      "sourcePageKey": "page:uk:category:avtokrisla",
+      "entityKey": "entity:category:avtokrisla",
+      "payload": {
+        "name": {
+          "uk": "Дитяче автокрісло.Прокат оренда у Baby Service Луцьк"
+        },
+        "slug": {
+          "uk": "avtokrisla"
+        },
+        "description": {
+          "uk": "Зручні, сертифіковані, перевірені, чисті автокрісла-зручний засіб для перевезення дітей в автомобілі.Прокат оренда Луцьк"
+        },
+        "image": null,
+        "parentCategory": null,
+        "displayOrder": 0,
+        "status": "draft",
+        "importMeta": {
+          "source": "candidate-manifest; defaults applied: status=draft",
+          "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla.html"
+        },
+        "_id": "1b04529bcd47ae89a17fdad1"
+      }
+    }
+  ],
+  "products": [
+    {
+      "sourcePageKey": "page:uk:product:avtokreslo-adbor-capri",
+      "entityKey": "entity:product:avtokreslo-adbor-capri",
+      "payload": {
+        "category": "1b04529bcd47ae89a17fdad1",
+        "name": {
+          "uk": "Автокрісло adbor напрокат, в оренду Baby Service Луцьк"
+        },
+        "slug": {
+          "uk": "avtokreslo-adbor-capri"
+        },
+        "shortDescription": {
+          "uk": "Дитяче автокрісло-люлька adbor для самих маленьких від 0 до 10кг. Зручна, недорога оренда, прокат в Baby Service Луцьк."
+        },
+        "description": {
+          "uk": "Дитяче автокрісло-люлька adbor для самих маленьких від 0 до 10кг. Зручна, недорога оренда, прокат в Baby Service Луцьк."
+        },
+        "images": [],
+        "pricing": {
+          "currency": "UAH",
+          "rentalRates": []
+        },
+        "availability": "in_stock",
+        "featured": false,
+        "displayOrder": 0,
+        "status": "draft",
+        "importMeta": {
+          "source": "candidate-manifest; defaults applied: availability=in_stock, status=draft, currency=UAH, price=0, rentalRates=[] (unit unconfirmed; deferred price=0 UAH)",
+          "legacyUrl": "https://lutsk.babyservice.ua/avtokrisla/avtokreslo_adbor_capri.html"
+        },
+        "_id": "1e9f418c65cc80c3d3a56184",
+        "attributes": []
+      }
+    }
+  ],
+  "result": {
+    "mode": "dry-run",
+    "target": "test",
+    "database": "db-babyhub-test",
+    "planned": {
+      "categories": "reuse",
+      "products": "reuse"
+    },
+    "categoryId": "1b04529bcd47ae89a17fdad1",
+    "productId": "1e9f418c65cc80c3d3a56184",
+    "mongoWrites": 0
+  }
+}

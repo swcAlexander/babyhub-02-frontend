@@ -4,45 +4,27 @@ import path from 'node:path';
 import { registerHooks } from 'node:module';
 import { createHash } from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import dotenv from 'dotenv';
+import { safetyError, targetFor, assertTargetDatabase, assertWriteAuthorization,
+  parseTargetArguments, loadTargetConfiguration, openTargetConnection } from './migration-target.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const OUTPUT_DIR = path.join(__dirname, 'output');
 export const TEST_DATABASE = 'db-babyhub-test';
-const ENV_PATH = path.resolve(__dirname, '../../.env');
-const safetyError = (code) => Object.assign(new Error(code), { code });
 
 export const assertTestDatabase = (databaseName) => {
   if (databaseName !== TEST_DATABASE) throw safetyError('UNSAFE_DATABASE');
 };
 
-export const loadImportConfiguration = async ({ readFile = fs.readFile } = {}) => {
-  let values;
-  try {
-    values = dotenv.parse(await readFile(ENV_PATH, 'utf8'));
-  } catch {
-    throw safetyError('TEST_ENV_UNAVAILABLE');
-  }
-  const uri = values.DB_HOST_TEST?.trim();
-  if (!uri) throw safetyError('DB_HOST_TEST_REQUIRED');
-  // Never fall back to DB_HOST, MONGODB_URI or inherited environment variables.
-  return Object.freeze({ uri, dbName: TEST_DATABASE });
-};
+export const loadImportConfiguration = loadTargetConfiguration;
 
 export const parseImportArguments = (args) => {
-  const positional = [];
-  let confirmed = false;
-  for (const arg of args) {
-    if (arg === '--confirm-import' && !confirmed) confirmed = true;
-    else if (arg.startsWith('--')) throw safetyError('INVALID_ARGUMENTS');
-    else positional.push(arg);
-  }
-  if (positional.length > 2) throw safetyError('INVALID_ARGUMENTS');
+  const { positional, ...selection } = parseTargetArguments(args, { maxPositional: 2 });
   return {
-    confirmed,
+    ...selection,
     inputPath: path.resolve(positional[0] || path.join(OUTPUT_DIR, 'candidate-manifest.json')),
-    outputPath: path.resolve(positional[1] || path.join(OUTPUT_DIR, 'import-dry-run-v1.json')),
+    outputPath: path.resolve(positional[1] || path.join(OUTPUT_DIR,
+      selection.target ? `import-dry-run-${selection.target}-v1.json` : 'import-dry-run-v1.json')),
   };
 };
 const DEFAULTS_APPLIED = {
@@ -242,26 +224,13 @@ export const assertImportScope = (prepared) => {
 
 export const openTestConnection = async (models, configuration) => {
   assertTestDatabase(configuration.dbName);
-  const connection = models.mongoose.createConnection(configuration.uri, {
-    dbName: TEST_DATABASE,
-    autoCreate: false,
-    autoIndex: false,
-    bufferCommands: false,
-    serverSelectionTimeoutMS: 10000,
-  });
-  try {
-    await connection.asPromise();
-    return connection;
-  } catch (error) {
-    await connection.close().catch(() => {});
-    throw error;
-  }
+  return openTargetConnection(models, { ...configuration, target: 'test' });
 };
 
 // The mandatory unique _id index also protects simultaneous runs of the same slug,
 // even in a new collection without the optional model indexes.
-const importId = (models, type, slug) => new models.mongoose.Types.ObjectId(
-  createHash('sha256').update(`babyhub-test-import-v1:${type}:${slug}`).digest('hex').slice(0, 24),
+export const importId = (models, type, slug, target) => new models.mongoose.Types.ObjectId(
+  createHash('sha256').update(`babyhub-${target}-import-v1:${type}:${slug}`).digest('hex').slice(0, 24),
 );
 
 const findExisting = async (Model, document, session) => {
@@ -283,33 +252,36 @@ const findExisting = async (Model, document, session) => {
 
 export const runPreparedImport = async (prepared, models, {
   confirmed = false,
+  target,
+  confirmDatabase,
   configuration,
-  openConnection = openTestConnection,
+  openConnection = openTargetConnection,
 } = {}) => {
+  assertWriteAuthorization({ confirmed, target, confirmDatabase });
   assertImportScope(prepared);
   if ((await validateImportDocuments(prepared)).length) throw safetyError('INVALID_DOCUMENTS');
   // This branch must not read .env, open connections, start sessions or write documents.
-  if (confirmed !== true) return { mode: 'dry-run', created: { categories: 0, products: 0 } };
-  const target = configuration ?? await loadImportConfiguration();
-  assertTestDatabase(target.dbName);
-  if (!target.uri) throw safetyError('DB_HOST_TEST_REQUIRED');
+  if (confirmed !== true && target === undefined) return { mode: 'dry-run', created: { categories: 0, products: 0 } };
+  const config = configuration ?? await loadImportConfiguration({ target });
+  if (config.target !== target) throw safetyError('UNSAFE_DATABASE');
+  assertTargetDatabase(config.dbName, target);
+  if (!config.uri) throw safetyError(`${targetFor(target).variable}_REQUIRED`);
 
-  const connection = await openConnection(models, target);
+  const connection = await openConnection(models, config);
   let session;
   try {
-    assertTestDatabase(connection.db?.databaseName);
+    assertTargetDatabase(connection.db?.databaseName, target);
     const Category = connection.model('Category', models.Category.schema);
     const Product = connection.model('Product', models.Product.schema);
-    session = await connection.startSession();
-    return await session.withTransaction(async () => {
-      assertTestDatabase(connection.db?.databaseName);
+    const execute = async () => {
+      assertTargetDatabase(connection.db?.databaseName, target);
       const category = new Category(prepared.categories[0].document.toObject());
-      category._id = importId(models, 'Category', category.slug.uk);
+      category._id = importId(models, 'Category', category.slug.uk, target);
       const existingCategory = await findExisting(Category, category, session);
       if (existingCategory) category._id = existingCategory._id;
 
       const product = new Product(prepared.products[0].document.toObject());
-      product._id = importId(models, 'Product', product.slug.uk);
+      product._id = importId(models, 'Product', product.slug.uk, target);
       product.category = category._id;
       const existingProduct = await findExisting(Product, product, session);
       if (existingProduct && String(existingProduct.category) !== String(category._id)) {
@@ -319,19 +291,30 @@ export const runPreparedImport = async (prepared, models, {
       // Validate both final documents with their resolved IDs before the first insert.
       await category.validate();
       await product.validate();
-      assertTestDatabase(connection.db?.databaseName);
+      assertTargetDatabase(connection.db?.databaseName, target);
+      if (confirmed !== true) return {
+        mode: 'dry-run', target, database: connection.db.databaseName,
+        planned: { categories: existingCategory ? 'reuse' : 'create-draft', products: existingProduct ? 'reuse' : 'create-draft' },
+        categoryId: String(category._id), productId: String(existingProduct?._id ?? product._id),
+        mongoWrites: 0,
+      };
       if (!existingCategory) await Category.create([category.toObject()], { session });
       if (!existingProduct) await Product.create([product.toObject()], { session });
 
       return {
         mode: 'confirmed-import',
+        target,
         database: connection.db.databaseName,
         created: { categories: existingCategory ? 0 : 1, products: existingProduct ? 0 : 1 },
         reused: { categories: existingCategory ? 1 : 0, products: existingProduct ? 1 : 0 },
         categoryId: String(category._id),
         productId: String(existingProduct?._id ?? product._id),
       };
-    }, { readConcern: { level: 'snapshot' }, writeConcern: { w: 'majority' } });
+    };
+    if (confirmed !== true) return await execute();
+    session = await connection.startSession();
+    return await session.withTransaction(execute,
+      { readConcern: { level: 'snapshot' }, writeConcern: { w: 'majority' } });
   } finally {
     try {
       if (session) await session.endSession();
@@ -342,7 +325,7 @@ export const runPreparedImport = async (prepared, models, {
 };
 
 const main = async () => {
-  const { inputPath, outputPath, confirmed } = parseImportArguments(process.argv.slice(2));
+  const { inputPath, outputPath, confirmed, target, confirmDatabase } = parseImportArguments(process.argv.slice(2));
   const manifest = JSON.parse(await fs.readFile(inputPath, 'utf8'));
   const models = await loadModels();
   const prepared = buildImportDocuments(manifest, models);
@@ -350,7 +333,9 @@ const main = async () => {
   const validationErrors = await validateImportDocuments(prepared);
   const report = {
     mode: confirmed ? 'confirmed-import' : 'dry-run',
-    targetDatabase: TEST_DATABASE,
+    target: target ?? null,
+    targetDatabase: target ? targetFor(target).dbName : TEST_DATABASE,
+    databaseChecked: false,
     sourceManifest: path.relative(process.cwd(), inputPath).replace(/\\/g, '/'),
     defaultsApplied: prepared.defaultsApplied,
     issues: prepared.issues,
@@ -375,7 +360,15 @@ const main = async () => {
     process.exitCode = 1;
     return;
   }
-  const result = await runPreparedImport(prepared, models, { confirmed });
+  const result = await runPreparedImport(prepared, models, { confirmed, target, confirmDatabase });
+  report.databaseChecked = Boolean(target);
+  report.result = result;
+  if (target) {
+    report.categories[0].payload._id = result.categoryId;
+    report.products[0].payload._id = result.productId;
+    report.products[0].payload.category = result.categoryId;
+  }
+  await fs.writeFile(outputPath, JSON.stringify(report, null, 2), 'utf8');
   console.log(JSON.stringify(result, null, 2));
 };
 
@@ -386,6 +379,8 @@ if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
       'UNSAFE_DATABASE', 'TEST_ENV_UNAVAILABLE', 'DB_HOST_TEST_REQUIRED', 'INVALID_ARGUMENTS',
       'SINGLE_PAIR_REQUIRED', 'UK_DRAFT_REQUIRED', 'SOURCE_IDENTITY_REQUIRED',
       'CATEGORY_LINK_MISMATCH', 'DUPLICATE_IDENTITY', 'EXISTING_DOCUMENT_CONFLICT', 'INVALID_DOCUMENTS',
+      'TARGET_REQUIRED', 'MAIN_DATABASE_CONFIRMATION_REQUIRED', 'TARGET_ENV_UNAVAILABLE',
+      'DB_HOST_REQUIRED', 'UNSAFE_DATABASE_URI',
     ]);
     console.error(JSON.stringify({ error: safeCodes.has(error.code) ? error.code : 'IMPORT_PREPARATION_FAILED' }));
     process.exitCode = 1;

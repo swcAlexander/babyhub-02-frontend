@@ -907,3 +907,173 @@ Manifest повинен зберігати legacy mappings окремо від r
 Підтверджено 6/6 ізольованих тестів, typecheck, lint (4 попередні legacy-попередження),
 production build, HTTP 200 сторінки й оптимізованого JPEG. Окремо виконано фактичну
 візуальну перевірку скриншота Chromium: товар і фотографію видно.
+
+## 20. Контрольований вибір main/test після 3.8.16
+
+Цей розділ описує актуальну реалізацію; попередні результати 3.8.10–3.8.16 залишаються
+історією стану на момент перевірок. Поточний етап не виконує імпорт або upload.
+
+### Перевірка джерел даних
+
+Читання основної `db-babyhub` 2026-11-10 підтвердило лише колекції `articles`, `items`,
+`users`. `products`, `categories`, `media` відсутні; читання їх count повертає 0.
+Жодних користувацьких документів не читали й не виводили.
+
+Фактичні `model.collection.name` нових моделей — Product → `products`, Category →
+`categories`, Media → `media`. Legacy-оголошення `model('article')`, `model('Item')`,
+`model('user')` без collection override через Mongoose pluralizer дають відповідно
+`articles`, `items`, `users`. `Item` із `title`/string `price`/`poster`/`owner` не є Product.
+
+Поточні `/catalog/...` та `/ru/catalog/...` уже використовують нові сервіси й моделі:
+`category.service.ts`/`product.service.ts` → `src/lib/mongodb.ts` → `DB_HOST`.
+Окремий legacy Item controller читає `items` і populate owner із `users`; article/auth
+контролери та authenticate посилаються на legacy `articles`/`users`. Проте підключених
+App Router `route.ts`/`route.js` для них не знайдено: `src/app/api/items.ts` з GET handler
+не є App Router route. Сторінки articles — заглушки, login/register — форми без інтеграції
+з legacy-auth. Активного читання цих legacy-колекцій новими сторінками не виявлено.
+Legacy-контролери не викликалися (Item GET також логує populated owner); React hooks
+завантаження каталогу не знайдено, legacy Mongoose hooks лише керують валідацією/помилками.
+
+Розбіжність штатного каталогу та попереднього імпорту — main/test **база**, а не
+`items`/Product: нові draft-документи були створені в test, штатний каталог читає main.
+Обидва штатні модулі підключення використовують `DB_HOST`, помилкового test-binding
+немає. Сервіси, хуки, auth, схеми, публічні фільтри й development preview не змінено.
+Нові Article/User також за замовчуванням мають legacy-назви колекцій; можлива сумісність
+їх різних схем залишається окремим технічним боргом, не частиною цього імпорту.
+
+### Реалізовані захисти
+
+- Спільний `tools/content-migration/migration-target.mjs` задає `--target=test|main`:
+  `DB_HOST_TEST` → лише `db-babyhub-test`, `DB_HOST` → лише `db-babyhub`.
+  Конфігурація читається з кореневого `.env`, успадкована підміна PowerShell ігнорується.
+  Підміну `disabled-for-local-preview` у поточному процесі/файлі не виявлено.
+  URI з іншою явно названою БД відхиляється; для URI без назви задається фіксований
+  `dbName`; фактична БД перевіряється після підключення й перед діями.
+- Будь-який запис потребує явних target + `--confirm-import`, main додатково —
+  `--confirm-database=db-babyhub`. Захисти діють і в програмних entry points.
+  Dry-run без target лишається сумісним; prepare без target не читає БД, а з target
+  перевіряє identity-конфлікти й планує create-draft/reuse без транзакцій/вставок.
+- Photo читає підготовлений manifest-запис; allowlist legacyUrl/slug/JPEG і
+  `imageLegacyUrls` підтверджує зв'язок фото з Adbor Capri. Product визначається
+  точним `importMeta.legacyUrl`/slug, унікальністю збігу та draft-статусом; перевіряється
+  пов'язана draft-категорія з правильним source URL. `_id` товару не захардкоджено:
+  його читають і закріплюють на час запуску з обраної БД.
+- Namespace main — `baby-service`, test — `baby-service-test`. Main має окремі
+  stable public_id/Media ID/filename, lock ID та `product-photo-journal-main-v1.json`.
+  Test ID/provenance/lock і старий `product-photo-journal-v1.json` збережено для recovery.
+  Database/productId/source/hash/account в журналі та provenance Media блокують змішування цілей.
+- Збережені всі попередні перевірки конфліктів і походження, durable журнал,
+  транзакція Media + `$addToSet` Product.images, перевірки результату та відновлення.
+  Зайнятий/невідповідний lock блокує також dry-run. При відсутньому товарі dry-run фото
+  повертає `PRODUCT_IMPORT_REQUIRED`, підтверджений режим зупиняється до lock/upload.
+  Cloudinary lookup у dry-run не виконується; upload надалі можливий лише після
+  підтвердженого 404 та окремого дозволу на виконання команди запису.
+
+### Перевірений план без мутацій
+
+- Main: підготовлено одну валідну draft-пару «Автокрісла» / Adbor Capri, конфліктів
+  немає. План створити Category `f1780080e3a428313fa00e67` та Product
+  `1e7f71a16f3c0e7f577c424c`; це заплановані ID, не створені документи.
+- Фото main: Product/Media/lock/журнал відсутні. Спершу потрібен імпорт Product;
+  потім запланована Media `cf32e0fd119d5555e07a2400` у namespace `baby-service`.
+  Реального main Cloudinary URL поки немає; наявність ресурсу в Cloudinary не перевіряли.
+  Джерело JPEG підтверджено: 249×270, 9079 байтів, попередній content SHA-256.
+- Test: пара й Media повторно використовуються; журнал committed, lock вільний;
+  тестові артефакти не приймаються як виконаний main-імпорт.
+- 97/97 тестів, typecheck та `git diff --check` успішні. Транзакції/rollback/recovery
+  й confirmed-гілки перевірені лише в пам'яті. Реальні main/test dry-run додатково
+  виконано з заблокованими методами мутацій/створення індексів/початку транзакцій і
+  Cloudinary upload/delete: 0 спроб мутацій, `.env`/test-журнал незмінні за SHA-256.
+
+Точні PowerShell-команди dry-run та **майбутнього, ще не дозволеного запису**,
+артефакти й межі перевірки наведені в актуальному розділі
+[README міграції](../tools/content-migration/README.md#актуальний-вибір-testmain-і-перевірка-колекцій).
+Реальних `--confirm-import`, записів MongoDB, upload/delete, створення індексів,
+публікації чи змін legacy-колекцій/користувачів не було.
+
+## 21. Фактичний перший імпорт у main — 3.8.18
+
+За явним дозволом користувача виконано `prepare-import.mjs --target=main
+--confirm-import --confirm-database=db-babyhub` з `--use-system-ca --experimental-strip-types`.
+Перед записом прямим читанням підтверджено фактичну `db-babyhub` та відсутність
+Category/Product/Media/locks. Перший запуск транзакційно створив 1 Category + 1 Product,
+повторний після прямої перевірки створив 0 + 0 та повторно використав 1 + 1.
+
+Створені й перевірені безпосередньо через MongoDB driver документи:
+
+| Сутність | `_id` | `slug.uk` | Статус |
+| --- | --- | --- | --- |
+| Category «Автокрісла» | `f1780080e3a428313fa00e67` | `avtokrisla` | `draft` |
+| Product Adbor Capri | `1e7f71a16f3c0e7f577c424c` | `avtokreslo-adbor-capri` | `draft` |
+
+Product.category містить ObjectId зазначеної Category. Legacy URL точно відповідають
+підготовленим джерелам `/avtokrisla.html` та `/avtokrisla/avtokreslo_adbor_capri.html`
+на `https://lutsk.babyservice.ua`. У кожній новій колекції рівно 1 документ, за кожним
+slug/legacyUrl — єдиний збіг. Повний payload відповідає підготовленому набору,
+обидва документи проходять актуальну Mongoose-валідацію.
+
+Збережено Product defaults `in_stock`, `UAH`, `rentalRates: []`, `images: []`,
+`featured: false`, `displayOrder: 0`; salePrice відсутній. Непідтверджена ціна 0
+позначена як deferred у importMeta, не як rental-тариф. Category має displayOrder 0,
+image/parentCategory null. Повний вміст обох документів після повторного запуску,
+включно з timestamps, точно збігається зі знімком після першого: дублікатів і оновлень немає.
+
+Наступним виконано **лише photo dry-run** з `--target=main` і серверними Node-прапорцями.
+Знайдено правильний Product, `dependency: null`. План — створити Media
+`cf32e0fd119d5555e07a2400`, public_id
+`baby-service/legacy-photo-cf32e0fd119d5555e07a240016073530326118910f8e55d1b7424ab50e540fba`,
+після окремо дозволеного upload додати її ID у Product.images транзакційно.
+Конфліктів у БД/журналі не виявлено; lock/Media/main-журнал відсутні.
+JPEG перевірений: 249×270, 9079 байтів, попередній content SHA-256.
+Cloudinary resource lookup у dry-run не виконується; наявність ресурсу там ще не підтверджена.
+`uploads: 0`, `mongoWrites: 0`; фото confirmed-режим не запускали.
+
+Після фото dry-run пряме читання підтвердило незмінні документи та 0 Media/locks.
+Legacy articles/items/users не змінювали, їх документи не читали; контрольні кількості
+збереглися. Тестову БД не підключали, `.env` і тестовий фотожурнал незмінні за SHA-256.
+Код, схеми, auth і public-фільтри не змінювалися; публікації, upload/delete, commit/push немає.
+Перевірки цього етапу — фактичні DB-читання та порівняння після обох запусків і dry-run;
+новий build/typecheck не запускався, оскільки код не змінено. `git diff --check` успішний.
+
+Команди, defaults і особливість локального `import-dry-run-main-v1.json` (тепер містить
+confirmed-результат останнього повторного запуску) описані в
+[README, етап 3.8.18](../tools/content-migration/README.md#етап-3818-перший-контрольований-імпорт-у-main).
+
+## 22. Фактичне перенесення main-фотографії — 3.8.19
+
+За явним дозволом виконано `migrate-product-photo.mjs --target=main --confirm-import
+--confirm-database=db-babyhub` з `--use-system-ca --conditions=react-server
+--experimental-strip-types`. Перед записом пряме читання підтвердило правильні draft
+Product/Category, відсутні Media/lock/main-журнал і порожні images; read-only Cloudinary
+lookup підтвердив відсутність цільового ресурсу кодом 404.
+
+Перший запуск: **uploads 1, createdMedia 1, productModified 1**. Після прямої перевірки
+результату та HTTP-фото команду повторено: **uploads 0, createdMedia 0, productModified 0**.
+
+- Product `_id`: `1e7f71a16f3c0e7f577c424c`.
+- Media `_id`: `cf32e0fd119d5555e07a2400`.
+- Public_id: `baby-service/legacy-photo-cf32e0fd119d5555e07a240016073530326118910f8e55d1b7424ab50e540fba`.
+- URL: `https://res.cloudinary.com/dmvl4lxnq/image/upload/v1794317657/baby-service/legacy-photo-cf32e0fd119d5555e07a240016073530326118910f8e55d1b7424ab50e540fba.jpg`.
+
+Пряме читання MongoDB після обох запусків підтвердило 1 Media та рівно одне посилання
+на неї в Product.images. Media валідна актуальній моделі; її URL/розміри/bytes
+збігаються з Cloudinary resource lookup і журналом. Product та Category залишилися draft;
+Category повністю незмінна проти знімка до перенесення, у Product змінено тільки images.
+Після повторного запуску повний вміст Product/Category/Media, включно з timestamps,
+та Cloudinary-метадані точно збігаються зі знімком після першого запуску.
+
+Main lock `baby-service-photo-main-v1:cf32e0fd119d5555e07a2400` звільнений (`owner: null`),
+новий `output/product-photo-journal-main-v1.json` має фазу `committed` і правильні
+ідентифікатори/URL/source hash. Журнал слід зберігати для recovery.
+
+HTTPS GET після обох запусків — HTTP 200, image/jpeg, 9079 байтів, 249×270. SHA-256
+`916854470160e1ae0a0f1a8d70546538ac602ec10339452c946ffd5a5b0c9425` збігається з поточним
+джерелом, provenance Media та журналом: перевірено відповідність самих байтів.
+
+Помилок немає. Legacy-колекції не змінювалися (контрольні кількості збережені, документи
+не читалися); test не підключали, `.env`/тестовий журнал незмінні за SHA-256.
+Код/схеми/auth/public-фільтри не змінено, публікації/delete/перезаписів/commit/push не було.
+Це перевірка реального main-перенесення та HTTP-доступності, не браузерного відображення;
+новий build/typecheck не запускався, оскільки код не змінено. `git diff --check` успішний.
+Деталі та точна команда наведені в
+[README, етап 3.8.19](../tools/content-migration/README.md#етап-3819-перенесення-фотографії-для-main).
