@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import mongoose from 'mongoose';
-import { CloudinaryServiceError } from '../../src/lib/cloudinary.ts';
+import { CloudinaryServiceError, createCloudinaryService } from '../../src/lib/cloudinary.ts';
 import { TARGET, IDENTITY, MAX_PHOTO_BYTES, parsePhotoArguments, inspectJpeg,
   fetchPhoto, createPhotoJournal, runPhotoMigration } from './migrate-product-photo.mjs';
 const [{ default: Media }, { default: Product }] = await Promise.all([
@@ -264,6 +264,42 @@ test('лише типізований підтверджений 404 дозво�
     assert.equal(state.media.length, 0);
     assert.deepEqual(state.journalSaves, []);
     assert.equal(state.content_migration_locks[0].owner, null);
+  }
+});
+
+test('реальний нормалізатор дозволяє міграцію лише після верхнього/вкладеного 404 (mock SDK)', async () => {
+  for (const [rawError, missing] of [
+    [{ http_code: 404 }, true], [{ error: { http_code: 404 } }, true],
+    [{ error: { http_code: 401 } }, false], [{ error: { http_code: 403 } }, false],
+    [Object.assign(new Error('timeout'), { code: 'ETIMEDOUT' }), false],
+    [{ error: { message: 'unknown' } }, false], [{ status: 404 }, false],
+    [{ http_code: 401, error: { http_code: 404 } }, false],
+  ]) {
+    const { state, options } = fixture();
+    const fakeCloud = options.cloudinary;
+    options.cloudinary = createCloudinaryService({
+      env: { CLOUDINARY_CLOUD_NAME: 'test', CLOUDINARY_API_KEY: '123', CLOUDINARY_API_SECRET: 'dummy-secret' },
+      sdk: {
+        api: { async resource() { throw rawError; } },
+        uploader: {
+          async upload(source, settings) {
+            return { ...await fakeCloud.uploadImage(source, { public_id: settings.public_id }), resource_type: 'image' };
+          },
+          async destroy() { assert.fail('Deletion must never be called'); },
+        },
+      },
+    });
+    const run = () => runPhotoMigration({ ...options, confirmed: true });
+    if (missing) {
+      const result = await run();
+      assert.equal(result.uploads, 1);
+      assert.equal(result.createdMedia, 1);
+    } else {
+      await assert.rejects(run(), { code: 'CLOUDINARY_REQUEST_FAILED' });
+      assert.equal(state.cloudCalls.includes('upload'), false);
+      assert.equal(state.media.length, 0);
+      assert.deepEqual(state.journalSaves, []);
+    }
   }
 });
 

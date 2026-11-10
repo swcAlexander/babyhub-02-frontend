@@ -157,6 +157,50 @@ test('мережеві помилки без HTTP-коду нормалізую�
   });
 });
 
+test('404 верхнього і вкладеного рівнів зберігаються без сирої SDK-помилки', async () => {
+  for (const raw of [
+    { http_code: 404, message: 'private upload error' },
+    { error: { http_code: 404, message: 'private admin error' },
+      request_options: { api_secret: env.CLOUDINARY_API_SECRET }, query_params: { signature: 'private-signature' } },
+    { http_code: 404, error: { http_code: 404 } },
+  ]) {
+    const { sdk } = fixture();
+    sdk.api.resource = async () => { throw raw; };
+    await assert.rejects(createCloudinaryService({ env, sdk }).getImageInfo('id'), error => {
+      assert.ok(error instanceof CloudinaryServiceError);
+      assert.equal(error.code, 'CLOUDINARY_REQUEST_FAILED');
+      assert.equal(error.status, 404);
+      assert.equal(error.cause, undefined);
+      assert.equal(error.request_options, undefined);
+      assert.doesNotMatch(JSON.stringify(error) + error.stack, /test-secret|private-signature|private admin error|private upload error/);
+      return true;
+    });
+  }
+});
+
+test('авторизація, мережеві, некоректні та суперечливі помилки не стають 404', async () => {
+  for (const [raw, expected] of [
+    [{ http_code: 401 }, 401], [{ error: { http_code: 401 } }, 401],
+    [{ error: { http_code: 403 } }, 403], [{ error: { http_code: 429 } }, 429],
+    [{ error: { http_code: 500 } }, 500],
+    [Object.assign(new Error('network timeout 404'), { code: 'ETIMEDOUT' }), 502],
+    [Object.assign(new Error('DNS failed'), { code: 'ENOTFOUND' }), 502],
+    [null, 502], ['404', 502], [{ status: 404 }, 502],
+    [{ error: { http_code: '404' } }, 502], [{ http_code: '404' }, 502],
+    [{ error: { http_code: NaN } }, 502], [{ error: { http_code: 404.5 } }, 502],
+    [{ error: { http_code: 200 } }, 502], [{ error: { http_code: 600 } }, 502],
+    [{ http_code: 401, error: { http_code: 404 } }, 502],
+    [{ http_code: 404, error: { http_code: 403 } }, 502],
+    [{ http_code: '401', error: { http_code: 404 } }, 502],
+  ]) {
+    const { sdk } = fixture();
+    sdk.api.resource = async () => { throw raw; };
+    await assert.rejects(createCloudinaryService({ env, sdk }).getImageInfo('id'), {
+      code: 'CLOUDINARY_REQUEST_FAILED', status: expected,
+    });
+  }
+});
+
 test('невалідні image metadata та небезпечна URL-відповідь відхиляються', async () => {
   for (const invalid of [
     {}, { ...response, resource_type: 'video' }, { ...response, secure_url: 'http://example.test/image.jpg' },

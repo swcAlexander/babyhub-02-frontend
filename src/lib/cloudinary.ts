@@ -114,9 +114,16 @@ const request = async <T>(operation: string, action: () => Promise<T>): Promise<
     return await action();
   } catch (error) {
     if (error instanceof CloudinaryServiceError) throw error;
-    const status = isRecord(error) && typeof error.http_code === 'number'
-      && Number.isInteger(error.http_code) && error.http_code >= 400 && error.http_code <= 599
-      ? error.http_code : 502;
+    // Admin API rejects { error: { http_code } }; Upload API may use { http_code }.
+    // Reject malformed or conflicting codes rather than misclassifying them as 404.
+    const codes = isRecord(error)
+      ? [error.http_code, isRecord(error.error) ? error.error.http_code : undefined]
+        .filter(value => value !== undefined)
+      : [];
+    const isHttpErrorCode = (value: unknown): value is number => typeof value === 'number'
+      && Number.isInteger(value) && value >= 400 && value <= 599;
+    const status = codes.length > 0 && codes.every(isHttpErrorCode)
+      && codes.every(value => value === codes[0]) ? codes[0] : 502;
     // Never retain the SDK error/cause: it may contain credentials, a signed URL or the input path.
     throw new CloudinaryServiceError('CLOUDINARY_REQUEST_FAILED', `Cloudinary ${operation} failed.`, status);
   }
