@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "database": "db-babyhub-test",
+  "productId": "1e9f418c65cc80c3d3a56184",
+  "sourceUrl": "https://lutsk.babyservice.ua/images/prods/43_2_avtokreslo-adbor_baby_service__lutsk.jpg",
+  "publicId": "baby-service-test/legacy-photo-2f19079efd10749817072a2d105d81c4cbdad38946fb28ef70532ac16fdadd5a",
+  "mediaId": "2f19079efd10749817072a2d",
+  "filename": "legacy-photo-2f19079efd10749817072a2d105d81c4cbdad38946fb28ef70532ac16fdadd5a.jpg",
+  "sourceSha256": "916854470160e1ae0a0f1a8d70546538ac602ec10339452c946ffd5a5b0c9425",
+  "sourceBytes": 9079,
+  "width": 249,
+  "height": 270,
+  "account": "3cfeacb737d0cb5753ea84e4d5d58b909178f5ac96537a3146977b23119e2a96",
+  "phase": "committed",
+  "image": {
+    "public_id": "baby-service-test/legacy-photo-2f19079efd10749817072a2d105d81c4cbdad38946fb28ef70532ac16fdadd5a",
+    "secure_url": "https://res.cloudinary.com/dmvl4lxnq/image/upload/v1794314014/baby-service-test/legacy-photo-2f19079efd10749817072a2d105d81c4cbdad38946fb28ef70532ac16fdadd5a.jpg",
+    "width": 249,
+    "height": 270,
+    "bytes": 9079,
+    "format": "jpg"
+  }
+}

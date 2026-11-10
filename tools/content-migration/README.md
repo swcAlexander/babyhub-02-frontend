@@ -204,7 +204,8 @@ Dry-run за замовчуванням (читає MongoDB і завантаж�
 node --use-system-ca --conditions=react-server --experimental-strip-types tools/content-migration/migrate-product-photo.mjs
 ```
 
-Майбутній запис, лише після окремого дозволу; у поточному етапі **не запускався**:
+Запис, лише після окремого дозволу. У підготовчій частині 3.8.15 не запускався;
+результати подальшого дозволеного виконання наведені нижче:
 
 ```bash
 node --use-system-ca --conditions=react-server --experimental-strip-types tools/content-migration/migrate-product-photo.mjs --confirm-import
@@ -328,8 +329,39 @@ typecheck і `git diff --check` успішні. Фактичний read-only `ge
 правильно повертає нормалізований **404**, підтверджуючи відсутність запланованого ресурсу.
 Dry-run успішний: JPEG 249×270, 9079 байтів, Media відсутня, журнал відсутній,
 0 upload і 0 MongoDB writes. `--confirm-import`, upload/delete та реальні записи не запускалися;
-`.env`, схеми й сам код інструмента міграції не змінено. Перенесення залишається наступним
-окремо дозволеним кроком.
+`.env`, схеми й сам код інструмента міграції не змінено. На момент завершення цього
+виправлення перенесення залишалося наступним окремо дозволеним кроком.
+
+#### Фактичне перенесення після виправлення HTTP-нормалізації
+
+За повторним явним дозволом виконано команду `migrate-product-photo.mjs --confirm-import`
+з усіма наведеними Node.js-прапорцями. Перед запуском пряме читання підтвердило
+`db-babyhub-test`, точний draft-товар, `images: []`, 0 Media, відсутність lock/журналу
+та підтверджену відсутність цільового ресурсу в Cloudinary (404).
+
+- Перший запуск: **uploads: 1, createdMedia: 1, productModified: 1**.
+- `public_id`: `baby-service-test/legacy-photo-2f19079efd10749817072a2d105d81c4cbdad38946fb28ef70532ac16fdadd5a`.
+- Cloudinary URL: `https://res.cloudinary.com/dmvl4lxnq/image/upload/v1794314014/baby-service-test/legacy-photo-2f19079efd10749817072a2d105d81c4cbdad38946fb28ef70532ac16fdadd5a.jpg`.
+- Media `_id`: `2f19079efd10749817072a2d`; `storageType: cloudinary`, `mimeType: image/jpeg`,
+  9079 байтів, 249×270. Документ прочитано безпосередньо через MongoDB driver і перевірено
+  актуальною Mongoose-моделлю; HTTPS URL і метадані збігаються з Cloudinary resource lookup.
+- Product `1e9f418c65cc80c3d3a56184`: `images: [ObjectId('2f19079efd10749817072a2d')]`,
+  рівно одне входження. Статус залишається `draft`; SHA-256 решти полів Product до/після збігається.
+- Після успішної перевірки першого результату виконано ту саму команду повторно:
+  **uploads: 0, createdMedia: 0, productModified: 0**. Пряме читання підтвердило рівно одну
+  Media, один збіг за ідентифікаторами/source URL, незмінний вміст Media та те саме посилання.
+- Category `1b04529bcd47ae89a17fdad1` не змінилася: SHA-256 повного документа до імпорту,
+  після першого і повторного запусків збігається.
+- Lock `content_migration_locks._id: baby-service-photo-v1` збережений, `owner: null` після
+  обох запусків. Локальний `output/product-photo-journal-v1.json` має фазу `committed`.
+  Усі з'єднання закриті, ресурсів не видаляли.
+- Cloudinary URL перевірено HTTPS GET після обох запусків: **HTTP 200**, `image/jpeg`,
+  9079 байтів, JPEG 249×270. SHA-256 отриманих байтів
+  `916854470160e1ae0a0f1a8d70546538ac602ec10339452c946ffd5a5b0c9425` збігається з початковим фото й журналом.
+
+Помилок або конфліктів немає. Записи виконані виключно в тестовій БД та в дозволеному
+Cloudinary namespace; `.env`, схеми, production-база й статуси не змінювалися. Перевірка
+відображення на сайті та публікація не виконувалися. Журнал потрібно зберегти для відновлення.
 
 ## Дозволені URL
 
